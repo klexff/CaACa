@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Principal</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #b3e5fc, #e1f5fe);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      text-align: center;
+      color: #01579b;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 40px;
+      text-shadow: 1px 1px 2px #81d4fa;
+    }
+
+    .card {
+      background: white;
+      padding: 40px 60px;
+      border-radius: 20px;
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+      animation: fadeIn 1s ease;
+    }
+
+    .buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 30px;
+    }
+
+    button {
+      background-color: #0288d1;
+      color: white;
+      border: none;
+      padding: 14px 22px;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #0277bd;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    .footer {
+      position: absolute;
+      bottom: 15px;
+      font-size: 0.85rem;
+      color: #0277bd;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.4);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background-color: white;
+      padding: 30px;
+      border-radius: 15px;
+      text-align: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    input[type="password"] {
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      width: 80%;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .close-btn {
+      background: none;
+      color: #0288d1;
+      font-weight: bold;
+      border: none;
+      margin-top: 15px;
+      cursor: pointer;
+    }
+
+    .close-btn:hover {
+      text-decoration: underline;
+    }
+
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Panel Principal</h1>
+    <p>Bienvenido al sistema de gestión escolar</p>
+
+    <div class="buttons">
+      <button onclick="window.location.href='calificaciones.html'">📘 Ir a Calificaciones</button>
+      <button onclick="abrirModal()">🔒 Control de Trimestres</button>
+    </div>
+  </div>
+
+  <div class="modal" id="passwordModal">
+    <div class="modal-content">
+      <h3>Acceso Restringido</h3>
+      <p>Ingrese la contraseña de administrador:</p>
+      <input type="password" id="adminPassword" placeholder="Contraseña" />
+      <div style="margin-top: 20px;">
+        <button onclick="verificarPassword()">Ingresar</button>
+        <button class="close-btn" onclick="cerrarModal()">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    © 2025 Sistema Escolar | Acceso institucional
+  </div>
+
+  <script>
+    function abrirModal() {
+      document.getElementById("passwordModal").style.display = "flex";
+    }
+
+    function cerrarModal() {
+      document.getElementById("passwordModal").style.display = "none";
+      document.getElementById("adminPassword").value = "";
+    }
+
+    function verificarPassword() {
+      const password = document.getElementById("adminPassword").value.trim();
+      const claveCorrecta = "admin123"; // 🔐 Puedes cambiar esta clave
+
+      if (password === claveCorrecta) {
+        window.location.href = "control_trimestres.html";
+      } else {
+        alert("Contraseña incorrecta. Acceso denegado.");
+      }
+    }
+
+    // Cerrar modal si se hace clic fuera
+    window.onclick = function(event) {
+      const modal = document.getElementById("passwordModal");
+      if (event.target === modal) {
+        cerrarModal();
+      }
+    };
+  </script>
+</body>
+</html>

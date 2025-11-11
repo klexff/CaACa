@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Historial de Calificaciones</title>
+<style>
+  body {
+    font-family: "Segoe UI", Arial, sans-serif;
+    background-color: #dff3ff; /* Celeste clásico */
+    margin: 0;
+    padding: 20px;
+    text-align: center;
+  }
+
+  header {
+    background-color: #2B82C6;
+    color: white;
+    padding: 20px;
+    border-radius: 0 0 10px 10px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+    nav {
+      display: flex;
+      justify-content: center;
+      background-color: #e9f2ff;
+      padding: 10px;
+      gap: 15px;
+    }
+
+ nav a {
+      text-decoration: none;
+      color: #007bff;
+      font-weight: bold;
+      padding: 8px 16px;
+      border-radius: 8px;
+      transition: all 0.3s;
+    }
+
+    nav a:hover {
+      background-color: #007bff;
+      color: white;
+    }
+
+
+  h1 { margin: 0; }
+
+  .contenedor-tablas {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 30px;
+    margin-top: 25px;
+  }
+
+  .tabla-contenedor {
+    position: relative;
+    width: 90%;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+    overflow: hidden;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  th, td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: center;
+  }
+
+  th {
+    background-color: #2B82C6;
+    color: white;
+  }
+
+  tr:nth-child(even) { background-color: #f9f9f9; }
+
+  .promedios {
+    text-align: center;
+    margin-top: 10px;
+    font-weight: bold;
+  }
+
+  .botones {
+    margin: 10px 0;
+  }
+
+  button {
+    border: none;
+    border-radius: 6px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-weight: bold;
+    color: white;
+    margin: 4px;
+  }
+
+  .pdf { background-color: #e74c3c; }
+  .excel { background-color: #2ecc71; }
+  .subir { background-color: #2B82C6; }
+
+  .eliminarTabla {
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+  }
+
+  .mensaje {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 10px;
+    border-radius: 8px;
+    width: 80%;
+    margin: 15px auto;
+    display: none;
+    animation: fade 1s ease-in-out;
+  }
+
+  @keyframes fade {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📘 Historial de Calificaciones</h1>
+  <div style="margin-top:10px;">
+    <input type="file" id="inputArchivo" accept=".json" style="display:none">
+    <button class="subir" onclick="document.getElementById('inputArchivo').click()">📤 Subir archivo</button>
+  </div>
+
+
+</header>
+
+  <nav>
+    
+    <a href="control_trimestres.html">📖 Control de Trimestre</a>
+  </nav>
+
+
+<div id="mensajeConfirmacion" class="mensaje">✅ Grupo eliminado del historial correctamente</div>
+<div class="contenedor-tablas" id="contenedorTablas"></div>
+
+<!-- Librerías -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", mostrarHistorial);
+
+const inputArchivo = document.getElementById("inputArchivo");
+inputArchivo.addEventListener("change", subirArchivo);
+
+function subirArchivo(event) {
+  const archivo = event.target.files[0];
+  if (!archivo) return;
+
+  const lector = new FileReader();
+  lector.onload = function(e) {
+    try {
+      const contenido = JSON.parse(e.target.result);
+      if (Array.isArray(contenido)) {
+        localStorage.setItem("historialCalificaciones", JSON.stringify(contenido));
+        alert("✅ Archivo cargado correctamente al historial.");
+        mostrarHistorial();
+      } else {
+        alert("⚠️ El archivo no tiene el formato correcto.");
+      }
+    } catch {
+      alert("❌ Error al leer el archivo. Asegúrate de que sea un JSON válido.");
+    }
+  };
+  lector.readAsText(archivo);
+}
+
+function mostrarHistorial() {
+  const contenedor = document.getElementById("contenedorTablas");
+  contenedor.innerHTML = "";
+  const historial = JSON.parse(localStorage.getItem("historialCalificaciones")) || [];
+
+  if (historial.length === 0) {
+    contenedor.innerHTML = "<p>No hay calificaciones registradas.</p>";
+    return;
+  }
+
+  const grupos = {};
+  historial.forEach(item => {
+    if (!grupos[item.grupo]) grupos[item.grupo] = [];
+    grupos[item.grupo].push(item);
+  });
+
+  Object.keys(grupos).forEach(grupo => {
+    const contenedorTabla = document.createElement("div");
+    contenedorTabla.classList.add("tabla-contenedor");
+
+    const btnEliminarTabla = document.createElement("button");
+    btnEliminarTabla.textContent = "🗑️";
+    btnEliminarTabla.classList.add("eliminarTabla");
+    btnEliminarTabla.title = "Eliminar tabla";
+    btnEliminarTabla.onclick = () => eliminarTabla(contenedorTabla);
+
+    const titulo = document.createElement("h2");
+    titulo.textContent = `Grupo ${grupo}`;
+    titulo.style.backgroundColor = "#2B82C6";
+    titulo.style.color = "white";
+    titulo.style.margin = "0";
+    titulo.style.padding = "10px";
+    titulo.style.borderRadius = "10px 10px 0 0";
+
+    const tabla = document.createElement("table");
+    const thead = document.createElement("thead");
+    const tbody = document.createElement("tbody");
+
+    let materias = [];
+    grupos[grupo].forEach(reg => reg.datos.forEach(d => {
+      if (!materias.includes(reg.materia)) materias.push(reg.materia);
+    }));
+
+    const encabezado = document.createElement("tr");
+    encabezado.innerHTML = "<th>Alumno</th>" + materias.map(m => `<th>${m}</th>`).join("");
+    thead.appendChild(encabezado);
+
+    const alumnos = new Set();
+    grupos[grupo].forEach(reg => reg.datos.forEach(d => alumnos.add(d.alumno)));
+    const listaAlumnos = Array.from(alumnos).sort();
+
+    listaAlumnos.forEach(alumno => {
+      const fila = document.createElement("tr");
+      let celdas = `<td>${alumno}</td>`;
+      materias.forEach(m => {
+        let calificacion = "-";
+        grupos[grupo].forEach(reg => {
+          const encontrado = reg.datos.find(d => d.alumno === alumno && reg.materia === m);
+          if (encontrado) calificacion = encontrado.calificacion;
+        });
+        celdas += `<td>${calificacion}</td>`;
+      });
+      fila.innerHTML = celdas;
+      tbody.appendChild(fila);
+    });
+
+    tabla.append(thead, tbody);
+
+    const botones = document.createElement("div");
+    botones.classList.add("botones");
+
+    const btnPDF = document.createElement("button");
+    btnPDF.textContent = "📄 Exportar PDF";
+    btnPDF.classList.add("pdf");
+    btnPDF.onclick = () => exportarPDF(tabla, grupo, grupos[grupo]);
+
+    const btnExcel = document.createElement("button");
+    btnExcel.textContent = "📊 Exportar Excel";
+    btnExcel.classList.add("excel");
+    btnExcel.onclick = () => exportarExcel(tabla, grupo, grupos[grupo]);
+
+    botones.append(btnPDF, btnExcel);
+
+    const promediosDiv = document.createElement("div");
+    promediosDiv.classList.add("promedios");
+    promediosDiv.innerHTML = calcularPromedios(tabla);
+
+    contenedorTabla.append(btnEliminarTabla, titulo, tabla, botones, promediosDiv);
+    contenedor.appendChild(contenedorTabla);
+  });
+}
+
+function eliminarTabla(contenedorTabla) {
+  if (confirm("¿Seguro que deseas eliminar esta tabla completa?")) {
+    const titulo = contenedorTabla.querySelector("h2");
+    const grupo = titulo.textContent.replace("Grupo ", "").trim();
+
+    // 🔹 Obtener historial actual y eliminar el grupo correspondiente
+    const historial = JSON.parse(localStorage.getItem("historialCalificaciones")) || [];
+    const nuevoHistorial = historial.filter(item => item.grupo !== grupo);
+    localStorage.setItem("historialCalificaciones", JSON.stringify(nuevoHistorial));
+
+    // 🔹 Quitar la tabla del DOM
+    contenedorTabla.remove();
+
+    // 🔹 Mostrar mensaje de confirmación animado
+    const mensaje = document.getElementById("mensajeConfirmacion");
+    mensaje.style.display = "block";
+    setTimeout(() => mensaje.style.display = "none", 2000);
+  }
+}
+
+function calcularPromedios(tabla) {
+  const filas = tabla.querySelectorAll("tbody tr");
+  const columnas = tabla.querySelectorAll("thead th").length - 1;
+
+  let promedioPorMateria = Array(columnas).fill(0);
+  let cuentaPorMateria = Array(columnas).fill(0);
+
+  filas.forEach(fila => {
+    const celdas = fila.querySelectorAll("td");
+    celdas.forEach((td, i) => {
+      if (i > 0 && !isNaN(td.textContent) && td.textContent.trim() !== "-") {
+        promedioPorMateria[i - 1] += parseFloat(td.textContent);
+        cuentaPorMateria[i - 1]++;
+      }
+    });
+  });
+
+  const promediosMaterias = promedioPorMateria.map((p, i) =>
+    cuentaPorMateria[i] > 0 ? (p / cuentaPorMateria[i]) : 0
+  );
+
+  const promedioGrupal = (
+    promediosMaterias.reduce((a, b) => a + b, 0) / promediosMaterias.length
+  ).toFixed(1);
+
+  let texto = "<b>Promedio por Materia:</b><br>";
+  promediosMaterias.forEach((p, i) => {
+    if (cuentaPorMateria[i] > 0)
+      texto += `Materia ${i + 1}: ${p.toFixed(1)} | `;
+  });
+  texto += "<br><b>Promedio Grupal:</b> " + promedioGrupal;
+  return texto;
+}
+
+function exportarPDF(tabla, grupo, datosGrupo) {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ orientation: "landscape" });
+
+  const trimestre = datosGrupo[0]?.trimestre || "Sin trimestre";
+
+  doc.setFontSize(18);
+  doc.setTextColor(43, 130, 198);
+  doc.text(`Calificaciones - Grupo ${grupo} - ${trimestre}`, 148, 20, { align: "center" });
+
+  const headers = [...tabla.querySelectorAll("thead th")].map(th => th.innerText);
+  const rows = [...tabla.querySelectorAll("tbody tr")].map(tr =>
+    [...tr.querySelectorAll("td")].map(td => td.innerText)
+  );
+
+  doc.autoTable({
+    startY: 30,
+    head: [headers],
+    body: rows,
+    theme: "striped",
+    styles: { halign: "center", fontSize: 10 },
+    headStyles: { fillColor: [43, 130, 198], textColor: 255, fontStyle: "bold" },
+  });
+
+  // Calcular promedio grupal
+  let promedioTexto = calcularPromedios(tabla);
+  const match = promedioTexto.match(/Promedio Grupal:<\/b>\s(\d+(\.\d+)?)/);
+  const promedioGrupal = match ? match[1] : "N/A";
+
+  const finalY = doc.lastAutoTable.finalY + 15;
+  doc.setTextColor(43, 130, 198);
+  doc.setFontSize(14);
+  doc.setFont("helvetica", "bold");
+  doc.text(`Promedio Grupal: ${promedioGrupal}`, 270, finalY, { align: "right" });
+  doc.line(220, finalY + 1, 280, finalY + 1);
+
+  doc.save(`Calificaciones_${grupo}_${trimestre}.pdf`);
+}
+
+function exportarExcel(tabla, grupo, datosGrupo) {
+  const trimestre = datosGrupo[0]?.trimestre || "Sin trimestre";
+  const wb = XLSX.utils.book_new();
+  const ws = XLSX.utils.table_to_sheet(tabla);
+  XLSX.utils.book_append_sheet(wb, ws, `Grupo ${grupo}`);
+  XLSX.writeFile(wb, `Calificaciones_${grupo}_${trimestre}.xlsx`);
+}
+</script>
+</body>
+</html>
