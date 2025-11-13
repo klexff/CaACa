@@ -1,275 +1,104 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Control de Trimestres</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Control de Trimestres — Centro Educativo Integral Camino a Casa</title>
   <style>
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background-color: #f0f4fa;
-      margin: 0;
-      padding: 0;
-    }
-
-    header {
-      background: linear-gradient(90deg, #007bff, #00a2ff);
-      color: white;
-      text-align: center;
-      padding: 20px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    header h1 {
-      margin: 0;
-      font-size: 1.8rem;
-    }
-
-    nav {
-      display: flex;
-      justify-content: center;
-      background-color: #e9f2ff;
-      padding: 10px;
-      gap: 15px;
-    }
-
-    nav a {
-      text-decoration: none;
-      color: #007bff;
-      font-weight: bold;
-      padding: 8px 16px;
-      border-radius: 8px;
-      transition: all 0.3s;
-    }
-
-    nav a:hover {
-      background-color: #007bff;
-      color: white;
-    }
-
-    main {
-      padding: 20px;
-      max-width: 1100px;
-      margin: auto;
-    }
-
-    h2 {
-      text-align: center;
-      color: #007bff;
-      margin-bottom: 20px;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 12px;
-      overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      padding: 10px;
-      text-align: center;
-    }
-
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-
-    input, select {
-      padding: 6px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      width: 100%;
-      box-sizing: border-box;
-    }
-
-    button {
-      padding: 6px 12px;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-      color: white;
-      font-weight: bold;
-      margin: 3px;
-    }
-
-    .agregar { background-color: #28a745; }
-    .editar { background-color: #ffc107; color: black; }
-    .eliminar { background-color: #dc3545; }
-    .guardar { background-color: #007bff; }
-    .activo { background-color: #28a745; color: white; padding: 3px 8px; border-radius: 5px; }
-    .inactivo { background-color: #dc3545; color: white; padding: 3px 8px; border-radius: 5px; }
-
-    .panel {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-      align-items: center;
-      background: #ffffff;
-      padding: 15px;
-      border-radius: 12px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    .indicador {
-      margin-top: 15px;
-      text-align: right;
-      font-weight: bold;
-      color: #007bff;
-    }
+    body { font-family:"Segoe UI", Arial; background:#f5f8ff; margin:0; padding:20px; text-align:center; }
+    header{ background:#2B82C6; color:#fff; padding:18px; box-shadow:0 3px 8px rgba(0,0,0,0.12); }
+    main{ max-width:900px; margin:18px auto; background:#fff; padding:14px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.06);}
+    input,select{ padding:8px; border-radius:6px; border:1px solid #ccc; }
+    .btn{ padding:8px 12px; border-radius:8px; border:none; color:#fff; cursor:pointer; }
+    .guardar{ background:#007bff; } .volver{ background:#6c757d; }
+    .mensaje{ background:#d4edda; border:1px solid #c3e6cb; color:#155724; padding:10px; border-radius:8px; display:none; margin-top:8px; }
   </style>
 </head>
 <body>
-
-  <header>
-    <h1>📅 Control de Trimestres Académicos</h1>
-  </header>
-
-  <nav>
-    
-    <a href="historial.html">📖 Historial de Calificaciones</a>
-  </nav>
+  <header><h1>🔧 Control de Trimestres</h1></header>
 
   <main>
-    <h2>Gestión de Fechas y Estados</h2>
-
-    <div class="panel">
-      <label><b>Nombre del Trimestre:</b></label>
+    <div style="margin-bottom:12px;">
+      <label>Nombre del Trimestre:</label>
       <select id="nombreTrimestre">
-        <option value="">Seleccione...</option>
         <option value="1er Trimestre">1er Trimestre</option>
         <option value="2do Trimestre">2do Trimestre</option>
         <option value="3er Trimestre">3er Trimestre</option>
       </select>
-
-      <label><b>Inicio:</b></label>
-      <input type="date" id="fechaInicio">
-
-      <label><b>Fin:</b></label>
-      <input type="date" id="fechaFin">
-
-      <button class="agregar" onclick="agregarTrimestre()">Agregar Trimestre</button>
     </div>
 
-    <table id="tablaTrimestres">
-      <thead>
-        <tr>
-          <th>Nombre</th>
-          <th>Fecha de Inicio</th>
-          <th>Fecha de Fin</th>
-          <th>Estado</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+    <div style="margin-bottom:12px;">
+      <label>Inicio:</label>
+      <input type="date" id="fechaInicio" />
+      <label style="margin-left:8px">Fin:</label>
+      <input type="date" id="fechaFin" />
+    </div>
 
-    <div class="indicador" id="indicadorActivos"></div>
+    <div style="margin-bottom:12px;">
+      <label><input type="checkbox" id="activo" /> Trimestre activo</label>
+    </div>
+
+    <div>
+      <button class="btn guardar" id="guardarBtn">Guardar</button>
+      <button class="btn volver" id="volverBtn">Volver</button>
+    </div>
+
+    <div id="mensaje" class="mensaje">✅ Guardado correctamente</div>
   </main>
 
-  <script>
-    const tabla = document.querySelector("#tablaTrimestres tbody");
-    const indicador = document.getElementById("indicadorActivos");
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    document.addEventListener("DOMContentLoaded", cargarTrimestres);
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
+      authDomain: "camino-a-casa-87d65.firebaseapp.com",
+      databaseURL: "https://camino-a-casa-87d65-default-rtdb.firebaseio.com",
+      projectId: "camino-a-casa-87d65",
+      storageBucket: "camino-a-casa-87d65.firebasestorage.app",
+      messagingSenderId: "725645453280",
+      appId: "1:725645453280:web:4cc41935020d1ae290ed85"
+    };
 
-    function cargarTrimestres() {
-      tabla.innerHTML = "";
-      const trimestres = JSON.parse(localStorage.getItem("trimestres")) || [];
-      let activos = 0;
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
 
-      trimestres.forEach((t, index) => {
-        if (t.activo) activos++;
-        const fila = document.createElement("tr");
-        fila.innerHTML = `
-          <td>${t.nombre}</td>
-          <td>${t.inicio}</td>
-          <td>${t.fin}</td>
-          <td><span class="${t.activo ? "activo" : "inactivo"}">${t.activo ? "Activo" : "Inactivo"}</span></td>
-          <td>
-            <button class="editar" onclick="editarTrimestre(${index})">✏️</button>
-            <button class="eliminar" onclick="eliminarTrimestre(${index})">🗑️</button>
-            <button class="guardar" onclick="toggleEstado(${index})">${t.activo ? "Desactivar" : "Activar"}</button>
-          </td>
-        `;
-        tabla.appendChild(fila);
-      });
+    const nombreTrimestre = document.getElementById("nombreTrimestre");
+    const fechaInicio = document.getElementById("fechaInicio");
+    const fechaFin = document.getElementById("fechaFin");
+    const activo = document.getElementById("activo");
+    const guardarBtn = document.getElementById("guardarBtn");
+    const volverBtn = document.getElementById("volverBtn");
+    const mensaje = document.getElementById("mensaje");
 
-      indicador.textContent = `Trimestres activos: ${activos} / ${trimestres.length}`;
-    }
-
-    function agregarTrimestre() {
-      const nombre = document.getElementById("nombreTrimestre").value;
-      const inicio = document.getElementById("fechaInicio").value;
-      const fin = document.getElementById("fechaFin").value;
-
-      if (!nombre || !inicio || !fin) {
-        alert("⚠️ Por favor selecciona el trimestre y completa las fechas.");
-        return;
-      }
-
-      const trimestres = JSON.parse(localStorage.getItem("trimestres")) || [];
-      if (trimestres.some(t => t.nombre === nombre)) {
-        alert("⚠️ Este trimestre ya existe.");
-        return;
-      }
-
-      trimestres.push({ nombre, inicio, fin, activo: false });
-      localStorage.setItem("trimestres", JSON.stringify(trimestres));
-      document.getElementById("nombreTrimestre").value = "";
-      document.getElementById("fechaInicio").value = "";
-      document.getElementById("fechaFin").value = "";
-      cargarTrimestres();
-      alert("✅ Trimestre agregado correctamente.");
-    }
-
-    function editarTrimestre(index) {
-      const trimestres = JSON.parse(localStorage.getItem("trimestres")) || [];
-      const t = trimestres[index];
-      const nuevoInicio = prompt("Nueva fecha de inicio:", t.inicio) || t.inicio;
-      const nuevoFin = prompt("Nueva fecha de fin:", t.fin) || t.fin;
-      trimestres[index] = { ...t, inicio: nuevoInicio, fin: nuevoFin };
-      localStorage.setItem("trimestres", JSON.stringify(trimestres));
-      cargarTrimestres();
-    }
-
-    function eliminarTrimestre(index) {
-      if (!confirm("¿Seguro que deseas eliminar este trimestre?")) return;
-      const trimestres = JSON.parse(localStorage.getItem("trimestres")) || [];
-      trimestres.splice(index, 1);
-      localStorage.setItem("trimestres", JSON.stringify(trimestres));
-      cargarTrimestres();
-    }
-
-    function toggleEstado(index) {
-      const trimestres = JSON.parse(localStorage.getItem("trimestres")) || [];
-      trimestres[index].activo = !trimestres[index].activo;
-      localStorage.setItem("trimestres", JSON.stringify(trimestres));
-      cargarTrimestres();
-    }
-
-    // Revisión automática por fecha
-    setInterval(() => {
-      const trimestres = JSON.parse(localStorage.getItem("trimestres")) || [];
-      const hoy = new Date().toISOString().split("T")[0];
-      let cambiado = false;
-
-      trimestres.forEach(t => {
-        if (hoy >= t.inicio && hoy <= t.fin) {
-          if (!t.activo) { t.activo = true; cambiado = true; }
-        } else {
-          if (t.activo) { t.activo = false; cambiado = true; }
+    // Cargar trimestre existente al abrir
+    (async function cargar() {
+      try {
+        const snap = await get(ref(db, "configuracion/trimestreActivo"));
+        if (snap.exists()) {
+          const t = snap.val();
+          nombreTrimestre.value = t.nombre || nombreTrimestre.value;
+          fechaInicio.value = t.inicio || "";
+          fechaFin.value = t.fin || "";
+          activo.checked = !!t.activo;
         }
-      });
+      } catch(e){ console.error(e); }
+    })();
 
-      if (cambiado) localStorage.setItem("trimestres", JSON.stringify(trimestres));
-      cargarTrimestres();
-    }, 60000);
+    guardarBtn.addEventListener("click", async () => {
+      const nombre = nombreTrimestre.value;
+      const inicio = fechaInicio.value;
+      const fin = fechaFin.value;
+      const act = activo.checked;
+      if (!inicio || !fin) { alert("Complete inicio y fin."); return; }
+      if (new Date(inicio) > new Date(fin)) { alert("La fecha de inicio debe ser anterior a la fecha fin."); return; }
+      try {
+        await set(ref(db, "configuracion/trimestreActivo"), { nombre, inicio, fin, activo: act });
+        mensaje.style.display = "block"; setTimeout(()=>mensaje.style.display="none",2500);
+      } catch(err){ console.error(err); alert("Error al guardar."); }
+    });
+
+    volverBtn.addEventListener("click", ()=> window.location.href="index.html");
   </script>
-
 </body>
 </html>

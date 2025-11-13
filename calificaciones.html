@@ -1,152 +1,39 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Registro de Calificaciones</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Calificaciones — Centro Educativo Integral Camino a Casa</title>
   <style>
-    body {
-      font-family: "Segoe UI", Arial, sans-serif;
-      background-color: #f5f8ff;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-
-    header {
-      background: linear-gradient(90deg, #007bff, #00a2ff);
-      color: white;
-      text-align: center;
-      padding: 20px;
-      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
-    }
-
-    main {
-      padding: 20px;
-      max-width: 1100px;
-      margin: auto;
-      text-align: center;
-    }
-
-    table {
-      width: 80%;
-      margin: 20px auto;
-      border-collapse: collapse;
-      background-color: white;
-      border-radius: 10px;
-      overflow: hidden;
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    th, td {
-      border: 1px solid #ddd;
-      text-align: center;
-      padding: 8px;
-    }
-
-    th {
-      background-color: #007bff;
-      color: white;
-    }
-
-    input, select {
-      padding: 6px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      margin: 3px;
-    }
-
-    button {
-      padding: 6px 10px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      color: white;
-      font-weight: bold;
-      margin: 3px;
-      font-size: 0.9em;
-    }
-
-    .aceptar { background-color: #17a2b8; } /* color discreto */
-    .agregar { background-color: #28a745; }
-    .guardar { background-color: #007bff; }
-    .editar { background-color: #ffc107; color: black; }
-    .eliminar { background-color: #dc3545; }
-
-    .rojo { background-color: #f8d7da; }
-    .amarillo { background-color: #fff3cd; }
-    .verde { background-color: #d4edda; }
-
-    .alerta {
-      padding: 10px;
-      border-radius: 10px;
-      text-align: center;
-      margin-bottom: 15px;
-      width: 80%;
-      margin-left: auto;
-      margin-right: auto;
-    }
-
-    .advertencia {
-      background-color: #fff3cd;
-      border: 1px solid #ffeeba;
-      color: #856404;
-    }
-
-    .bloqueado {
-      background-color: #f8d7da;
-      border: 1px solid #f5c6cb;
-      color: #721c24;
-    }
-
-    .mensajeExito {
-      background-color: #d4edda;
-      border: 1px solid #c3e6cb;
-      color: #155724;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 8px;
-      text-align: center;
-      font-weight: bold;
-      width: 80%;
-      margin-left: auto;
-      margin-right: auto;
-      position: fixed;
-      top: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 999;
-      display: none;
-      animation: fadeInOut 3s ease-in-out forwards;
-    }
-
-    @keyframes fadeInOut {
-      0% { opacity: 0; top: -50px; }
-      10% { opacity: 1; top: 20px; }
-      90% { opacity: 1; top: 20px; }
-      100% { opacity: 0; top: -50px; }
-    }
-
-    label { font-weight: bold; }
+    body { font-family: "Segoe UI", Arial, sans-serif; background:#f5f8ff; margin:0; padding:20px; text-align:center; }
+    header { background:linear-gradient(90deg,#007bff,#00a2ff); color:#fff; padding:18px; box-shadow:0 3px 8px rgba(0,0,0,0.12); }
+    main { max-width:1100px; margin:16px auto; text-align:left; }
+    table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+    th,td { border:1px solid #ddd; padding:8px; text-align:center; }
+    th { background:#007bff; color:#fff; }
+    input, select { padding:6px; border-radius:6px; border:1px solid #ccc; }
+    .agregar { background:#28a745; color:#fff; padding:8px 12px; border-radius:8px; border:none; }
+    .guardar { background:#007bff; color:#fff; padding:8px 12px; border-radius:8px; border:none; }
+    .editar { background:#ffc107; color:#000; border:none; padding:6px 8px; border-radius:6px; }
+    .eliminar { background:#dc3545; color:#fff; border:none; padding:6px 8px; border-radius:6px; }
+    .rojo{background:#f8d7da;} .amarillo{background:#fff3cd;} .verde{background:#d4edda;}
+    .mensajeExito { background:#d4edda; border:1px solid #c3e6cb; color:#155724; padding:10px; border-radius:8px; margin-top:12px; display:none; text-align:center; }
+    label { font-weight:700; margin-right:8px; }
+    .center { text-align:center; }
   </style>
 </head>
 <body>
-
-  <header>
-    <h1>📝 Registro de Calificaciones</h1>
-  </header>
-
-  <div id="mensajeExito" class="mensajeExito"></div>
+  <header><h1>📝 Registro de Calificaciones — Centro Educativo Integral Camino a Casa</h1></header>
 
   <main>
-    <div id="alertaTrimestre" class="alerta advertencia">Cargando información de trimestres...</div>
+    <div id="alertaTrimestre" style="padding:10px; background:#fff3cd; border-radius:8px; margin-bottom:12px;">Cargando información de trimestres...</div>
 
-    <div>
+    <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
       <label>Trimestre:</label>
       <select id="trimestre"></select>
 
       <label>Grupo:</label>
-      <select id="grupo" onchange="actualizarMaterias()">
+      <select id="grupo">
         <option value="">Seleccione...</option>
         <option value="1°">1°</option>
         <option value="2°">2°</option>
@@ -154,150 +41,121 @@
       </select>
 
       <label>Materia:</label>
-      <select id="materia">
-        <option value="">Seleccione un grupo primero...</option>
-      </select>
+      <select id="materia"><option>Seleccione...</option></select>
 
       <label>Docente:</label>
-      <input type="text" id="docente" placeholder="Nombre del docente">
+      <input id="docente" placeholder="Nombre del docente" />
 
-      <div>
-        <button class="agregar" id="btnNuevoAlumno">Agregar Alumno</button>
-        <button class="guardar" onclick="guardarCalificaciones()">Guardar Calificaciones</button>
-        <button class="agregar" onclick="nuevaMateria()">Agregar Nueva Materia</button>
-      </div>
+      <button id="btnAgregar" class="agregar">Aceptar / Agregar Alumno</button>
+      <button id="btnNuevoMateria" class="agregar">Agregar Nueva Materia</button>
+      <button id="btnGuardar" class="guardar">Guardar Calificaciones</button>
     </div>
 
     <table id="tablaCalificaciones">
-      <thead>
-        <tr>
-          <th>Alumno</th>
-          <th>Calificación</th>
-          <th>Acciones</th>
-        </tr>
-      </thead>
+      <thead><tr><th>Alumno</th><th>Calificación</th><th>Acciones</th></tr></thead>
       <tbody></tbody>
-      <tfoot>
-        <tr>
-          <th>Promedio del grupo</th>
-          <th id="promedioGrupo"></th>
-          <th></th>
-        </tr>
-      </tfoot>
+      <tfoot><tr><th>Promedio del grupo</th><th id="promedioGrupo">-</th><th></th></tr></tfoot>
     </table>
+
+    <div id="mensajeExito" class="mensajeExito"></div>
   </main>
 
-  <script>
+  <!-- Firebase SDK (v10.8.0) -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, set, get, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
+      authDomain: "camino-a-casa-87d65.firebaseapp.com",
+      databaseURL: "https://camino-a-casa-87d65-default-rtdb.firebaseio.com",
+      projectId: "camino-a-casa-87d65",
+      storageBucket: "camino-a-casa-87d65.firebasestorage.app",
+      messagingSenderId: "725645453280",
+      appId: "1:725645453280:web:4cc41935020d1ae290ed85"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    // materias por grupo (como definiste)
+    const materiasPorGrupo = {
+      "1°": ["Matemáticas 1","Español 1","Biología 1","Geografía 1","Danza 1","Educación Física 1","Historia I","Ética I","Inglés 1","Gastronomía 1","Habilidades Digitales 1"],
+      "2°": ["Matemáticas 2","Español 2","Danza 2","Ética II","Física 2","Inglés 2","Educación Física 2","Historia II","Gastronomía 2","Habilidades Digitales 2"],
+      "3°": ["Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III","Vida Saludable 3","Historia III","Educación Física 3","Gastronomía 3","Habilidades Digitales 3","Química 3"]
+    };
+
     const cuerpoTabla = document.querySelector("#tablaCalificaciones tbody");
     const promedioGrupo = document.getElementById("promedioGrupo");
     const alertaTrimestre = document.getElementById("alertaTrimestre");
     const mensajeExito = document.getElementById("mensajeExito");
 
-    const materiasPorGrupo = {
-      "1°": ["Matemáticas 1", "Español 1", "Biología 1", "Geografía 1", "Danza 1", "Educación Física 1", "Historia I", "Ética I", "Inglés 1", "Gastronomía 1", "Habilidades Digitales 1"],
-      "2°": ["Matemáticas 2", "Español 2", "Danza 2", "Ética II", "Física 2", "Inglés 2", "Educación Física 2", "Historia II", "Gastronomía 2", "Habilidades Digitales 2"],
-      "3°": ["Matemáticas 3", "Español 3", "Inglés 3", "Danza 3", "Ética III", "Vida Saludable 3", "Historia III", "Educación Física 3", "Gastronomía 3", "Habilidades Digitales 3", "Química 3"]
-    };
-
-    document.addEventListener("DOMContentLoaded", () => {
-      cargarTrimestres();
-      document.getElementById("btnNuevoAlumno").addEventListener("click", agregarFila);
+    document.addEventListener("DOMContentLoaded", async () => {
+      await cargarTrimestres();
+      document.getElementById("btnAgregar").addEventListener("click", agregarFila);
+      document.getElementById("btnGuardar").addEventListener("click", guardarCalificaciones);
+      document.getElementById("btnNuevoMateria").addEventListener("click", nuevaMateria);
+      document.getElementById("grupo").addEventListener("change", actualizarMaterias);
+      // Disabled Enter in contenteditable cells:
+      document.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" && (document.activeElement && (document.activeElement.isContentEditable || document.activeElement.tagName === "INPUT"))) {
+          e.preventDefault();
+        }
+      });
     });
 
-    function cargarTrimestres() {
-      const trimestres = JSON.parse(localStorage.getItem("trimestres")) || [];
-      const activos = trimestres.filter(t => t.activo);
+    async function cargarTrimestres() {
+      const snap = await get(ref(db, "configuracion/trimestreActivo"));
       const select = document.getElementById("trimestre");
       select.innerHTML = "";
-
-      if (activos.length === 0) {
-        alertaTrimestre.textContent = "🚫 No hay trimestres activos.";
-        alertaTrimestre.className = "alerta bloqueado";
+      if (!snap.exists()) {
+        alertaTrimestre.textContent = "🚫 No hay trimestres activos. El registro de calificaciones está deshabilitado temporalmente.";
+        alertaTrimestre.style.background = "#f8d7da";
         select.disabled = true;
         return;
       }
-
-      alertaTrimestre.innerHTML = `✅ Trimestre activo: <b>${activos[0].nombre}</b> (Del ${activos[0].inicio} al ${activos[0].fin})`;
-      alertaTrimestre.className = "alerta advertencia";
-
-      activos.forEach(t => {
-        const opt = document.createElement("option");
-        opt.value = t.nombre;
-        opt.textContent = t.nombre;
-        select.appendChild(opt);
-      });
+      const activo = snap.val();
+      alertaTrimestre.innerHTML = `✅ Trimestre activo: <b>${activo.nombre}</b> (Del ${activo.inicio} al ${activo.fin})`;
+      select.disabled = false;
+      const opt = document.createElement("option"); opt.value = activo.nombre; opt.textContent = activo.nombre; select.appendChild(opt);
     }
 
     function actualizarMaterias() {
       const grupo = document.getElementById("grupo").value;
       const materiaSelect = document.getElementById("materia");
       materiaSelect.innerHTML = "";
-      if (!grupo) {
-        materiaSelect.innerHTML = "<option value=''>Seleccione un grupo primero...</option>";
-        return;
-      }
-      materiasPorGrupo[grupo].forEach(m => {
-        const opt = document.createElement("option");
-        opt.value = m;
-        opt.textContent = m;
-        materiaSelect.appendChild(opt);
-      });
+      if (!grupo) { materiaSelect.innerHTML = "<option>Seleccione un grupo primero...</option>"; return; }
+      materiasPorGrupo[grupo].forEach(m => { const opt = document.createElement("option"); opt.value = m; opt.textContent = m; materiaSelect.appendChild(opt); });
     }
 
     function agregarFila() {
       const fila = document.createElement("tr");
-      fila.innerHTML = `
-        <td contenteditable="true" onkeydown="bloquearEnter(event)"></td>
-        <td contenteditable="true" onblur="validarCalificacion(this)" onkeydown="bloquearEnter(event)"></td>
-        <td>
-          <button class="aceptar" onclick="aceptarFila(this)">✔️</button>
-          <button class="editar" onclick="editarFila(this)">✏️</button>
-          <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
-        </td>
-      `;
+      fila.innerHTML = `<td contenteditable="true"></td>
+                        <td contenteditable="true" onblur="validarCalificacion(this)"></td>
+                        <td>
+                          <button class="editar" onclick="editarFila(this)">✏️</button>
+                          <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
+                        </td>`;
       cuerpoTabla.appendChild(fila);
-    }
-
-    function bloquearEnter(event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-      }
+      fila.querySelector("td").focus();
     }
 
     function validarCalificacion(td) {
       let nota = td.textContent.trim();
       if (nota === "") return;
-      if (!/^\d{1,2}$/.test(nota)) {
-        td.textContent = "";
-        return;
-      }
-      let num = parseInt(nota, 10);
-      if (num < 6 || num > 10) {
-        td.textContent = "";
-        return;
-      }
+      if (!/^\d{1,2}$/.test(nota)) { alert("⚠️ Ingrese un número entero entre 6 y 10."); td.textContent=""; return; }
+      let num = parseInt(nota,10);
+      if (num<6||num>10) { alert("⚠️ La calificación debe estar entre 6 y 10."); td.textContent=""; return; }
       td.textContent = num;
-      aplicarColor(td, num);
+      aplicarColor(td,num);
       calcularPromedio();
     }
 
     function aplicarColor(td, nota) {
       td.className = "";
-      if (nota < 7) td.classList.add("rojo");
-      else if (nota <= 8) td.classList.add("amarillo");
+      if (nota<7) td.classList.add("rojo");
+      else if (nota<=8) td.classList.add("amarillo");
       else td.classList.add("verde");
-    }
-
-    function aceptarFila(btn) {
-      const fila = btn.closest("tr");
-      const alumno = fila.cells[0].textContent.trim();
-      const calificacion = fila.cells[1].textContent.trim();
-      if (!alumno || !calificacion) {
-        alert("⚠️ Complete el nombre del alumno y la calificación antes de aceptar.");
-        return;
-      }
-      btn.disabled = true;
-      btn.style.opacity = "0.6";
     }
 
     function editarFila(btn) {
@@ -312,45 +170,42 @@
 
     function calcularPromedio() {
       const celdas = [...document.querySelectorAll("#tablaCalificaciones tbody td:nth-child(2)")];
-      const notas = celdas.map(td => parseInt(td.textContent)).filter(n => !isNaN(n));
-      if (notas.length === 0) { promedioGrupo.textContent = "-"; return; }
+      let notas = celdas.map(td => parseInt(td.textContent)).filter(n => !isNaN(n));
+      if (notas.length===0) { promedioGrupo.textContent="-"; return; }
       const prom = (notas.reduce((a,b)=>a+b,0)/notas.length).toFixed(1);
       promedioGrupo.textContent = prom;
     }
 
-    function guardarCalificaciones() {
+    async function guardarCalificaciones() {
       const trimestre = document.getElementById("trimestre").value;
       const materia = document.getElementById("materia").value;
       const grupo = document.getElementById("grupo").value;
       const docente = document.getElementById("docente").value.trim();
 
-      if (!trimestre || !materia || !grupo || !docente) {
-        alert("⚠️ Complete todos los campos antes de guardar.");
-        return;
-      }
+      if (!trimestre||!materia||!grupo||!docente) { alert("⚠️ Complete todos los campos antes de guardar."); return; }
 
       const filas = [...document.querySelectorAll("#tablaCalificaciones tbody tr")];
-      if (filas.length === 0) {
-        alert("⚠️ No hay alumnos registrados.");
-        return;
+      if (filas.length===0) { alert("⚠️ No hay alumnos registrados."); return; }
+
+      const datos = filas.map(f => ({ alumno: f.cells[0].textContent.trim(), calificacion: parseInt(f.cells[1].textContent.trim()) || null }));
+
+      // Validaciones: no decimales, no menores a 6
+      for (const d of datos) {
+        if (!d.alumno) { alert("⚠️ Rellene el nombre de todos los alumnos."); return; }
+        if (d.calificacion === null) { alert("⚠️ Rellene todas las calificaciones."); return; }
+        if (d.calificacion < 6 || d.calificacion > 10 || !Number.isInteger(d.calificacion)) { alert("⚠️ Calificaciones enteras entre 6 y 10."); return; }
       }
 
-      const datos = filas.map(f => ({
-        alumno: f.cells[0].textContent.trim(),
-        calificacion: parseInt(f.cells[1].textContent.trim()) || 0
-      }));
-
-      const historial = JSON.parse(localStorage.getItem("historialCalificaciones")) || [];
-      historial.push({ trimestre, grupo, materia, docente, datos });
-      localStorage.setItem("historialCalificaciones", JSON.stringify(historial));
-
-      mostrarMensajeExito(`✅ Calificaciones guardadas correctamente para ${materia} - ${grupo} (${trimestre}).`);
-    }
-
-    function mostrarMensajeExito(mensaje) {
-      mensajeExito.textContent = mensaje;
-      mensajeExito.style.display = "block";
-      setTimeout(() => { mensajeExito.style.display = "none"; }, 3000);
+      // Guardar en Firebase: estructura /calificaciones/{trimestre}/{grupo}/{materia}
+      const path = `calificaciones/${encodeKey(trimestre)}/${encodeKey(grupo)}/${encodeKey(materia)}`;
+      try {
+        await set(ref(db, path), { docente, datos, savedAt: new Date().toISOString() });
+        mensajeExito.style.display = "block";
+        mensajeExito.textContent = `✅ Calificaciones guardadas correctamente para ${materia} - ${grupo} (${trimestre}).`;
+        setTimeout(()=> mensajeExito.style.display="none", 4000);
+      } catch (err) {
+        console.error(err); alert("❌ Error al guardar en la nube. Revise su conexión.");
+      }
     }
 
     function nuevaMateria() {
@@ -358,8 +213,11 @@
       cuerpoTabla.innerHTML = "";
       promedioGrupo.textContent = "";
       document.getElementById("materia").selectedIndex = 0;
-      mensajeExito.innerHTML = "";
+      document.getElementById("docente").value = "";
+      mensajeExito.style.display = "none";
     }
+
+    function encodeKey(s) { return s.replace(/\./g,"_"); } // para keys seguras
   </script>
 </body>
 </html>
