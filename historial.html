@@ -7,6 +7,22 @@
   <style>
     body { font-family:"Segoe UI", Arial; background:#dff3ff; margin:0; padding:20px; text-align:center; }
     header{ background:#2B82C6; color:#fff; padding:18px; box-shadow:0 3px 8px rgba(0,0,0,0.12); }
+    .barra-superior{
+      margin-top:10px;
+      display:flex;
+      justify-content:center;
+      gap:10px;
+    }
+    .btn-top{
+      border:none;
+      padding:8px 12px;
+      border-radius:8px;
+      cursor:pointer;
+      color:#fff;
+      font-weight:600;
+    }
+    .btn-volver{ background:#6c757d; }
+    .btn-salir{ background:#c0392b; }
     .contenedor-tablas { display:flex; flex-direction:column; gap:22px; margin-top:20px; align-items:center; }
     .tabla-contenedor { position:relative; width:92%; background:#fff; border-radius:10px; padding:10px; box-shadow:0 3px 10px rgba(0,0,0,0.08); }
     table{ width:100%; border-collapse:collapse; margin-top:8px; }
@@ -20,7 +36,15 @@
   </style>
 </head>
 <body>
-  <header><h1>📘 Historial de Calificaciones — Centro Educativo Integral Camino a Casa</h1></header>
+  <header>
+    <h1>📘 Historial de Calificaciones — Centro Educativo Integral Camino a Casa</h1>
+  </header>
+
+  <div class="barra-superior">
+    <button id="btnVolver" class="btn-top btn-volver">⬅ Control de Trimestres</button>
+    <button id="btnSalir" class="btn-top btn-salir">Salir</button>
+  </div>
+
   <div id="mensajeConfirmacion" class="mensaje">✅ Grupo eliminado del historial correctamente</div>
   <div class="contenedor-tablas" id="contenedorTablas"></div>
 
@@ -28,7 +52,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, get, remove, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, get, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
     import { jsPDF } from "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js";
 
     const firebaseConfig = {
@@ -47,24 +71,28 @@
     const contenedor = document.getElementById("contenedorTablas");
     const mensajeConfirmacion = document.getElementById("mensajeConfirmacion");
 
-    // Cargar automaticamente al abrir
+    document.getElementById("btnVolver").addEventListener("click", () => {
+      window.location.href = "control_trimestres.html";
+    });
+    document.getElementById("btnSalir").addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
+
     async function cargarHistorial() {
       contenedor.innerHTML = "";
       const snap = await get(ref(db, "calificaciones"));
-      if (!snap.exists()) { contenedor.innerHTML = "<p>No hay calificaciones registradas.</p>"; return; }
-      const datos = snap.val(); // estructura: { trimestre: { grupo: { materia: {docente,datos:[] } } } }
-      // Organizamos por grupo -> para cada trimestre
-      // Lo recorreremos por trimestres y grupos
+      if (!snap.exists()) {
+        contenedor.innerHTML = "<p>No hay calificaciones registradas.</p>";
+        return;
+      }
+      const datos = snap.val();
       for (const trimestreKey of Object.keys(datos)) {
         const gruposObj = datos[trimestreKey];
-        // gruposObj: { "1°": { "Matemáticas 1": {...}, ... }, "2°": ... }
         for (const grupoKey of Object.keys(gruposObj)) {
           const materiasObj = gruposObj[grupoKey];
-          // construir lista de materias y alumnos
           const materias = Object.keys(materiasObj || {});
           if (materias.length === 0) continue;
 
-          // obtener lista de alumnos (union)
           const alumnosSet = new Set();
           materias.forEach(m => {
             const entrada = materiasObj[m];
@@ -72,17 +100,33 @@
           });
           const alumnos = Array.from(alumnosSet).sort((a,b)=> a.localeCompare(b,'es'));
 
-          // crear contenedor de tabla
-          const contDiv = document.createElement("div"); contDiv.className = "tabla-contenedor";
-          const header = document.createElement("h3"); header.textContent = `Grupo ${grupoKey} — ${trimestreKey}`; header.style.margin="6px 0 0 0";
-          const accionesDiv = document.createElement("div"); accionesDiv.className="acciones";
-          // botones
-          const btnEliminar = document.createElement("button"); btnEliminar.className="eliminar"; btnEliminar.textContent="🗑️"; btnEliminar.title="Eliminar tabla"; btnEliminar.onclick = () => eliminarTabla(trimestreKey, grupoKey, contDiv);
-          const btnPDF = document.createElement("button"); btnPDF.className="pdf"; btnPDF.textContent="📄 PDF"; btnPDF.onclick = () => exportarPDF_trimestre(grupoKey, trimestreKey, materiasObj);
-          const btnExcel = document.createElement("button"); btnExcel.className="excel"; btnExcel.textContent="📊 Excel"; btnExcel.onclick = () => exportarExcel_trimestre(grupoKey, trimestreKey, materiasObj);
+          const contDiv = document.createElement("div");
+          contDiv.className = "tabla-contenedor";
+          const header = document.createElement("h3");
+          header.textContent = `Grupo ${grupoKey} — ${trimestreKey}`;
+          header.style.margin="6px 0 0 0";
+
+          const accionesDiv = document.createElement("div");
+          accionesDiv.className="acciones";
+
+          const btnEliminar = document.createElement("button");
+          btnEliminar.className="eliminar";
+          btnEliminar.textContent="🗑️";
+          btnEliminar.title="Eliminar tabla";
+          btnEliminar.onclick = () => eliminarTabla(trimestreKey, grupoKey, contDiv);
+
+          const btnPDF = document.createElement("button");
+          btnPDF.className="pdf";
+          btnPDF.textContent="📄 PDF";
+          btnPDF.onclick = () => exportarPDF_trimestre(grupoKey, trimestreKey, materiasObj);
+
+          const btnExcel = document.createElement("button");
+          btnExcel.className="excel";
+          btnExcel.textContent="📊 Excel";
+          btnExcel.onclick = () => exportarExcel_trimestre(grupoKey, trimestreKey, materiasObj);
+
           accionesDiv.append(btnPDF, btnExcel, btnEliminar);
 
-          // tabla
           const tabla = document.createElement("table");
           const thead = document.createElement("thead");
           const headRow = document.createElement("tr");
@@ -102,17 +146,19 @@
             tbody.appendChild(tr);
           });
 
-          tabla.appendChild(thead); tabla.appendChild(tbody);
+          tabla.appendChild(thead);
+          tabla.appendChild(tbody);
 
-          // promedios
-          const promediosDiv = document.createElement("div"); promediosDiv.className="promedios";
-          // calcular promedio por materia y promedio grupal real (suma de todas notas / total)
+          const promediosDiv = document.createElement("div");
+          promediosDiv.className="promedios";
           let texto = "<b>Promedio por Materia:</b> ";
           let sumaTotal=0; let contTotal=0;
-          materias.forEach((m,i)=> {
+          materias.forEach((m)=> {
             const entrada = materiasObj[m];
             let s=0, c=0;
-            (entrada.datos || []).forEach(d => { if (!isNaN(d.calificacion)) { s += Number(d.calificacion); c++; }});
+            (entrada.datos || []).forEach(d => {
+              if (!isNaN(d.calificacion)) { s += Number(d.calificacion); c++; }
+            });
             const pm = c>0 ? (s/c).toFixed(1) : "-";
             texto += `${m}: ${pm}  `;
             if (c>0) { sumaTotal += s; contTotal += c; }
@@ -127,11 +173,9 @@
       }
     }
 
-    // eliminar tabla en Firebase
     async function eliminarTabla(trimestreKey, grupoKey, contDiv) {
       if (!confirm("¿Seguro que deseas eliminar esta tabla completa?")) return;
       try {
-        // borrar el nodo del grupo dentro de ese trimestre
         await remove(ref(db, `calificaciones/${encodeKey(trimestreKey)}/${encodeKey(grupoKey)}`));
         contDiv.remove();
         mensajeConfirmacion.style.display="block";
@@ -141,19 +185,23 @@
 
     function encodeKey(s){ return s.replace(/\./g,"_"); }
 
-    // Exportar Excel (por tabla)
     function exportarExcel_trimestre(grupo, trimestre, materiasObj) {
-      // Generar tabla HTML temporal
       const container = document.createElement("div");
       const table = document.createElement("table");
+
+      const caption = document.createElement("caption");
+      caption.textContent = "Centro Educativo Integral Camino a Casa";
+      caption.style.fontWeight = "bold";
+      table.appendChild(caption);
+
       const thead = document.createElement("thead");
       const materias = Object.keys(materiasObj);
       const headRow = document.createElement("tr");
       headRow.innerHTML = "<th>Alumno</th>" + materias.map(m=>`<th>${m}</th>`).join("");
       thead.appendChild(headRow);
       table.appendChild(thead);
+
       const tbody = document.createElement("tbody");
-      // Alumnos union
       const alumnosSet = new Set();
       materias.forEach(m => (materiasObj[m].datos || []).forEach(d=> alumnosSet.add(d.alumno)));
       const alumnos = Array.from(alumnosSet).sort((a,b)=> a.localeCompare(b,'es'));
@@ -173,10 +221,26 @@
       XLSX.writeFile(wb, `Calificaciones_${grupo}_${trimestre}.xlsx`);
     }
 
-    // Exportar PDF (sencillo, encabezado color #2B82C6)
     async function exportarPDF_trimestre(grupo, trimestre, materiasObj) {
       const { jsPDF } = await import("https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js");
       const doc = new jsPDF({ orientation: "landscape" });
+
+      // Logo
+      try {
+        const img = new Image();
+        img.src = "logo_camino_a_casa.png";
+        await new Promise((res, rej) => {
+          img.onload = res;
+          img.onerror = rej;
+        });
+        const logoWidth = 35;
+        const ratio = img.height / img.width;
+        const logoHeight = logoWidth * ratio;
+        doc.addImage(img, "PNG", 12, 5, logoWidth, logoHeight);
+      } catch (e) {
+        console.warn("No se pudo cargar el logo para el PDF:", e);
+      }
+
       doc.setFontSize(16);
       doc.setTextColor(43,130,198);
       doc.text(`Centro Educativo Integral Camino a Casa`, 148, 12, {align:"center"});
@@ -186,7 +250,6 @@
       const materias = Object.keys(materiasObj);
       const headers = ["Alumno", ...materias];
       const rows = [];
-      // alumnos union
       const alumnosSet = new Set();
       materias.forEach(m => (materiasObj[m].datos || []).forEach(d=> alumnosSet.add(d.alumno)));
       const alumnos = Array.from(alumnosSet).sort((a,b)=> a.localeCompare(b,'es'));
@@ -200,9 +263,6 @@
         rows.push(row);
       });
 
-      // usar autoTable si está disponible
-      // crear tabla simple:
-      // calculo de posicion
       doc.autoTable({
         startY: 30,
         head: [headers],
@@ -212,24 +272,25 @@
         styles: { halign: "center", fontSize: 9 }
       });
 
-      // promedio grupal (suma real / total)
       let suma=0, cuenta=0;
       materias.forEach(m=>{
-        (materiasObj[m].datos||[]).forEach(d=> { if (!isNaN(d.calificacion)) { suma += Number(d.calificacion); cuenta++; }});
+        (materiasObj[m].datos||[]).forEach(d=> {
+          if (!isNaN(d.calificacion)) { suma += Number(d.calificacion); cuenta++; }
+        });
       });
       const prom = cuenta>0 ? (suma/cuenta).toFixed(1) : "N/A";
       const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 10 : 200;
-      doc.setFontSize(12); doc.setTextColor(43,130,198); doc.setFont(undefined,"bold");
+      doc.setFontSize(12);
+      doc.setTextColor(43,130,198);
+      doc.setFont(undefined,"bold");
       doc.text(`Promedio Grupal: ${prom}`, 280, finalY, { align: "right" });
       doc.line(220, finalY+1, 280, finalY+1);
 
       doc.save(`Calificaciones_${grupo}_${trimestre}.pdf`);
     }
 
-    // Cargar en init
     (function init(){ cargarHistorial(); })();
   </script>
-  <!-- jspdf-autotable is optional if you want enhanced tables in PDF; if missing, pdf will still be generated -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 </body>
 </html>

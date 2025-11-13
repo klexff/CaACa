@@ -8,46 +8,114 @@
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(135deg, #b3e5fc, #e1f5fe);
+      background: radial-gradient(circle at top, #fdfaf4 0, #f3f6f4 35%, #e7f0eb 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       height: 100vh;
       text-align: center;
-      color: #01579b;
+      color: #23422f;
     }
-    h1 { font-size: 2.0rem; margin-bottom: 18px; color:#013a63; }
     .card {
-      background: white;
-      padding: 32px 36px;
-      border-radius: 16px;
-      box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+      background: #ffffff;
+      padding: 28px 32px 32px;
+      border-radius: 18px;
+      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+      border-top: 5px solid #2f8c4a;
       animation: fadeIn 0.7s ease;
       width: 360px;
     }
-    .buttons { display:flex; flex-direction:column; gap:14px; margin-top:18px; }
+    .logo {
+      max-width: 230px;
+      margin: 0 auto 10px;
+      display: block;
+    }
+    h1 {
+      font-size: 1.4rem;
+      margin: 4px 0 0;
+      color: #23422f;
+    }
+    h1 small {
+      display: block;
+      font-size: 0.9rem;
+      color: #bc8b31;
+      margin-top: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .sub {
+      margin: 6px 0 0 0;
+      color: #44624a;
+      font-size: 0.9rem;
+    }
+    .buttons {
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin-top:18px;
+    }
     button {
-      background-color:#0288d1;
+      background-color:#2f8c4a;
       color:white;
       border:none;
       padding:12px 14px;
       border-radius:10px;
       cursor:pointer;
       font-weight:600;
+      font-size:0.95rem;
+      transition: transform .08s ease, box-shadow .08s ease, opacity .08s ease;
     }
-    button.secondary { background:#2B82C6; }
-    .footer { position: absolute; bottom: 12px; font-size:0.85rem; color:#0277bd; }
+    button.secondary {
+      background:#25619c;
+    }
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      opacity: 0.96;
+    }
+    .footer {
+      position: absolute;
+      bottom: 10px;
+      font-size:0.8rem;
+      color:#44624a;
+    }
     @keyframes fadeIn { from {opacity:0; transform:translateY(12px)} to {opacity:1; transform:none} }
-    .modal { display:none; position:fixed; inset:0; background: rgba(0,0,0,0.4); align-items:center; justify-content:center; }
-    .modal-content { background:white; padding:20px; border-radius:10px; width:320px; text-align:center; box-shadow:0 6px 12px rgba(0,0,0,0.15); }
-    input[type=password] { padding:10px; border-radius:8px; width:90%; margin-top:8px; border:1px solid #ccc; text-align:center; }
+    .modal {
+      display:none;
+      position:fixed;
+      inset:0;
+      background: rgba(0,0,0,0.35);
+      align-items:center;
+      justify-content:center;
+    }
+    .modal-content {
+      background:white;
+      padding:20px;
+      border-radius:12px;
+      width:320px;
+      text-align:center;
+      box-shadow:0 8px 16px rgba(0,0,0,0.18);
+      border-top:4px solid #25619c;
+    }
+    input[type=password] {
+      padding:10px;
+      border-radius:8px;
+      width:90%;
+      margin-top:8px;
+      border:1px solid #ccc;
+      text-align:center;
+    }
   </style>
 </head>
 <body>
   <div class="card">
-    <h1>Centro Educativo Integral<br><small style="font-size:0.85rem; font-weight:700">Camino a Casa</small></h1>
-    <p style="margin:6px 0 0 0; color:#046">Bienvenido al sistema de gestión escolar</p>
+    <img src="logo_camino_a_casa.png" alt="Centro Educativo Integral Camino a Casa" class="logo">
+    <h1>
+      Centro Educativo Integral
+      <small>Camino a Casa</small>
+    </h1>
+    <p class="sub">Bienvenido al sistema de gestión escolar</p>
 
     <div class="buttons">
       <button id="btnCalificaciones">📘 Ir a Calificaciones</button>
@@ -57,12 +125,12 @@
 
   <div class="modal" id="passwordModal">
     <div class="modal-content">
-      <h3>Acceso Restringido</h3>
+      <h3 style="margin-top:0;">Acceso restringido</h3>
       <p>Ingrese la contraseña de administrador:</p>
       <input type="password" id="adminPassword" placeholder="Contraseña" />
       <div style="margin-top:12px;">
-        <button id="ingresarBtn" style="background:#2B82C6; padding:8px 12px; color:#fff; border-radius:8px; border:none">Ingresar</button>
-        <button id="cancelBtn" style="background:none; color:#2B82C6; border:none; margin-left:8px">Cancelar</button>
+        <button id="ingresarBtn" style="background:#25619c; padding:8px 12px; color:#fff; border-radius:8px; border:none">Ingresar</button>
+        <button id="cancelBtn" style="background:none; color:#25619c; border:none; margin-left:8px; font-weight:600;">Cancelar</button>
       </div>
     </div>
   </div>
@@ -74,7 +142,6 @@
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-    // Tu configuración (ya proporcionada)
     const firebaseConfig = {
       apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
       authDomain: "camino-a-casa-87d65.firebaseapp.com",
@@ -94,13 +161,12 @@
     const ingresarBtn = document.getElementById("ingresarBtn");
     const cancelBtn = document.getElementById("cancelBtn");
 
-    // Función para checar si hay trimestre activo
     async function hayTrimestreActivo() {
       try {
         const snap = await get(ref(db, "configuracion/trimestreActivo"));
         if (!snap.exists()) return false;
         const t = snap.val();
-        if (!t || !t.inicio || !t.fin) return false;
+        if (!t || !t.inicio || !t.fin || !t.activo) return false;
         const hoy = new Date();
         const inicio = new Date(t.inicio);
         const fin = new Date(t.fin + "T23:59:59");
@@ -120,7 +186,10 @@
       }
     });
 
-    btnControl.addEventListener("click", () => { modal.style.display = "flex"; document.getElementById("adminPassword").focus(); });
+    btnControl.addEventListener("click", () => {
+      modal.style.display = "flex";
+      document.getElementById("adminPassword").focus();
+    });
 
     ingresarBtn.addEventListener("click", () => {
       const pwd = document.getElementById("adminPassword").value.trim();
@@ -134,9 +203,17 @@
       }
     });
 
-    cancelBtn.addEventListener("click", () => { modal.style.display = "none"; document.getElementById("adminPassword").value = ""; });
+    cancelBtn.addEventListener("click", () => {
+      modal.style.display = "none";
+      document.getElementById("adminPassword").value = "";
+    });
 
-    window.addEventListener("click", (e) => { if (e.target === modal) { modal.style.display = "none"; document.getElementById("adminPassword").value = ""; } });
+    window.addEventListener("click", (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+        document.getElementById("adminPassword").value = "";
+      }
+    });
   </script>
 </body>
 </html>

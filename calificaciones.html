@@ -63,7 +63,7 @@
   <!-- Firebase SDK (v10.8.0) -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, get, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
@@ -78,11 +78,18 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
-    // materias por grupo (como definiste)
+    // materias por grupo
     const materiasPorGrupo = {
       "1°": ["Matemáticas 1","Español 1","Biología 1","Geografía 1","Danza 1","Educación Física 1","Historia I","Ética I","Inglés 1","Gastronomía 1","Habilidades Digitales 1"],
       "2°": ["Matemáticas 2","Español 2","Danza 2","Ética II","Física 2","Inglés 2","Educación Física 2","Historia II","Gastronomía 2","Habilidades Digitales 2"],
       "3°": ["Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III","Vida Saludable 3","Historia III","Educación Física 3","Gastronomía 3","Habilidades Digitales 3","Química 3"]
+    };
+
+    // alumnos por grupo (orden alfabético)
+    const alumnosPorGrupo = {
+      "1°": ["Cesar","Isabella","Samuel","Santiago","Victoria"],
+      "2°": ["Alisson","Julieta","Mario","Mateo"],
+      "3°": ["Damian","David A.","Grecia","Hector","Hiram","Jesus","Paulina","Ruben"]
     };
 
     const cuerpoTabla = document.querySelector("#tablaCalificaciones tbody");
@@ -95,8 +102,8 @@
       document.getElementById("btnAgregar").addEventListener("click", agregarFila);
       document.getElementById("btnGuardar").addEventListener("click", guardarCalificaciones);
       document.getElementById("btnNuevoMateria").addEventListener("click", nuevaMateria);
-      document.getElementById("grupo").addEventListener("change", actualizarMaterias);
-      // Disabled Enter in contenteditable cells:
+      document.getElementById("grupo").addEventListener("change", actualizarGrupo);
+      // Deshabilitar Enter en celdas
       document.addEventListener("keydown", (e) => {
         if (e.key === "Enter" && (document.activeElement && (document.activeElement.isContentEditable || document.activeElement.tagName === "INPUT"))) {
           e.preventDefault();
@@ -117,35 +124,78 @@
       const activo = snap.val();
       alertaTrimestre.innerHTML = `✅ Trimestre activo: <b>${activo.nombre}</b> (Del ${activo.inicio} al ${activo.fin})`;
       select.disabled = false;
-      const opt = document.createElement("option"); opt.value = activo.nombre; opt.textContent = activo.nombre; select.appendChild(opt);
+      const opt = document.createElement("option");
+      opt.value = activo.nombre;
+      opt.textContent = activo.nombre;
+      select.appendChild(opt);
     }
 
-    function actualizarMaterias() {
+    function actualizarGrupo() {
       const grupo = document.getElementById("grupo").value;
+      actualizarMaterias(grupo);
+      cargarAlumnos(grupo);
+    }
+
+    function actualizarMaterias(grupo) {
       const materiaSelect = document.getElementById("materia");
       materiaSelect.innerHTML = "";
-      if (!grupo) { materiaSelect.innerHTML = "<option>Seleccione un grupo primero...</option>"; return; }
-      materiasPorGrupo[grupo].forEach(m => { const opt = document.createElement("option"); opt.value = m; opt.textContent = m; materiaSelect.appendChild(opt); });
+      if (!grupo) {
+        materiaSelect.innerHTML = "<option>Seleccione un grupo primero...</option>";
+        return;
+      }
+      materiasPorGrupo[grupo].forEach(m => {
+        const opt = document.createElement("option");
+        opt.value = m;
+        opt.textContent = m;
+        materiaSelect.appendChild(opt);
+      });
+    }
+
+    function cargarAlumnos(grupo) {
+      cuerpoTabla.innerHTML = "";
+      promedioGrupo.textContent = "-";
+      if (!grupo || !alumnosPorGrupo[grupo]) return;
+      alumnosPorGrupo[grupo].forEach(nombre => {
+        const fila = document.createElement("tr");
+        fila.innerHTML = `
+          <td contenteditable="true">${nombre}</td>
+          <td contenteditable="true" onblur="validarCalificacion(this)"></td>
+          <td>
+            <button class="editar" onclick="editarFila(this)">✏️</button>
+            <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
+          </td>`;
+        cuerpoTabla.appendChild(fila);
+      });
     }
 
     function agregarFila() {
       const fila = document.createElement("tr");
-      fila.innerHTML = `<td contenteditable="true"></td>
-                        <td contenteditable="true" onblur="validarCalificacion(this)"></td>
-                        <td>
-                          <button class="editar" onclick="editarFila(this)">✏️</button>
-                          <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
-                        </td>`;
+      fila.innerHTML = `
+        <td contenteditable="true"></td>
+        <td contenteditable="true" onblur="validarCalificacion(this)"></td>
+        <td>
+          <button class="editar" onclick="editarFila(this)">✏️</button>
+          <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
+        </td>`;
       cuerpoTabla.appendChild(fila);
       fila.querySelector("td").focus();
     }
 
-    function validarCalificacion(td) {
+    // Hacemos las funciones globales para que funcionen los atributos onblur/onclick
+    window.validarCalificacion = function(td) {
       let nota = td.textContent.trim();
       if (nota === "") return;
-      if (!/^\d{1,2}$/.test(nota)) { alert("⚠️ Ingrese un número entero entre 6 y 10."); td.textContent=""; return; }
+      if (!/^\d{1,2}$/.test(nota)) {
+        alert("⚠️ Ingrese un número entero entre 6 y 10.");
+        td.textContent="";
+        return;
+      }
       let num = parseInt(nota,10);
-      if (num<6||num>10) { alert("⚠️ La calificación debe estar entre 6 y 10."); td.textContent=""; return; }
+      if (num<6||num>10) {
+        alert("⚠️ La calificación debe estar entre 6 y 10.");
+        td.textContent="";
+        return;
+      }
       td.textContent = num;
       aplicarColor(td,num);
       calcularPromedio();
@@ -158,12 +208,12 @@
       else td.classList.add("verde");
     }
 
-    function editarFila(btn) {
+    window.editarFila = function(btn) {
       const fila = btn.closest("tr");
       fila.querySelector("td").focus();
     }
 
-    function eliminarFila(btn) {
+    window.eliminarFila = function(btn) {
       btn.closest("tr").remove();
       calcularPromedio();
     }
@@ -171,7 +221,10 @@
     function calcularPromedio() {
       const celdas = [...document.querySelectorAll("#tablaCalificaciones tbody td:nth-child(2)")];
       let notas = celdas.map(td => parseInt(td.textContent)).filter(n => !isNaN(n));
-      if (notas.length===0) { promedioGrupo.textContent="-"; return; }
+      if (notas.length===0) {
+        promedioGrupo.textContent="-";
+        return;
+      }
       const prom = (notas.reduce((a,b)=>a+b,0)/notas.length).toFixed(1);
       promedioGrupo.textContent = prom;
     }
@@ -182,21 +235,37 @@
       const grupo = document.getElementById("grupo").value;
       const docente = document.getElementById("docente").value.trim();
 
-      if (!trimestre||!materia||!grupo||!docente) { alert("⚠️ Complete todos los campos antes de guardar."); return; }
-
-      const filas = [...document.querySelectorAll("#tablaCalificaciones tbody tr")];
-      if (filas.length===0) { alert("⚠️ No hay alumnos registrados."); return; }
-
-      const datos = filas.map(f => ({ alumno: f.cells[0].textContent.trim(), calificacion: parseInt(f.cells[1].textContent.trim()) || null }));
-
-      // Validaciones: no decimales, no menores a 6
-      for (const d of datos) {
-        if (!d.alumno) { alert("⚠️ Rellene el nombre de todos los alumnos."); return; }
-        if (d.calificacion === null) { alert("⚠️ Rellene todas las calificaciones."); return; }
-        if (d.calificacion < 6 || d.calificacion > 10 || !Number.isInteger(d.calificacion)) { alert("⚠️ Calificaciones enteras entre 6 y 10."); return; }
+      if (!trimestre||!materia||!grupo||!docente) {
+        alert("⚠️ Complete todos los campos antes de guardar.");
+        return;
       }
 
-      // Guardar en Firebase: estructura /calificaciones/{trimestre}/{grupo}/{materia}
+      const filas = [...document.querySelectorAll("#tablaCalificaciones tbody tr")];
+      if (filas.length===0) {
+        alert("⚠️ No hay alumnos registrados.");
+        return;
+      }
+
+      const datos = filas.map(f => ({
+        alumno: f.cells[0].textContent.trim(),
+        calificacion: parseInt(f.cells[1].textContent.trim()) || null
+      }));
+
+      for (const d of datos) {
+        if (!d.alumno) {
+          alert("⚠️ Rellene el nombre de todos los alumnos.");
+          return;
+        }
+        if (d.calificacion === null) {
+          alert("⚠️ Rellene todas las calificaciones.");
+          return;
+        }
+        if (d.calificacion < 6 || d.calificacion > 10 || !Number.isInteger(d.calificacion)) {
+          alert("⚠️ Calificaciones enteras entre 6 y 10.");
+          return;
+        }
+      }
+
       const path = `calificaciones/${encodeKey(trimestre)}/${encodeKey(grupo)}/${encodeKey(materia)}`;
       try {
         await set(ref(db, path), { docente, datos, savedAt: new Date().toISOString() });
@@ -204,20 +273,21 @@
         mensajeExito.textContent = `✅ Calificaciones guardadas correctamente para ${materia} - ${grupo} (${trimestre}).`;
         setTimeout(()=> mensajeExito.style.display="none", 4000);
       } catch (err) {
-        console.error(err); alert("❌ Error al guardar en la nube. Revise su conexión.");
+        console.error(err);
+        alert("❌ Error al guardar en la nube. Revise su conexión.");
       }
     }
 
     function nuevaMateria() {
       if (!confirm("¿Deseas agregar una nueva materia? Se limpiará la tabla actual.")) return;
       cuerpoTabla.innerHTML = "";
-      promedioGrupo.textContent = "";
+      promedioGrupo.textContent = "-";
       document.getElementById("materia").selectedIndex = 0;
-      document.getElementById("docente").value = "";
+      // el grupo se mantiene, así al cambiar materia puedes conservar alumnos si recargas
       mensajeExito.style.display = "none";
     }
 
-    function encodeKey(s) { return s.replace(/\./g,"_"); } // para keys seguras
+    function encodeKey(s) { return s.replace(/\./g,"_"); }
   </script>
 </body>
 </html>

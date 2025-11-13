@@ -6,19 +6,74 @@
   <title>Control de Trimestres — Centro Educativo Integral Camino a Casa</title>
   <style>
     body { font-family:"Segoe UI", Arial; background:#f5f8ff; margin:0; padding:20px; text-align:center; }
-    header{ background:#2B82C6; color:#fff; padding:18px; box-shadow:0 3px 8px rgba(0,0,0,0.12); }
-    main{ max-width:900px; margin:18px auto; background:#fff; padding:14px; border-radius:10px; box-shadow:0 3px 10px rgba(0,0,0,0.06);}
-    input,select{ padding:8px; border-radius:6px; border:1px solid #ccc; }
-    .btn{ padding:8px 12px; border-radius:8px; border:none; color:#fff; cursor:pointer; }
-    .guardar{ background:#007bff; } .volver{ background:#6c757d; }
-    .mensaje{ background:#d4edda; border:1px solid #c3e6cb; color:#155724; padding:10px; border-radius:8px; display:none; margin-top:8px; }
+    header{
+      background:#25619c;
+      color:#fff;
+      padding:16px 10px;
+      box-shadow:0 3px 8px rgba(0,0,0,0.12);
+    }
+    header h1{ margin:0; font-size:1.5rem; }
+    main{
+      max-width:900px;
+      margin:18px auto;
+      background:#fff;
+      padding:16px 18px 18px;
+      border-radius:12px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.06);
+      text-align:left;
+    }
+    .fila { margin-bottom:12px; }
+    input,select{
+      padding:8px;
+      border-radius:6px;
+      border:1px solid #ccc;
+      font-family:inherit;
+    }
+    .btn{
+      padding:8px 12px;
+      border-radius:8px;
+      border:none;
+      color:#fff;
+      cursor:pointer;
+      font-weight:600;
+      margin-right:6px;
+    }
+    .guardar{ background:#2f8c4a; }
+    .volver{ background:#6c757d; }
+    .historial{ background:#25619c; }
+    .salir{ background:#c0392b; }
+    .mensaje{
+      background:#d4edda;
+      border:1px solid #c3e6cb;
+      color:#155724;
+      padding:10px;
+      border-radius:8px;
+      display:none;
+      margin-top:10px;
+      text-align:center;
+    }
+    .panel-estado{
+      margin-top:16px;
+      padding:12px 14px;
+      border-radius:10px;
+      background:#f8fafc;
+      border:1px solid #dde5f0;
+    }
+    .estado-activo{
+      color:#2f8c4a;
+      font-weight:700;
+    }
+    .estado-inactivo{
+      color:#c0392b;
+      font-weight:700;
+    }
   </style>
 </head>
 <body>
   <header><h1>🔧 Control de Trimestres</h1></header>
 
   <main>
-    <div style="margin-bottom:12px;">
+    <div class="fila">
       <label>Nombre del Trimestre:</label>
       <select id="nombreTrimestre">
         <option value="1er Trimestre">1er Trimestre</option>
@@ -27,20 +82,25 @@
       </select>
     </div>
 
-    <div style="margin-bottom:12px;">
+    <div class="fila">
       <label>Inicio:</label>
       <input type="date" id="fechaInicio" />
       <label style="margin-left:8px">Fin:</label>
       <input type="date" id="fechaFin" />
     </div>
 
-    <div style="margin-bottom:12px;">
+    <div class="fila">
       <label><input type="checkbox" id="activo" /> Trimestre activo</label>
     </div>
 
-    <div>
+    <div class="fila">
       <button class="btn guardar" id="guardarBtn">Guardar</button>
-      <button class="btn volver" id="volverBtn">Volver</button>
+      <button class="btn historial" id="historialBtn">Historial</button>
+      <button class="btn salir" id="salirBtn">Salir</button>
+    </div>
+
+    <div id="panelTrimestre" class="panel-estado">
+      <strong>Trimestre configurado:</strong> aún no hay información guardada.
     </div>
 
     <div id="mensaje" class="mensaje">✅ Guardado correctamente</div>
@@ -68,10 +128,26 @@
     const fechaFin = document.getElementById("fechaFin");
     const activo = document.getElementById("activo");
     const guardarBtn = document.getElementById("guardarBtn");
-    const volverBtn = document.getElementById("volverBtn");
+    const historialBtn = document.getElementById("historialBtn");
+    const salirBtn = document.getElementById("salirBtn");
     const mensaje = document.getElementById("mensaje");
+    const panelTrimestre = document.getElementById("panelTrimestre");
 
-    // Cargar trimestre existente al abrir
+    function actualizarPanel(tri) {
+      if (!tri || !tri.nombre) {
+        panelTrimestre.innerHTML = "<strong>Trimestre configurado:</strong> aún no hay información guardada.";
+        return;
+      }
+      const estadoClass = tri.activo ? "estado-activo" : "estado-inactivo";
+      const estadoTexto = tri.activo ? "ACTIVO" : "INACTIVO";
+
+      panelTrimestre.innerHTML = `
+        <div><strong>Trimestre:</strong> ${tri.nombre}</div>
+        <div><strong>Periodo:</strong> ${tri.inicio} al ${tri.fin}</div>
+        <div class="${estadoClass}"><strong>Estado:</strong> ${estadoTexto}</div>
+      `;
+    }
+
     (async function cargar() {
       try {
         const snap = await get(ref(db, "configuracion/trimestreActivo"));
@@ -81,6 +157,9 @@
           fechaInicio.value = t.inicio || "";
           fechaFin.value = t.fin || "";
           activo.checked = !!t.activo;
+          actualizarPanel(t);
+        } else {
+          actualizarPanel(null);
         }
       } catch(e){ console.error(e); }
     })();
@@ -91,14 +170,29 @@
       const fin = fechaFin.value;
       const act = activo.checked;
       if (!inicio || !fin) { alert("Complete inicio y fin."); return; }
-      if (new Date(inicio) > new Date(fin)) { alert("La fecha de inicio debe ser anterior a la fecha fin."); return; }
+      if (new Date(inicio) > new Date(fin)) {
+        alert("La fecha de inicio debe ser anterior a la fecha fin.");
+        return;
+      }
       try {
-        await set(ref(db, "configuracion/trimestreActivo"), { nombre, inicio, fin, activo: act });
-        mensaje.style.display = "block"; setTimeout(()=>mensaje.style.display="none",2500);
-      } catch(err){ console.error(err); alert("Error al guardar."); }
+        const data = { nombre, inicio, fin, activo: act };
+        await set(ref(db, "configuracion/trimestreActivo"), data);
+        actualizarPanel(data);
+        mensaje.style.display = "block";
+        setTimeout(()=>mensaje.style.display="none",2500);
+      } catch(err){
+        console.error(err);
+        alert("Error al guardar.");
+      }
     });
 
-    volverBtn.addEventListener("click", ()=> window.location.href="index.html");
+    historialBtn.addEventListener("click", () => {
+      window.location.href = "historial.html";
+    });
+
+    salirBtn.addEventListener("click", () => {
+      window.location.href = "index.html";
+    });
   </script>
 </body>
 </html>
