@@ -185,11 +185,11 @@
     "3°": ["Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III","Vida Saludable 3","Historia III","Educación Física 3","Gastronomía 3","Habilidades Digitales 3","Química 3"]
   };
 
-  // Alumnos por grupo
+  // Alumnos por grupo (orden alfabético)
   const alumnosPorGrupo = {
-    "1°": ["Cesar","Isabella","Samuel","Santiago","Victoria"],
-    "2°": ["Alisson","Julieta","Mario","Mateo"],
-    "3°": ["Damian","David A.","Grecia","Hector","Hiram","Jesus","Paulina","Ruben"]
+    "1°": ["Cesar","Isabella","Samuel","Santiago","Victoria"].sort(),
+    "2°": ["Alisson","Julieta","Mario","Mateo"].sort(),
+    "3°": ["Damian","David A.","Grecia","Hector","Hiram","Jesus","Paulina","Ruben"].sort()
   };
 
   const cuerpoTabla = document.querySelector("#tablaCalificaciones tbody");
@@ -230,11 +230,14 @@
 
   function cargarMaterias(grupo) {
     const m = document.getElementById("materia");
-    m.innerHTML="";
-    materiasPorGrupo[groupo]?.forEach(mat=>{
-      const op=document.createElement("option");
-      op.value=mat;
-      op.textContent=mat;
+    m.innerHTML = "";
+
+    if (!grupo) return;
+
+    materiasPorGrupo[grupo]?.forEach(mat => {
+      const op = document.createElement("option");
+      op.value = mat;
+      op.textContent = mat;
       m.appendChild(op);
     });
   }
@@ -339,84 +342,6 @@
   }
 
   function encode(s){ return s.replace(/\./g,"_"); }
-
-  /* 
-   * EXPORTACIONES
-   * ------------------------------------------
-   * Logo, nombre del colegio, grupo y trimestre incluidos
-   */
-
-  window.exportarPDF = async function(){
-    const { jsPDF } = window.jspdf;
-    const doc=new jsPDF({orientation:"landscape"});
-
-    // LOGO
-    try{
-      const img=new Image();
-      img.src="logo2025.jpg";
-      await img.decode();
-      doc.addImage(img,"JPEG",10,6,30,30);
-    }catch(e){ console.warn("Logo no cargado en PDF"); }
-
-    const grupo=document.getElementById("grupo").value;
-    const trimestre=document.getElementById("trimestre").value;
-    const materia=document.getElementById("materia").value;
-
-    doc.setFontSize(16);
-    doc.setTextColor(43,130,198);
-    doc.text("Centro Educativo Integral Camino a Casa",150,14,{align:"center"});
-
-    doc.setFontSize(13);
-    doc.text(`Calificaciones — ${materia} — Grupo ${grupo} — ${trimestre}`,150,26,{align:"center"});
-
-    const filas=[...document.querySelectorAll("#tablaCalificaciones tbody tr")].map(tr=>[
-      tr.cells[0].textContent,
-      tr.cells[1].textContent
-    ]);
-
-    doc.autoTable({
-      startY:36,
-      head:[["Alumno","Calificación"]],
-      body:filas,
-      theme:"striped",
-      headStyles:{ fillColor:[37,97,156], textColor:255 },
-      styles:{ halign:"center", fontSize:10 }
-    });
-
-    doc.save(`Calificaciones_${materia}_${grupo}_${trimestre}.pdf`);
-  };
-
-  window.exportarExcel = function(){
-    const grupo=document.getElementById("grupo").value;
-    const trimestre=document.getElementById("trimestre").value;
-    const materia=document.getElementById("materia").value;
-
-    const table=document.createElement("table");
-
-    const cap=document.createElement("caption");
-    cap.textContent="Centro Educativo Integral Camino a Casa";
-    cap.style.fontWeight="bold";
-    cap.style.marginBottom="5px";
-    table.appendChild(cap);
-
-    const th=document.createElement("thead");
-    const hr=document.createElement("tr");
-    hr.innerHTML="<th>Alumno</th><th>Calificación</th>";
-    th.appendChild(hr);
-    table.appendChild(th);
-
-    const tb=document.createElement("tbody");
-    [...document.querySelectorAll("#tablaCalificaciones tbody tr")].forEach(row=>{
-      const tr=document.createElement("tr");
-      tr.innerHTML=`<td>${row.cells[0].textContent}</td><td>${row.cells[1].textContent}</td>`;
-      tb.appendChild(tr);
-    });
-
-    table.appendChild(tb);
-
-    const wb=XLSX.utils.table_to_book(table,{sheet:"Calificaciones"});
-    XLSX.writeFile(wb,`Calificaciones_${materia}_${grupo}_${trimestre}.xlsx`);
-  };
 
 </script>
 
