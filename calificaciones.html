@@ -104,6 +104,11 @@
     }
 
     label { font-weight:700; margin-right:8px; }
+
+    /* 👇 Mueve el botón "Nueva Materia" al otro extremo (derecha) */
+    .btn-nueva-materia {
+      margin-left: auto;
+    }
   </style>
 </head>
 
@@ -137,9 +142,10 @@
     <label>Docente:</label>
     <input id="docente" placeholder="Nombre del docente" />
 
+    <!-- Botones: Agregar, Guardar (izquierda), Nueva Materia (extremo derecho) -->
     <button id="btnAgregar" class="agregar">Agregar Alumno</button>
-    <button id="btnNuevoMateria" class="agregar">Nueva Materia</button>
     <button id="btnGuardar" class="guardar">Guardar</button>
+    <button id="btnNuevoMateria" class="agregar btn-nueva-materia">Nueva Materia</button>
   </div>
 
   <table id="tablaCalificaciones">
@@ -155,11 +161,6 @@
   <div id="mensajeExito" class="mensajeExito"></div>
 
 </main>
-
-<!-- Scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -178,14 +179,12 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Materias por grupo
   const materiasPorGrupo = {
     "1°": ["Matemáticas 1","Español 1","Biología 1","Geografía 1","Danza 1","Educación Física 1","Historia I","Ética I","Inglés 1","Gastronomía 1","Habilidades Digitales 1"],
     "2°": ["Matemáticas 2","Español 2","Danza 2","Ética II","Física 2","Inglés 2","Educación Física 2","Historia II","Gastronomía 2","Habilidades Digitales 2"],
     "3°": ["Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III","Vida Saludable 3","Historia III","Educación Física 3","Gastronomía 3","Habilidades Digitales 3","Química 3"]
   };
 
-  // Alumnos por grupo (orden alfabético)
   const alumnosPorGrupo = {
     "1°": ["Cesar","Isabella","Samuel","Santiago","Victoria"].sort(),
     "2°": ["Alisson","Julieta","Mario","Mateo"].sort(),
@@ -201,12 +200,13 @@
     document.getElementById("grupo").addEventListener("change", actualizarGrupo);
     document.getElementById("btnAgregar").addEventListener("click", agregarFila);
     document.getElementById("btnGuardar").addEventListener("click", guardar);
-    document.getElementById("btnNuevoMateria").addEventListener("click", limpiarMateria);
+    document.getElementById("btnNuevoMateria").addEventListener("click", nuevaMateria);
   });
 
   async function cargarTrimestre() {
     const snap = await get(ref(db, "configuracion/trimestreActivo"));
     const select = document.getElementById("trimestre");
+    const alertaTrimestre = document.getElementById("alertaTrimestre");
 
     if (!snap.exists()) {
       alertaTrimestre.textContent = "🚫 No hay trimestre activo.";
@@ -262,6 +262,16 @@
     });
   }
 
+  // 👉 FUNCIÓN PARA "NUEVA MATERIA"
+  function nuevaMateria() {
+    if (!confirm("¿Deseas iniciar captura para una nueva materia? Se limpiará la tabla actual.")) return;
+    cuerpoTabla.innerHTML = "";
+    promedioGrupo.textContent = "-";
+    document.getElementById("materia").selectedIndex = 0;
+    mensajeExito.style.display = "none";
+  }
+
+  // Validación y edición de filas
   window.validarCalificacion = function(td){
     let v=td.textContent.trim();
     if (!/^\d+$/.test(v)) { td.textContent=""; return; }
