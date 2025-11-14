@@ -4,44 +4,73 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Control de Trimestres — Centro Educativo Integral Camino a Casa</title>
+
   <style>
-    body { font-family:"Segoe UI", Arial; background:#f5f8ff; margin:0; padding:20px; text-align:center; }
+    body {
+      font-family:"Segoe UI", Arial;
+      background:#f0f5f3;
+      margin:0;
+      padding:0;
+      text-align:center;
+    }
+
     header{
       background:#25619c;
       color:#fff;
-      padding:16px 10px;
-      box-shadow:0 3px 8px rgba(0,0,0,0.12);
+      padding:18px;
+      box-shadow:0 3px 8px rgba(0,0,0,0.15);
     }
-    header h1{ margin:0; font-size:1.5rem; }
+
+    .logo {
+      width: 70px;
+      margin-bottom: 6px;
+    }
+
     main{
       max-width:900px;
-      margin:18px auto;
-      background:#fff;
-      padding:16px 18px 18px;
+      margin:20px auto;
+      background:#ffffff;
+      padding:20px;
       border-radius:12px;
-      box-shadow:0 4px 10px rgba(0,0,0,0.06);
+      box-shadow:0 4px 12px rgba(0,0,0,0.10);
       text-align:left;
     }
-    .fila { margin-bottom:12px; }
-    input,select{
+
+    .fila { margin-bottom:14px; }
+
+    label {
+      font-weight:600;
+      margin-right:8px;
+      color:#23422f;
+    }
+
+    input, select{
       padding:8px;
       border-radius:6px;
       border:1px solid #ccc;
       font-family:inherit;
     }
+
     .btn{
-      padding:8px 12px;
+      padding:10px 16px;
       border-radius:8px;
       border:none;
       color:#fff;
       cursor:pointer;
       font-weight:600;
       margin-right:6px;
+      transition:.15s ease;
     }
+
+    .btn:hover{
+      transform: translateY(-2px);
+      box-shadow:0 4px 10px rgba(0,0,0,0.15);
+    }
+
     .guardar{ background:#2f8c4a; }
-    .volver{ background:#6c757d; }
     .historial{ background:#25619c; }
     .salir{ background:#c0392b; }
+
     .mensaje{
       background:#d4edda;
       border:1px solid #c3e6cb;
@@ -49,16 +78,21 @@
       padding:10px;
       border-radius:8px;
       display:none;
-      margin-top:10px;
+      margin-top:14px;
       text-align:center;
+      font-weight:600;
     }
+
+    /* Panel de información */
     .panel-estado{
-      margin-top:16px;
-      padding:12px 14px;
+      margin-top:20px;
+      padding:16px;
       border-radius:10px;
-      background:#f8fafc;
+      background:#f7f9fb;
       border:1px solid #dde5f0;
+      color:#23422f;
     }
+
     .estado-activo{
       color:#2f8c4a;
       font-weight:700;
@@ -69,10 +103,17 @@
     }
   </style>
 </head>
+
 <body>
-  <header><h1>🔧 Control de Trimestres</h1></header>
+
+  <header>
+    <img src="logo2025.jpg" class="logo">
+    <h1 style="margin:0;">🔧 Control de Trimestres</h1>
+  </header>
 
   <main>
+
+    <!-- Selección de trimestre -->
     <div class="fila">
       <label>Nombre del Trimestre:</label>
       <select id="nombreTrimestre">
@@ -85,27 +126,35 @@
     <div class="fila">
       <label>Inicio:</label>
       <input type="date" id="fechaInicio" />
+
       <label style="margin-left:8px">Fin:</label>
       <input type="date" id="fechaFin" />
     </div>
 
     <div class="fila">
-      <label><input type="checkbox" id="activo" /> Trimestre activo</label>
+      <label>
+        <input type="checkbox" id="activo" /> Trimestre activo
+      </label>
     </div>
 
+    <!-- Botones -->
     <div class="fila">
       <button class="btn guardar" id="guardarBtn">Guardar</button>
       <button class="btn historial" id="historialBtn">Historial</button>
       <button class="btn salir" id="salirBtn">Salir</button>
     </div>
 
+    <!-- Panel de resumen -->
     <div id="panelTrimestre" class="panel-estado">
       <strong>Trimestre configurado:</strong> aún no hay información guardada.
     </div>
 
+    <!-- Mensaje -->
     <div id="mensaje" class="mensaje">✅ Guardado correctamente</div>
+
   </main>
 
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -127,9 +176,11 @@
     const fechaInicio = document.getElementById("fechaInicio");
     const fechaFin = document.getElementById("fechaFin");
     const activo = document.getElementById("activo");
+
     const guardarBtn = document.getElementById("guardarBtn");
     const historialBtn = document.getElementById("historialBtn");
     const salirBtn = document.getElementById("salirBtn");
+
     const mensaje = document.getElementById("mensaje");
     const panelTrimestre = document.getElementById("panelTrimestre");
 
@@ -138,6 +189,7 @@
         panelTrimestre.innerHTML = "<strong>Trimestre configurado:</strong> aún no hay información guardada.";
         return;
       }
+
       const estadoClass = tri.activo ? "estado-activo" : "estado-inactivo";
       const estadoTexto = tri.activo ? "ACTIVO" : "INACTIVO";
 
@@ -148,38 +200,40 @@
       `;
     }
 
+    // Cargar
     (async function cargar() {
       try {
         const snap = await get(ref(db, "configuracion/trimestreActivo"));
         if (snap.exists()) {
           const t = snap.val();
-          nombreTrimestre.value = t.nombre || nombreTrimestre.value;
-          fechaInicio.value = t.inicio || "";
-          fechaFin.value = t.fin || "";
-          activo.checked = !!t.activo;
+          nombreTrimestre.value = t.nombre;
+          fechaInicio.value = t.inicio;
+          fechaFin.value = t.fin;
+          activo.checked = t.activo;
           actualizarPanel(t);
-        } else {
-          actualizarPanel(null);
         }
-      } catch(e){ console.error(e); }
+      } catch(e){
+        console.error(e);
+      }
     })();
 
+    // Guardar
     guardarBtn.addEventListener("click", async () => {
       const nombre = nombreTrimestre.value;
       const inicio = fechaInicio.value;
       const fin = fechaFin.value;
       const act = activo.checked;
-      if (!inicio || !fin) { alert("Complete inicio y fin."); return; }
-      if (new Date(inicio) > new Date(fin)) {
-        alert("La fecha de inicio debe ser anterior a la fecha fin.");
-        return;
-      }
+
+      if (!inicio || !fin) return alert("Complete inicio y fin.");
+      if (new Date(inicio) > new Date(fin)) return alert("La fecha de inicio debe ser anterior a la fecha fin.");
+
+      const datos = { nombre, inicio, fin, activo: act };
+
       try {
-        const data = { nombre, inicio, fin, activo: act };
-        await set(ref(db, "configuracion/trimestreActivo"), data);
-        actualizarPanel(data);
+        await set(ref(db, "configuracion/trimestreActivo"), datos);
+        actualizarPanel(datos);
         mensaje.style.display = "block";
-        setTimeout(()=>mensaje.style.display="none",2500);
+        setTimeout(()=> mensaje.style.display="none", 2800);
       } catch(err){
         console.error(err);
         alert("Error al guardar.");
@@ -194,5 +248,6 @@
       window.location.href = "index.html";
     });
   </script>
+
 </body>
 </html>

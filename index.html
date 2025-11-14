@@ -4,11 +4,12 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Panel Principal — Centro Educativo Integral Camino a Casa</title>
+
   <style>
     body {
       margin: 0;
       font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-      background: radial-gradient(circle at top, #fdfaf4 0, #f3f6f4 35%, #e7f0eb 100%);
+      background: radial-gradient(circle at top, #faf8f2 0%, #eff6f2 50%, #e2ede7 100%);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -17,44 +18,51 @@
       text-align: center;
       color: #23422f;
     }
+
     .card {
       background: #ffffff;
-      padding: 28px 32px 32px;
+      padding: 32px;
       border-radius: 18px;
-      box-shadow: 0 10px 20px rgba(0,0,0,0.12);
-      border-top: 5px solid #2f8c4a;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+      border-top: 6px solid #2f8c4a;
       animation: fadeIn 0.7s ease;
       width: 360px;
     }
+
     .logo {
-      max-width: 230px;
+      max-width: 200px;
       margin: 0 auto 10px;
       display: block;
     }
+
     h1 {
       font-size: 1.4rem;
       margin: 4px 0 0;
       color: #23422f;
     }
+
     h1 small {
       display: block;
-      font-size: 0.9rem;
+      font-size: .9rem;
       color: #bc8b31;
       margin-top: 2px;
-      text-transform: uppercase;
       letter-spacing: 0.04em;
+      font-weight: 700;
     }
+
     .sub {
-      margin: 6px 0 0 0;
+      margin: 8px 0 0 0;
       color: #44624a;
-      font-size: 0.9rem;
+      font-size: .9rem;
     }
+
     .buttons {
       display:flex;
       flex-direction:column;
       gap:14px;
       margin-top:18px;
     }
+
     button {
       background-color:#2f8c4a;
       color:white;
@@ -64,23 +72,31 @@
       cursor:pointer;
       font-weight:600;
       font-size:0.95rem;
-      transition: transform .08s ease, box-shadow .08s ease, opacity .08s ease;
+      transition:.1s ease;
     }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 10px rgba(0,0,0,0.15);
+    }
+
     button.secondary {
       background:#25619c;
     }
-    button:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-      opacity: 0.96;
-    }
+
     .footer {
       position: absolute;
       bottom: 10px;
-      font-size:0.8rem;
+      font-size:.80rem;
       color:#44624a;
     }
-    @keyframes fadeIn { from {opacity:0; transform:translateY(12px)} to {opacity:1; transform:none} }
+
+    @keyframes fadeIn { 
+      from {opacity:0; transform:translateY(12px)} 
+      to {opacity:1; transform:none} 
+    }
+
+    /* Modal */
     .modal {
       display:none;
       position:fixed;
@@ -89,6 +105,7 @@
       align-items:center;
       justify-content:center;
     }
+
     .modal-content {
       background:white;
       padding:20px;
@@ -98,6 +115,7 @@
       box-shadow:0 8px 16px rgba(0,0,0,0.18);
       border-top:4px solid #25619c;
     }
+
     input[type=password] {
       padding:10px;
       border-radius:8px;
@@ -109,12 +127,14 @@
   </style>
 </head>
 <body>
+
   <div class="card">
-    <img src="logo_camino_a_casa.png" alt="Centro Educativo Integral Camino a Casa" class="logo">
-    <h1>
-      Centro Educativo Integral
+    <img src="logo2025.jpg" alt="Centro Educativo Integral Camino a Casa" class="logo">
+
+    <h1>Centro Educativo Integral
       <small>Camino a Casa</small>
     </h1>
+
     <p class="sub">Bienvenido al sistema de gestión escolar</p>
 
     <div class="buttons">
@@ -123,21 +143,23 @@
     </div>
   </div>
 
+  <!-- Modal -->
   <div class="modal" id="passwordModal">
     <div class="modal-content">
       <h3 style="margin-top:0;">Acceso restringido</h3>
       <p>Ingrese la contraseña de administrador:</p>
       <input type="password" id="adminPassword" placeholder="Contraseña" />
+
       <div style="margin-top:12px;">
-        <button id="ingresarBtn" style="background:#25619c; padding:8px 12px; color:#fff; border-radius:8px; border:none">Ingresar</button>
-        <button id="cancelBtn" style="background:none; color:#25619c; border:none; margin-left:8px; font-weight:600;">Cancelar</button>
+        <button id="ingresarBtn" style="background:#25619c; padding:8px 12px; border-radius:8px;">Ingresar</button>
+        <button id="cancelBtn" style="background:none; color:#25619c; border:none; margin-left:8px;">Cancelar</button>
       </div>
     </div>
   </div>
 
   <div class="footer">© 2025 Centro Educativo Integral Camino a Casa</div>
 
-  <!-- Firebase (SDK 10.8.0) -->
+  <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -157,33 +179,29 @@
 
     const btnCalificaciones = document.getElementById("btnCalificaciones");
     const btnControl = document.getElementById("btnControl");
+
     const modal = document.getElementById("passwordModal");
     const ingresarBtn = document.getElementById("ingresarBtn");
     const cancelBtn = document.getElementById("cancelBtn");
 
     async function hayTrimestreActivo() {
-      try {
-        const snap = await get(ref(db, "configuracion/trimestreActivo"));
-        if (!snap.exists()) return false;
-        const t = snap.val();
-        if (!t || !t.inicio || !t.fin || !t.activo) return false;
-        const hoy = new Date();
-        const inicio = new Date(t.inicio);
-        const fin = new Date(t.fin + "T23:59:59");
-        return hoy >= inicio && hoy <= fin;
-      } catch (e) {
-        console.error(e);
-        return false;
-      }
+      const snap = await get(ref(db, "configuracion/trimestreActivo"));
+      if (!snap.exists()) return false;
+
+      const t = snap.val();
+      if (!t.activo) return false;
+
+      const hoy = new Date();
+      const inicio = new Date(t.inicio);
+      const fin = new Date(t.fin + "T23:59:59");
+
+      return hoy >= inicio && hoy <= fin;
     }
 
     btnCalificaciones.addEventListener("click", async () => {
       const activo = await hayTrimestreActivo();
-      if (activo) {
-        window.location.href = "calificaciones.html";
-      } else {
-        alert("🚫 El registro de calificaciones está cerrado. Contacte al administrador.");
-      }
+      if (!activo) return alert("🚫 El registro de calificaciones está cerrado.");
+      window.location.href = "calificaciones.html";
     });
 
     btnControl.addEventListener("click", () => {
@@ -193,27 +211,18 @@
 
     ingresarBtn.addEventListener("click", () => {
       const pwd = document.getElementById("adminPassword").value.trim();
-      const claveCorrecta = "admin123";
-      if (pwd === claveCorrecta) {
+      if (pwd === "admin123") {
         modal.style.display = "none";
-        document.getElementById("adminPassword").value = "";
         window.location.href = "control_trimestres.html";
       } else {
-        alert("Contraseña incorrecta. Acceso denegado.");
+        alert("Contraseña incorrecta.");
       }
     });
 
     cancelBtn.addEventListener("click", () => {
       modal.style.display = "none";
-      document.getElementById("adminPassword").value = "";
-    });
-
-    window.addEventListener("click", (e) => {
-      if (e.target === modal) {
-        modal.style.display = "none";
-        document.getElementById("adminPassword").value = "";
-      }
     });
   </script>
+
 </body>
 </html>
