@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Calificaciones Reales</title>
+<style>
+  body { font-family: "Segoe UI", Arial; background:#eef5f1; padding:20px; }
+  header { background:linear-gradient(90deg,#25619c,#2f8c4a); color:white;
+           padding:15px; text-align:center; border-radius:8px; }
+  main { max-width:1100px; margin:auto; background:white; padding:20px;
+         box-shadow:0 3px 8px rgba(0,0,0,.15); border-radius:10px; }
+
+  table { width:100%; border-collapse:collapse; margin-top:10px; }
+  th,td { border:1px solid #ccc; padding:8px; text-align:center; }
+  th { background:#25619c; color:white; }
+
+  input, select { padding:6px; border:1px solid #bbb; border-radius:6px; }
+
+  .guardar{ background:#25619c; color:white; border:none; padding:8px 14px;
+            border-radius:6px; cursor:pointer; font-weight:600; }
+  .salir{ background:#c0392b; color:white; border:none; padding:8px 14px;
+          border-radius:6px; cursor:pointer; font-weight:600; }
+</style>
+</head>
+
+<body>
+
+<header><h2>📘 Calificaciones Reales</h2></header>
+
+<main>
+
+<label>Grupo: </label>
+<select id="grupo">
+  <option value="">Seleccione...</option>
+  <option value="1°">1°</option>
+  <option value="2°">2°</option>
+  <option value="3°">3°</option>
+</select>
+
+<label style="margin-left:10px;">Materia:</label>
+<select id="materia">
+  <option value="">Seleccione...</option>
+</select>
+
+<button class="salir" onclick="location.href='index.html'">Salir</button>
+
+<table id="tabla">
+<thead>
+  <tr><th>Alumno</th><th>Calificación (≥5)</th></tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<button class="guardar">Guardar</button>
+
+</main>
+
+<script>
+// materias por grupo
+const materiasPorGrupo = {
+  "1°": ["Matemáticas 1","Español 1","Biología 1","Geografía 1","Danza 1","Educación Física 1","Historia I","Ética I","Inglés 1","Gastronomía 1","Habilidades Digitales 1"],
+  "2°": ["Matemáticas 2","Español 2","Danza 2","Ética II","Física 2","Inglés 2","Educación Física 2","Historia II","Gastronomía 2","Habilidades Digitales 2"],
+  "3°": ["Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III","Vida Saludable 3","Historia III","Educación Física 3","Gastronomía 3","Habilidades Digitales 3","Química 3"]
+};
+
+// alumnos reales que pediste
+const alumnos = {
+  "1°": ["Cesar D. Hernandez","A. Santiago Sanchez","Isabella Barragan","V. Victoria Rios","Samuel Tassias"],
+  "2°": ["Mateo A. Vazquez","Mario N. Gordillo","Julieta Salinas","Alisson Valencia"],
+  "3°": ["Hector Penagos","David A. Gil","Damian Alcazar","Ruben Solis","Paulina Ruiz","Grecia Morales","Hiram Rodas","Jesus Borbollan"]
+};
+
+document.getElementById("grupo").addEventListener("change",()=>{
+  const g = grupo.value;
+  materia.innerHTML = "<option>Seleccione...</option>";
+  tabla.querySelector("tbody").innerHTML = "";
+
+  if(g && materiasPorGrupo[g]){
+    materiasPorGrupo[g].forEach(m=>{
+      const op = document.createElement("option");
+      op.textContent = m;
+      materia.appendChild(op);
+    });
+  }
+
+  if(g && alumnos[g]){
+    alumnos[g].forEach(a=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML=`<td>${a}</td><td contenteditable="true"></td>`;
+      tabla.querySelector("tbody").appendChild(tr);
+    });
+  }
+});
+
+document.querySelector(".guardar").onclick = () =>{
+  alert("✔ Datos guardados (simulación). Aquí iría Firebase.");
+};
+</script>
+
+</body>
+</html>

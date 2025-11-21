@@ -49,6 +49,16 @@
       border:1px solid #ccc;
     }
 
+    .agregar {
+      background:#2f8c4a;
+      color:#fff;
+      padding:8px 12px;
+      border-radius:8px;
+      border:none;
+      cursor:pointer;
+      font-weight:600;
+    }
+
     .guardar {
       background:#25619c;
       color:#fff;
@@ -121,7 +131,7 @@
     Cargando información de trimestres...
   </div>
 
-  <!-- Controles -->
+  <!-- Controles superiores -->
   <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
 
     <label>Trimestre:</label>
@@ -141,14 +151,12 @@
     <label>Docente:</label>
     <input id="docente" placeholder="Nombre del docente" />
 
-    <!-- 👉 SE ELIMINÓ ESTE BOTÓN (YA NO LO INCLUIMOS)
     <button id="btnAgregar" class="agregar">Agregar Alumno</button>
-    -->
-
     <button id="btnGuardar" class="guardar">Guardar</button>
 
-    <button id="btnNuevoMateria" class="guardar btn-nueva-materia">Nueva Materia</button>
+    <button id="btnNuevoMateria" class="agregar btn-nueva-materia">Nueva Materia</button>
 
+    <!-- ✅ BOTÓN SALIR AGREGADO -->
     <button id="btnSalir" class="salir">Salir</button>
 
   </div>
@@ -184,25 +192,14 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  /* ✔ MATERIAS ACTUALIZADAS */
+  // Materias por grupo
   const materiasPorGrupo = {
-    "1°": [
-      "Matemáticas 1","Español 1","Biología 1","Geografía 1",
-      "Danza 1","Educación Física 1","Historia I","Ética I",
-      "Inglés 1","Gastronomía 1","Habilidades Digitales 1"
-    ],
-    "2°": [
-      "Matemáticas 2","Español 2","Danza 2","Ética II","Física 2",
-      "Inglés 2","Educación Física 2","Historia II",
-      "Gastronomía 2","Habilidades Digitales 2"
-    ],
-    "3°": [
-      "Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III",
-      "Vida Saludable 3","Historia III","Educación Física 3",
-      "Gastronomía 3","Habilidades Digitales 3","Química 3"
-    ]
+    "1°": ["Matemáticas 1","Español 1","Biología 1","Geografía 1","Danza 1","Educación Física 1","Historia I","Ética I","Inglés 1","Gastronomía 1","Habilidades Digitales 1"],
+    "2°": ["Matemáticas 2","Español 2","Danza 2","Ética II","Física 2","Inglés 2","Educación Física 2","Historia II","Gastronomía 2","Habilidades Digitales 2"],
+    "3°": ["Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III","Vida Saludable 3","Historia III","Educación Física 3","Gastronomía 3","Habilidades Digitales 3","Química 3"]
   };
 
+  // Alumnos por grupo (orden alfabético)
   const alumnosPorGrupo = {
     "1°": ["Cesar","Isabella","Samuel","Santiago","Victoria"].sort(),
     "2°": ["Alisson","Julieta","Mario","Mateo"].sort(),
@@ -216,9 +213,11 @@
   document.addEventListener("DOMContentLoaded", async () => {
     await cargarTrimestre();
     document.getElementById("grupo").addEventListener("change", actualizarGrupo);
+    document.getElementById("btnAgregar").addEventListener("click", agregarFila);
     document.getElementById("btnGuardar").addEventListener("click", guardar);
     document.getElementById("btnNuevoMateria").addEventListener("click", nuevaMateria);
 
+    // ✅ EVENTO DEL BOTÓN SALIR
     document.getElementById("btnSalir").addEventListener("click", () => {
       window.location.href = "index.html";
     });
@@ -227,15 +226,15 @@
   async function cargarTrimestre() {
     const snap = await get(ref(db, "configuracion/trimestreActivo"));
     const select = document.getElementById("trimestre");
-    const alerta = document.getElementById("alertaTrimestre");
+    const alertaTrimestre = document.getElementById("alertaTrimestre");
 
     if (!snap.exists()) {
-      alerta.textContent = "🚫 No hay trimestre activo.";
+      alertaTrimestre.textContent = "🚫 No hay trimestre activo.";
       return;
     }
 
     const t = snap.val();
-    alerta.innerHTML = `✔ Trimestre activo: <b>${t.nombre}</b> (${t.inicio} al ${t.fin})`;
+    alertaTrimestre.innerHTML = `✔ Trimestre activo: <b>${t.nombre}</b> (${t.inicio} al ${t.fin})`;
 
     const opt = document.createElement("option");
     opt.value = t.nombre;
@@ -255,7 +254,7 @@
 
     if (!grupo) return;
 
-    materiasPorGrupo[grupo].forEach(mat => {
+    materiasPorGrupo[grupo]?.forEach(mat => {
       const op = document.createElement("option");
       op.value = mat;
       op.textContent = mat;
@@ -277,17 +276,19 @@
         <td>
           <button class="editar" onclick="editarFila(this)">✏️</button>
           <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
-        </td>`;
+        </td>
+      `;
       cuerpoTabla.appendChild(tr);
     });
   }
 
+  // FUNCIÓN NUEVA MATERIA
   function nuevaMateria() {
     if (!confirm("¿Deseas iniciar captura para una nueva materia?")) return;
-    cuerpoTabla.innerHTML="";
-    promedioGrupo.textContent="-";
-    document.getElementById("materia").selectedIndex=0;
-    mensajeExito.style.display="none";
+    cuerpoTabla.innerHTML = "";
+    promedioGrupo.textContent = "-";
+    document.getElementById("materia").selectedIndex = 0;
+    mensajeExito.style.display = "none";
   }
 
   window.validarCalificacion = function(td){
@@ -308,6 +309,18 @@
 
   window.editarFila = b => b.closest("tr").querySelector("td").focus();
   window.eliminarFila = b => { b.closest("tr").remove(); calcularPromedio(); };
+
+  function agregarFila(){
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td contenteditable="true"></td>
+      <td contenteditable="true" onblur="validarCalificacion(this)"></td>
+      <td>
+        <button class="editar" onclick="editarFila(this)">✏️</button>
+        <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
+      </td>`;
+    cuerpoTabla.appendChild(tr);
+  }
 
   function calcularPromedio(){
     const notas=[...document.querySelectorAll("#tablaCalificaciones tbody td:nth-child(2)")]

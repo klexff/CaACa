@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Boleta Escolar</title>
+
+<style>
+    body {
+        font-family: Arial;
+        background: #f0f5f3;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* ======== CONFIGURACIÓN DE IMPRESIÓN ======== */
+    @media print {
+        @page {
+            size: letter portrait;  /* carta vertical */
+            margin: 12mm;
+        }
+
+        body {
+            background: white;
+            margin: 0;
+            padding: 0;
+        }
+        #panel, #printPDF {
+            display: none !important;
+        }
+        #boleta {
+            width: 100%;
+            box-shadow: none;
+        }
+    }
+
+    /* PANEL */
+    #panel {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 700px;
+        margin: 20px auto;
+        box-shadow: 0 3px 10px rgba(0,0,0,.15);
+    }
+
+    select, button {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+        font-size: 15px;
+        font-weight: bold;
+    }
+
+    button {
+        cursor: pointer;
+        border: none;
+    }
+
+    .imprimir { background: #25619c; color:white; }
+    .volver   { background: #c0392b; color:white; }
+    #printPDF { 
+        background:#1b5e20; 
+        color:white; 
+        float:right; 
+        margin-top:5px;
+        padding:10px 15px;
+        border-radius:6px;
+    }
+
+    #boleta {
+        display: none;
+        background: white;
+        padding: 20px 25px;
+        max-width: 800px;
+        margin: 20px auto;
+        border-radius: 10px;
+        box-shadow: 0 3px 10px rgba(0,0,0,.15);
+    }
+
+    /* Logo centrado */
+    #logoBox {
+        text-align: center;
+        margin-bottom: 10px;
+    }
+    #logoBox img {
+        width: 100px;
+    }
+
+    #ciclo {
+        text-align: right;
+        font-size: 18px;
+        color: #2f602f;
+        margin-top: -10px;
+    }
+
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-top: 15px;
+        font-size: 12px;
+    }
+
+    td, th {
+        border: 1px solid #000;
+        text-align: center;
+        padding: 4px;
+    }
+
+    .titulo-verde {
+        background: #9ccc65;
+        font-weight: bold;
+    }
+
+    td[contenteditable="true"] {
+        background: #f6fff6;
+    }
+
+    .cuadro-firma {
+        height: 55px;
+        background: #eef5ec;
+        border: 2px solid #2f602f;
+    }
+
+</style>
+</head>
+
+<body>
+
+<!-- PANEL -->
+<div id="panel">
+    <label>Seleccione grupo:</label>
+    <select id="grupo">
+        <option value="">Seleccione...</option>
+        <option value="1°">1°</option>
+        <option value="2°">2°</option>
+        <option value="3°">3°</option>
+    </select>
+
+    <br><br>
+
+    <label>Seleccione alumno:</label>
+    <select id="alumno">
+        <option value="">Seleccione...</option>
+    </select>
+
+    <br><br>
+
+    <button class="imprimir" onclick="generar()">Generar Boleta</button>
+    <button class="volver" onclick="location.href='historial.html'">Volver</button>
+</div>
+
+
+
+<!-- BOLETA -->
+<div id="boleta">
+
+    <button id="printPDF" onclick="window.print()">Imprimir PDF</button>
+
+    <div id="logoBox">
+        <img src="logo2025.jpg">
+    </div>
+
+    <div id="ciclo">
+        <b>Ciclo Escolar 2025 – 2026</b>
+    </div>
+
+    <p><b>Nombre del alumno(a):</b> <span id="nombreAlumno"></span></p>
+    <p><b>Grado:</b> <span id="gradoAlumno"></span></p>
+
+    <!-- TABLA PRINCIPAL -->
+    <table>
+        <tr>
+            <th rowspan="2">Bloque</th>
+            <th colspan="3">Lenguaje</th>
+            <th colspan="2">Saberes Científicos</th>
+            <th colspan="3">Ética y Sociedad</th>
+            <th colspan="2">Comunitario</th>
+            <th>Promedio</th>
+        </tr>
+
+        <tr>
+            <th>Español</th><th>Lenguajes</th><th>Artes</th>
+            <th>Matemáticas</th><th>Biología</th>
+            <th>Geografía</th><th>Historia</th><th>Form. Cívica</th>
+            <th>Gastronomía</th><th>Ed. Física</th>
+            <th></th>
+        </tr>
+
+        <tbody id="cuerpoBoleta"></tbody>
+
+        <tr class="titulo-verde">
+            <td>Promedio final</td>
+            <td colspan="12" id="promedioFinal"></td>
+        </tr>
+    </table>
+
+
+    <!-- TABLA 2: INASISTENCIAS Y ASISTENCIAS -->
+    <table>
+        <tr class="titulo-verde">
+            <td></td><td>1er Trimestre</td><td>2do Trimestre</td><td>3er Trimestre</td>
+        </tr>
+        <tr>
+            <td><b>Inasistencias</b></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+        </tr>
+        <tr>
+            <td><b>Asistencia</b></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+            <td contenteditable="true"></td>
+        </tr>
+    </table>
+
+
+    <!-- TABLA DE FIRMAS SEPARADA -->
+    <table>
+        <tr class="titulo-verde">
+            <td colspan="3">FIRMAS DE MADRE, PADRE O TUTOR</td>
+        </tr>
+        <tr>
+            <td class="cuadro-firma"></td>
+            <td class="cuadro-firma"></td>
+            <td class="cuadro-firma"></td>
+        </tr>
+        <tr>
+            <td><b>1er Trimestre</b></td>
+            <td><b>2do Trimestre</b></td>
+            <td><b>3er Trimestre</b></td>
+        </tr>
+    </table>
+
+</div>
+
+
+<script>
+// === Listas de alumnos por grupo ===
+const alumnos = {
+  "1°": ["Cesar D. Hernandez","A. Santiago Sanchez","Isabella Barragan","V. Victoria Rios","Samuel Tassias"],
+  "2°": ["Mateo A. Vazquez","Mario N. Gordillo","Julieta Salinas","Alisson Valencia"],
+  "3°": ["Hector Penagos","David A. Gil","Damian Alcazar","Ruben Solis","Paulina Ruiz","Grecia Morales","Hiram Rodas","Jesus Borbollan"]
+};
+
+// Materias en orden
+const materias = ["Español","Lenguajes","Artes","Matemáticas","Biología","Geografía","Historia","Formación","Gastronomía","Ed. Física"];
+
+// Cargar alumnos
+grupo.onchange = () => {
+    alumno.innerHTML = "<option value=''>Seleccione...</option>";
+    alumnos[grupo.value]?.forEach(a => {
+        const op = document.createElement("option");
+        op.textContent = a;
+        alumno.appendChild(op);
+    });
+};
+
+// Generar boleta
+function generar() {
+
+    if (!grupo.value || !alumno.value) {
+        alert("Seleccione grupo y alumno.");
+        return;
+    }
+
+    nombreAlumno.textContent = alumno.value;
+    gradoAlumno.textContent = grupo.value;
+
+    const tbody = document.getElementById("cuerpoBoleta");
+    tbody.innerHTML = "";
+
+    for (let i=1; i<=3; i++){
+        let tr = document.createElement("tr");
+
+        tr.innerHTML = `
+            <td>${i}°</td>
+            ${materias.map(()=>`<td contenteditable="true" oninput="calcularPromedios()"></td>`).join("")}
+            <td class="prom-bloque"></td>
+        `;
+
+        tbody.appendChild(tr);
+    }
+
+    document.getElementById("boleta").style.display = "block";
+}
+
+// Calcular promedios
+function calcularPromedios() {
+    let filas = document.querySelectorAll("#cuerpoBoleta tr");
+    let proms = [];
+    
+    filas.forEach(fila => {
+        let celdas = fila.querySelectorAll("td[contenteditable='true']");
+        let nums = [...celdas].map(td => parseFloat(td.textContent) || 0);
+        
+        let prom = nums.reduce((a,b)=>a+b,0) / nums.length;
+        prom = prom ? prom.toFixed(1) : "";
+
+        fila.querySelector(".prom-bloque").textContent = prom;
+        if(prom) proms.push(parseFloat(prom));
+    });
+
+    if(proms.length){
+        let pf = (proms.reduce((a,b)=>a+b,0) / proms.length).toFixed(1);
+        document.getElementById("promedioFinal").textContent = pf;
+    }
+}
+</script>
+
+</body>
+</html>

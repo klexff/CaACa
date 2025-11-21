@@ -64,7 +64,7 @@
     }
 
     button {
-      background-color:#2f8c4a;
+      background-color:#661709;
       color:white;
       border:none;
       padding:12px 14px;
@@ -138,8 +138,18 @@
     <p class="sub">Bienvenido al sistema de gestión escolar</p>
 
     <div class="buttons">
-      <button id="btnCalificaciones">📘 Ir a Calificaciones</button>
+      <button id="btnCalificaciones">📘 Ir a Calificaciones SAECH</button>
       <button id="btnControl" class="secondary">🔒 Control de Trimestres</button>
+
+<button id="btnCalificacionesReales" class="secondary">📘 Calificaciones Reales</button>
+
+<script>
+  const btnCalificacionesReales = document.getElementById("btnCalificacionesReales");
+  btnCalificacionesReales.addEventListener("click",()=>{
+    window.location.href = "calificaciones_reales.html";
+  });
+</script>
+
     </div>
   </div>
 
