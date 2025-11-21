@@ -2,311 +2,467 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
-<title>Boleta Escolar</title>
+<title>Calificaciones Internas — Boleta</title>
 
 <style>
-    body {
-        font-family: Arial;
-        background: #f0f5f3;
-        padding: 0;
-        margin: 0;
-    }
+  :root{
+    --bg:#f0f5f3;
+    --verde:#25619c;
+    --verde-claro:#2f8c4a;
+    --texto:#23422f;
+  }
 
-    /* ======== CONFIGURACIÓN DE IMPRESIÓN ======== */
-    @media print {
-        @page {
-            size: letter portrait;  /* carta vertical */
-            margin: 12mm;
-        }
+  html,body{height:100%; margin:0; padding:0; font-family: "Segoe UI", Arial, sans-serif; background:var(--bg); color:var(--texto);}
+  .container{max-width:1200px; margin:18px auto; padding:10px;}
 
-        body {
-            background: white;
-            margin: 0;
-            padding: 0;
-        }
-        #panel, #printPDF {
-            display: none !important;
-        }
-        #boleta {
-            width: 100%;
-            box-shadow: none;
-        }
-    }
+  /* PANEL (selector) */
+  #panel {
+    background:white;
+    padding:14px;
+    border-radius:10px;
+    box-shadow:0 3px 8px rgba(0,0,0,0.12);
+    margin-bottom:12px;
+  }
+  label{ font-weight:700; margin-right:8px; }
+  select, button, input { padding:8px 10px; border-radius:6px; border:1px solid #cfcfcf; font-size:14px; }
 
-    /* PANEL */
-    #panel {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        max-width: 700px;
-        margin: 20px auto;
-        box-shadow: 0 3px 10px rgba(0,0,0,.15);
-    }
+  button{ cursor:pointer; font-weight:700; }
+  .btn-prim{ background:var(--verde); color:white; border:none; }
+  .btn-sec{ background:#c0392b; color:white; border:none; }
 
-    select, button {
-        padding: 8px;
-        border-radius: 6px;
-        border: 1px solid #ccc;
-        font-size: 15px;
-        font-weight: bold;
-    }
+  /* BOLETA (oculta hasta generar) */
+  #boleta{
+    display:none;
+    background:white;
+    border-radius:6px;
+    padding:12px;
+    box-shadow:0 3px 12px rgba(0,0,0,0.12);
+  }
 
-    button {
-        cursor: pointer;
-        border: none;
-    }
+  /* PRINT settings: letter landscape, fit to margins */
+  @media print {
+    @page { size: letter landscape; margin: 10mm; }
+    body { background:white; margin:0; }
+    #panel { display:none !important; }
+    .no-print { display:none !important; }
+    #boleta { box-shadow:none; margin:0; width:100%; }
+  }
 
-    .imprimir { background: #25619c; color:white; }
-    .volver   { background: #c0392b; color:white; }
-    #printPDF { 
-        background:#1b5e20; 
-        color:white; 
-        float:right; 
-        margin-top:5px;
-        padding:10px 15px;
-        border-radius:6px;
-    }
+  /* Boleta header: logo + ciclo a la derecha */
+  .boleta-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
 
-    #boleta {
-        display: none;
-        background: white;
-        padding: 20px 25px;
-        max-width: 800px;
-        margin: 20px auto;
-        border-radius: 10px;
-        box-shadow: 0 3px 10px rgba(0,0,0,.15);
-    }
+  .logo-box img{
+    width:160px;       /* más grande según pediste */
+    height:auto;
+    object-fit:contain;
+  }
 
-    /* Logo centrado */
-    #logoBox {
-        text-align: center;
-        margin-bottom: 10px;
-    }
-    #logoBox img {
-        width: 100px;
-    }
+  .ciclo{
+    text-align:right;
+    font-size:18px;
+    color:var(--verde-claro);
+    font-weight:800;
+  }
 
-    #ciclo {
-        text-align: right;
-        font-size: 18px;
-        color: #2f602f;
-        margin-top: -10px;
-    }
+  .alumno-info{
+    margin-top:10px;
+    text-align:center;
+  }
+  .alumno-info h2{ margin:4px 0; font-size:20px; }
+  .alumno-info p{ margin:2px 0; font-size:14px; color:#333; }
 
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-top: 15px;
-        font-size: 12px;
-    }
+  /* Tabla: ocupará todo el ancho imprimible, tamaño de letra reducido */
+  .tabla-wrap{ margin-top:10px; overflow:auto; }
+  table.boleta-table{
+    width:100%;
+    border-collapse:collapse;
+    font-size:12px;        /* un poco reducido para caber */
+  }
+  table.boleta-table th, table.boleta-table td {
+    border:1px solid #444;
+    padding:6px;
+    text-align:center;
+  }
+  table.boleta-table th {
+    background: #25619c;
+    color:white;
+    font-weight:700;
+  }
 
-    td, th {
-        border: 1px solid #000;
-        text-align: center;
-        padding: 4px;
-    }
+  /* Asistencias - editables */
+  .asistencias{ margin-top:10px; width:100%; border-collapse:collapse; font-size:13px; }
+  .asistencias td, .asistencias th{ border:1px solid #444; padding:6px; text-align:center; }
+  td[contenteditable="true"]{ background:#f6fff6; min-width:40px; }
 
-    .titulo-verde {
-        background: #9ccc65;
-        font-weight: bold;
-    }
+  /* Botones bajo la boleta */
+  .actions { display:flex; gap:10px; margin-top:12px; justify-content:flex-end; }
+  .small-note{ font-size:12px; color:#666; margin-top:8px; }
 
-    td[contenteditable="true"] {
-        background: #f6fff6;
-    }
-
-    .cuadro-firma {
-        height: 55px;
-        background: #eef5ec;
-        border: 2px solid #2f602f;
-    }
-
+  /* Responsive small screens */
+  @media (max-width:900px){
+    .logo-box img{ width:120px; }
+    .alumno-info h2{ font-size:18px; }
+  }
 </style>
 </head>
 
 <body>
+  <div class="container">
 
-<!-- PANEL -->
-<div id="panel">
-    <label>Seleccione grupo:</label>
-    <select id="grupo">
+    <!-- PANEL: SELECTORES -->
+    <div id="panel">
+      <label>Seleccione grupo:</label>
+      <select id="grupo">
         <option value="">Seleccione...</option>
         <option value="1°">1°</option>
         <option value="2°">2°</option>
         <option value="3°">3°</option>
-    </select>
+      </select>
 
-    <br><br>
-
-    <label>Seleccione alumno:</label>
-    <select id="alumno">
+      <label style="margin-left:12px;">Seleccione alumno:</label>
+      <select id="alumno">
         <option value="">Seleccione...</option>
-    </select>
+      </select>
 
-    <br><br>
+      <label style="margin-left:12px;">Seleccione ciclo (texto):</label>
+      <input id="cicloInput" value="2025 - 2026" style="width:160px" />
 
-    <button class="imprimir" onclick="generar()">Generar Boleta</button>
-    <button class="volver" onclick="location.href='historial.html'">Volver</button>
-</div>
+      <div style="display:inline-block; margin-left:12px;">
+        <button id="btnGenerar" class="btn-prim">Generar Boleta</button>
+        <button id="btnGuardarInterna" class="btn-prim no-print" style="background:#1b5e20">Guardar en internas</button>
+        <button id="btnVolver" class="btn-sec no-print" style="margin-left:6px">Volver</button>
+      </div>
 
-
-
-<!-- BOLETA -->
-<div id="boleta">
-
-    <button id="printPDF" onclick="window.print()">Imprimir PDF</button>
-
-    <div id="logoBox">
-        <img src="logo2025.jpg">
+      <div style="display:inline-block; float:right;">
+        <span class="small-note">Las calificaciones se obtienen desde <b>calificaciones_reales</b>.</span>
+      </div>
     </div>
 
-    <div id="ciclo">
-        <b>Ciclo Escolar 2025 – 2026</b>
+    <!-- BOLETA -->
+    <div id="boleta">
+      <div class="boleta-header">
+        <div class="logo-box">
+          <!-- ruta local a logo; si tu servidor sirve desde la misma carpeta, use 'logo2025.jpg' -->
+          <img id="logoImg" src="/mnt/data/logo2025.jpg" alt="Logo colegio">
+        </div>
+        <div class="ciclo" id="cicloText">Ciclo Escolar 2025 - 2026</div>
+      </div>
+
+      <div class="alumno-info">
+        <h2 id="nombreAlumno">Nombre Alumno</h2>
+        <p id="gradoAlumno">Grado</p>
+      </div>
+
+      <div class="tabla-wrap">
+        <table class="boleta-table" id="tablaBoleta">
+          <thead>
+            <tr>
+              <th>Materia</th>
+              <th>Calificación (Final)</th>
+              <th>Observaciones</th>
+            </tr>
+          </thead>
+          <tbody id="tablaBody">
+            <!-- filas generadas por JS -->
+          </tbody>
+          <tfoot>
+            <tr>
+              <th>Promedio General</th>
+              <th id="promedioGeneral">-</th>
+              <th></th>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <!-- ASISTENCIAS editable -->
+      <table class="asistencias" style="margin-top:12px; width:100%;">
+        <tr>
+          <th></th><th>1er Trimestre</th><th>2do Trimestre</th><th>3er Trimestre</th>
+        </tr>
+        <tr>
+          <td><b>Inasistencias</b></td>
+          <td contenteditable="true" id="inasis1">0</td>
+          <td contenteditable="true" id="inasis2">0</td>
+          <td contenteditable="true" id="inasis3">0</td>
+        </tr>
+        <tr>
+          <td><b>Asistencias</b></td>
+          <td contenteditable="true" id="asis1">0</td>
+          <td contenteditable="true" id="asis2">0</td>
+          <td contenteditable="true" id="asis3">0</td>
+        </tr>
+      </table>
+
+      <div class="actions">
+        <button id="btnGuardarImpresion" class="btn-prim no-print">Guardar y preparar impresión</button>
+        <button id="btnImprimir" class="btn-prim">Imprimir / Descargar PDF</button>
+      </div>
+
+      <div class="small-note">Nota: solo las celdas de asistencias/inasistencias son editables. Las calificaciones provienen de calificaciones_reales y se almacenan en <code>internar</code> al guardar.</div>
     </div>
 
-    <p><b>Nombre del alumno(a):</b> <span id="nombreAlumno"></span></p>
-    <p><b>Grado:</b> <span id="gradoAlumno"></span></p>
+    <!-- lugar para mostrar mensajes pequeños -->
+    <div id="mensaje" style="margin-top:10px; color:green; font-weight:700;"></div>
 
-    <!-- TABLA PRINCIPAL -->
-    <table>
-        <tr>
-            <th rowspan="2">Bloque</th>
-            <th colspan="3">Lenguaje</th>
-            <th colspan="2">Saberes Científicos</th>
-            <th colspan="3">Ética y Sociedad</th>
-            <th colspan="2">Comunitario</th>
-            <th>Promedio</th>
-        </tr>
+  </div>
 
-        <tr>
-            <th>Español</th><th>Lenguajes</th><th>Artes</th>
-            <th>Matemáticas</th><th>Biología</th>
-            <th>Geografía</th><th>Historia</th><th>Form. Cívica</th>
-            <th>Gastronomía</th><th>Ed. Física</th>
-            <th></th>
-        </tr>
+<script type="module">
+/* internas.html - JS parte 2 (Firebase + lógica) */
 
-        <tbody id="cuerpoBoleta"></tbody>
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set, get, child, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        <tr class="titulo-verde">
-            <td>Promedio final</td>
-            <td colspan="12" id="promedioFinal"></td>
-        </tr>
-    </table>
+/* --- CONFIG FIREBASE (usa la misma configuración que tus otros archivos) --- */
+const firebaseConfig = {
+  apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
+  authDomain: "camino-a-casa-87d65.firebaseapp.com",
+  databaseURL: "https://camino-a-casa-87d65-default-rtdb.firebaseio.com",
+  projectId: "camino-a-casa-87d65",
+  storageBucket: "camino-a-casa-87d65.firebasestorage.app",
+  messagingSenderId: "725645453280",
+  appId: "1:725645453280:web:4cc41935020d1ae290ed85"
+};
 
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-    <!-- TABLA 2: INASISTENCIAS Y ASISTENCIAS -->
-    <table>
-        <tr class="titulo-verde">
-            <td></td><td>1er Trimestre</td><td>2do Trimestre</td><td>3er Trimestre</td>
-        </tr>
-        <tr>
-            <td><b>Inasistencias</b></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-        </tr>
-        <tr>
-            <td><b>Asistencia</b></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-            <td contenteditable="true"></td>
-        </tr>
-    </table>
-
-
-    <!-- TABLA DE FIRMAS SEPARADA -->
-    <table>
-        <tr class="titulo-verde">
-            <td colspan="3">FIRMAS DE MADRE, PADRE O TUTOR</td>
-        </tr>
-        <tr>
-            <td class="cuadro-firma"></td>
-            <td class="cuadro-firma"></td>
-            <td class="cuadro-firma"></td>
-        </tr>
-        <tr>
-            <td><b>1er Trimestre</b></td>
-            <td><b>2do Trimestre</b></td>
-            <td><b>3er Trimestre</b></td>
-        </tr>
-    </table>
-
-</div>
-
-
-<script>
-// === Listas de alumnos por grupo ===
-const alumnos = {
+/* --- Datos locales: alumnos y materias (coinciden con calificaciones_reales) --- */
+const alumnosPorGrupo = {
   "1°": ["Cesar D. Hernandez","A. Santiago Sanchez","Isabella Barragan","V. Victoria Rios","Samuel Tassias"],
   "2°": ["Mateo A. Vazquez","Mario N. Gordillo","Julieta Salinas","Alisson Valencia"],
   "3°": ["Hector Penagos","David A. Gil","Damian Alcazar","Ruben Solis","Paulina Ruiz","Grecia Morales","Hiram Rodas","Jesus Borbollan"]
 };
 
-// Materias en orden
-const materias = ["Español","Lenguajes","Artes","Matemáticas","Biología","Geografía","Historia","Formación","Gastronomía","Ed. Física"];
-
-// Cargar alumnos
-grupo.onchange = () => {
-    alumno.innerHTML = "<option value=''>Seleccione...</option>";
-    alumnos[grupo.value]?.forEach(a => {
-        const op = document.createElement("option");
-        op.textContent = a;
-        alumno.appendChild(op);
-    });
+const materiasPorGrupo = {
+  "1°": ["Español 1","Matemáticas 1","Biología 1","Geografía 1","Historia I","Inglés 1","Gastronomía 1"],
+  "2°": ["Español 2","Matemáticas 2","Física 2","Historia II","Inglés 2","Gastronomía 2"],
+  "3°": ["Español 3","Matemáticas 3","Historia III","Inglés 3","Gastronomía 3","Química 3"]
 };
 
-// Generar boleta
-function generar() {
+/* --- Elementos DOM --- */
+const grupo = document.getElementById("grupo");
+const alumno = document.getElementById("alumno");
+const btnGenerar = document.getElementById("btnGenerar");
+const btnVolver = document.getElementById("btnVolver");
+const tablaBody = document.getElementById("tablaBody");
+const boleta = document.getElementById("boleta");
+const nombreAlumno = document.getElementById("nombreAlumno");
+const gradoAlumno = document.getElementById("gradoAlumno");
+const promedioGeneral = document.getElementById("promedioGeneral");
+const cicloText = document.getElementById("cicloText");
+const cicloInput = document.getElementById("cicloInput");
 
-    if (!grupo.value || !alumno.value) {
-        alert("Seleccione grupo y alumno.");
-        return;
-    }
+const inasis1 = document.getElementById("inasis1");
+const inasis2 = document.getElementById("inasis2");
+const inasis3 = document.getElementById("inasis3");
+const asis1 = document.getElementById("asis1");
+const asis2 = document.getElementById("asis2");
+const asis3 = document.getElementById("asis3");
 
-    nombreAlumno.textContent = alumno.value;
-    gradoAlumno.textContent = grupo.value;
+const btnGuardarInterna = document.getElementById("btnGuardarInterna");
+const btnGuardarImpresion = document.getElementById("btnGuardarImpresion");
+const btnImprimir = document.getElementById("btnImprimir");
+const mensaje = document.getElementById("mensaje");
 
-    const tbody = document.getElementById("cuerpoBoleta");
-    tbody.innerHTML = "";
+/* --- Eventos --- */
+grupo.addEventListener("change", cargarAlumnos);
+btnGenerar.addEventListener("click", generarBoleta);
+btnVolver.addEventListener("click", ()=> location.href = "historial.html");
+btnGuardarInterna.addEventListener("click", guardarInternar);
+btnGuardarImpresion.addEventListener("click", async ()=>{
+  await guardarInternar();
+  mensaje.textContent = "Guardado local en 'internar'. Listo para imprimir.";
+});
+btnImprimir.addEventListener("click", ()=>{
+  window.print();
+});
 
-    for (let i=1; i<=3; i++){
-        let tr = document.createElement("tr");
+/* --- Carga alumnos según grupo --- */
+function cargarAlumnos(){
+  alumno.innerHTML = "<option value=''>Seleccione...</option>";
+  tablaBody.innerHTML = "";
+  mensaje.textContent = "";
+  cicloText.textContent = cicloInput.value || "Ciclo Escolar 2025 - 2026";
 
-        tr.innerHTML = `
-            <td>${i}°</td>
-            ${materias.map(()=>`<td contenteditable="true" oninput="calcularPromedios()"></td>`).join("")}
-            <td class="prom-bloque"></td>
-        `;
-
-        tbody.appendChild(tr);
-    }
-
-    document.getElementById("boleta").style.display = "block";
+  const g = grupo.value;
+  if(!g) return;
+  (alumnosPorGrupo[g]||[]).forEach(a=>{
+    const op = document.createElement("option");
+    op.value = a;
+    op.textContent = a;
+    alumno.appendChild(op);
+  });
 }
 
-// Calcular promedios
-function calcularPromedios() {
-    let filas = document.querySelectorAll("#cuerpoBoleta tr");
-    let proms = [];
-    
-    filas.forEach(fila => {
-        let celdas = fila.querySelectorAll("td[contenteditable='true']");
-        let nums = [...celdas].map(td => parseFloat(td.textContent) || 0);
-        
-        let prom = nums.reduce((a,b)=>a+b,0) / nums.length;
-        prom = prom ? prom.toFixed(1) : "";
-
-        fila.querySelector(".prom-bloque").textContent = prom;
-        if(prom) proms.push(parseFloat(prom));
-    });
-
-    if(proms.length){
-        let pf = (proms.reduce((a,b)=>a+b,0) / proms.length).toFixed(1);
-        document.getElementById("promedioFinal").textContent = pf;
-    }
+/* --- Función para leer calificaciones desde Firebase (estructura por alumno) --- */
+async function obtenerCalificacionesDesdeFirebase(grado, nombreAlumno){
+  // lee todo el objeto bajo calificaciones_reales/{grado}/{alumno}
+  const dbRef = ref(db);
+  try{
+    const snap = await get(child(dbRef, `calificaciones_reales/${encodeKey(grado)}/${encodeKey(nombreAlumno)}`));
+    if(!snap.exists()) return {}; // no hay calificaciones
+    // snap.val() puede ser un objeto { "Español 1": 8, "Matemáticas 1": 9, ... }
+    return snap.val();
+  }catch(err){
+    console.error("Error leyendo Firebase:", err);
+    return {};
+  }
 }
+
+/* --- Generar boleta: rellenar tabla con materias y calificaciones (no editables) --- */
+async function generarBoleta(){
+  mensaje.textContent = "";
+  const g = grupo.value;
+  const a = alumno.value;
+  if(!g || !a) return alert("Seleccione grupo y alumno.");
+
+  nombreAlumno.textContent = a;
+  gradoAlumno.textContent = "Grado: " + g;
+  cicloText.textContent = cicloInput.value || "2025 - 2026";
+
+  // limpiar tabla
+  tablaBody.innerHTML = "";
+  promedioGeneral.textContent = "-";
+
+  // traer calificaciones desde Firebase
+  const datosCal = await obtenerCalificacionesDesdeFirebase(g, a);
+
+  // generar filas según materiasPorGrupo
+  const materias = materiasPorGrupo[g] || [];
+  let suma = 0, cont = 0;
+
+  materias.forEach(mat=>{
+    const fila = document.createElement("tr");
+
+    // obtener cal si existe
+    let cal = datosCal && (datosCal[mat] !== undefined) ? Number(datosCal[mat]) : null;
+
+    // mostrar '-' si no hay calificación
+    const calText = (cal !== null && !isNaN(cal)) ? cal.toString() : "-";
+
+    fila.innerHTML = `
+      <td style="text-align:left; padding-left:10px;">${mat}</td>
+      <td data-materia="${escapeHtml(mat)}" class="cel-cal">${calText}</td>
+      <td contenteditable="false"></td>
+    `;
+    tablaBody.appendChild(fila);
+
+    if(cal !== null && !isNaN(cal)){
+      suma += Number(cal);
+      cont++;
+    }
+  });
+
+  // calcular promedio general
+  if(cont>0){
+    promedioGeneral.textContent = (suma/cont).toFixed(1);
+  } else {
+    promedioGeneral.textContent = "-";
+  }
+
+  // cargar asistencias e inasistencias desde internar si existen
+  await cargarAsistencias(g, a);
+
+  // mostrar boleta
+  boleta.style.display = "block";
+  // desplazar a la boleta (útil en pantallas largas)
+  setTimeout(()=> { boleta.scrollIntoView({behavior:"smooth"}); }, 120);
+}
+
+/* --- Cargar asistencias desde internar si ya fueron guardadas --- */
+async function cargarAsistencias(grado, nombreAlumno){
+  try{
+    const snap = await get(ref(db, `internar/${encodeKey(grado)}/${encodeKey(nombreAlumno)}/asistencias`));
+    if(!snap.exists()){
+      // valores por defecto
+      inasis1.textContent = inasis2.textContent = inasis3.textContent = "0";
+      asis1.textContent = asis2.textContent = asis3.textContent = "0";
+      return;
+    }
+    const data = snap.val();
+    inasis1.textContent = data.inasis1 ?? "0";
+    inasis2.textContent = data.inasis2 ?? "0";
+    inasis3.textContent = data.inasis3 ?? "0";
+    asis1.textContent = data.asis1 ?? "0";
+    asis2.textContent = data.asis2 ?? "0";
+    asis3.textContent = data.asis3 ?? "0";
+  }catch(e){
+    console.error("Error al cargar asistencias", e);
+  }
+}
+
+/* --- Guardar en ruta internar/{grado}/{alumno}:
+       - calificaciones: objeto materia => cal
+       - asistencias: inasis1/2/3, asis1/2/3
+       - meta: savedAt
+    También se crea/actualiza si ya existe.
+*/
+async function guardarInternar(){
+  const g = grupo.value;
+  const a = alumno.value;
+  if(!g || !a) return alert("Seleccione grupo y alumno antes de guardar.");
+
+  // recolectar calificaciones de la tabla (las que se muestran)
+  const filas = [...document.querySelectorAll("#tablaBody tr")];
+  let calificacionesObj = {};
+  filas.forEach(tr=>{
+    const mat = tr.querySelector("td[data-materia]")?.getAttribute("data-materia");
+    const cel = tr.querySelector(".cel-cal");
+    let val = cel ? cel.textContent.trim() : "";
+    if(val === "-" || val === "") return;
+    const num = Number(val);
+    if(!isNaN(num)) calificacionesObj[unescapeHtml(mat)] = num;
+  });
+
+  // asistencias
+  const asistObj = {
+    inasis1: inasis1.textContent.trim() || "0",
+    inasis2: inasis2.textContent.trim() || "0",
+    inasis3: inasis3.textContent.trim() || "0",
+    asis1: asis1.textContent.trim() || "0",
+    asis2: asis2.textContent.trim() || "0",
+    asis3: asis3.textContent.trim() || "0"
+  };
+
+  // payload
+  const payload = {
+    calificaciones: calificacionesObj,
+    asistencias: asistObj,
+    meta: {
+      savedAt: new Date().toISOString(),
+      ciclo: cicloInput.value || ""
+    }
+  };
+
+  try{
+    await set(ref(db, `internar/${encodeKey(g)}/${encodeKey(a)}`), payload);
+    mensaje.textContent = "✔ Guardado en internar correctamente.";
+    setTimeout(()=> mensaje.textContent = "", 3500);
+    return true;
+  }catch(e){
+    console.error("Error guardando internar:", e);
+    alert("Error al guardar en internar. Revisa la consola.");
+    return false;
+  }
+}
+
+/* --- Utilidades --- */
+function encodeKey(s){
+  // mantener consistencia con otros archivos que reemplazan puntos por guiones bajos
+  return String(s).replace(/\./g,"_").replace(/\$/g,"").replace(/\]/g,"").replace(/\[/g,"");
+}
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+function unescapeHtml(s){
+  return String(s).replace(/&amp;/g,'&').replace(/&quot;/g,'"').replace(/&#39;/g,"'").replace(/&lt;/g,'<').replace(/&gt;/g,'>');
+}
+
+/* --- FIN del script --- */
 </script>
-
-</body>
-</html>
