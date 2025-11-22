@@ -118,7 +118,6 @@
 
     label { font-weight:700; margin-right:8px; }
 
-    /* 🔥 Botones distribuidos uniformemente */
     .botonera {
       display:flex;
       gap:10px;
@@ -160,7 +159,6 @@
 
   </div>
 
-  <!-- 🔥 Botones ya sin el botón Agregar Alumno -->
   <div class="botonera">
     <button id="btnGuardar" class="guardar">Guardar</button>
     <button id="btnNuevoMateria" class="agregar">Nueva Materia</button>
@@ -288,9 +286,6 @@ const alumnosPorGrupo = {
     });
   }
 
-  // -------------------------------------------------
-  //  🔥 FUNCIÓN CORREGIDA PARA LEER ALUMNOS DE FIREBASE
-  // -------------------------------------------------
   async function cargarAlumnos(grupo) {
     cuerpoTabla.innerHTML = "";
     promedioGrupo.textContent = "-";
@@ -360,7 +355,10 @@ const alumnosPorGrupo = {
     let v = td.textContent.trim();
     if (!/^\d+$/.test(v)) { td.textContent=""; return; }
     v = parseInt(v,10);
-    if (v < 6 || v > 10) { td.textContent=""; return; }
+
+    // ✔ AHORA ACEPTA CALIFICACIONES DESDE 5
+    if (v < 5 || v > 10) { td.textContent=""; return; }
+
     aplicarColor(td,v);
     calcularPromedio();
   };
@@ -415,7 +413,7 @@ const alumnosPorGrupo = {
     await set(ref(db,path),{
       docente,
       datos,
-      savedAt:new(Date).toISOString()
+      savedAt: new Date().toISOString()
     });
 
     mensajeExito.style.display="block";
