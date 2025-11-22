@@ -115,9 +115,25 @@
 
     label { font-weight:700; margin-right:8px; }
 
+    /* 📌 Mantengo la distribución solicitada antes (botones distribuidos) */
+    .controles {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:space-between;
+      align-items:center;
+      margin-bottom:10px;
+    }
+
+    .controles > * {
+      flex:1;
+      min-width:150px;
+    }
+
     .btn-nueva-materia {
       margin-left: auto;
     }
+
   </style>
 </head>
 
@@ -132,33 +148,41 @@
   </div>
 
   <!-- Controles superiores -->
-  <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-bottom:10px;">
-
-    <label>Trimestre:</label>
-    <select id="trimestre"></select>
-
-    <label>Grupo:</label>
-    <select id="grupo">
-      <option value="">Seleccione...</option>
-      <option value="1°">1°</option>
-      <option value="2°">2°</option>
-      <option value="3°">3°</option>
-    </select>
-
-    <label>Materia:</label>
-    <select id="materia"><option>Seleccione...</option></select>
-
-    <label>Docente:</label>
-    <input id="docente" placeholder="Nombre del docente" />
+  <div class="controles">
 
     <div>
+      <label>Trimestre:</label>
+      <select id="trimestre"></select>
+    </div>
+
+    <div>
+      <label>Grupo:</label>
+      <select id="grupo">
+        <option value="">Seleccione...</option>
+        <option value="1°">1°</option>
+        <option value="2°">2°</option>
+        <option value="3°">3°</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Materia:</label>
+      <select id="materia"><option>Seleccione...</option></select>
+    </div>
+
+    <div>
+      <label>Docente:</label>
+      <input id="docente" placeholder="Nombre del docente" />
+    </div>
+
+    <!-- BOTÓN AGREGAR ALUMNO REMOVIDO -->
+
     <button id="btnGuardar" class="guardar">Guardar</button>
 
     <button id="btnNuevoMateria" class="agregar btn-nueva-materia">Nueva Materia</button>
 
-    <!-- ✅ BOTÓN SALIR AGREGADO -->
     <button id="btnSalir" class="salir">Salir</button>
-  
+
   </div>
 
   <table id="tablaCalificaciones">
@@ -236,7 +260,7 @@ const alumnosPorGrupo = {
   document.addEventListener("DOMContentLoaded", async () => {
     await cargarTrimestre();
     document.getElementById("grupo").addEventListener("change", actualizarGrupo);
-    document.getElementById("btnAgregar").addEventListener("click", agregarFila);
+    // removida la referencia al botón btnAgregar para evitar errores
     document.getElementById("btnGuardar").addEventListener("click", guardar);
     document.getElementById("btnNuevoMateria").addEventListener("click", nuevaMateria);
 
