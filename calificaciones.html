@@ -151,14 +151,14 @@
     <label>Docente:</label>
     <input id="docente" placeholder="Nombre del docente" />
 
-    <button id="btnAgregar" class="agregar">Agregar Alumno</button>
+    <div>
     <button id="btnGuardar" class="guardar">Guardar</button>
 
     <button id="btnNuevoMateria" class="agregar btn-nueva-materia">Nueva Materia</button>
 
     <!-- ✅ BOTÓN SALIR AGREGADO -->
     <button id="btnSalir" class="salir">Salir</button>
-
+  
   </div>
 
   <table id="tablaCalificaciones">
@@ -200,11 +200,34 @@
   };
 
   // Alumnos por grupo (orden alfabético)
-  const alumnosPorGrupo = {
-    "1°": ["Cesar","Isabella","Samuel","Santiago","Victoria"].sort(),
-    "2°": ["Alisson","Julieta","Mario","Mateo"].sort(),
-    "3°": ["Damian","David A.","Grecia","Hector","Hiram","Jesus","Paulina","Ruben"].sort()
-  };
+const alumnosPorGrupo = {
+  "1°": [
+    "Cesar D. Hernandez",
+    "A. Santiago Sanchez",
+    "Isabella Barragan",
+    "V. Victoria Rios",
+    "Samuel Tassias"
+  ],
+
+  "2°": [
+    "Mateo A. Vazquez",
+    "Mario N. Gordillo",
+    "Julieta Salinas",
+    "Alisson Valencia"
+  ],
+
+  "3°": [
+    "Hector Penagos",
+    "David A. Gil",
+    "Damian Alcazar",
+    "Ruben Solis",
+    "Paulina Ruiz",
+    "Grecia Morales",
+    "Hiram Rodas",
+    "Jesus Borbollan"
+  ]
+};
+
 
   const cuerpoTabla = document.querySelector("#tablaCalificaciones tbody");
   const promedioGrupo = document.getElementById("promedioGrupo");
