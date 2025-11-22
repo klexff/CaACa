@@ -384,7 +384,7 @@ const alumnosPorGrupo = {
     promedioGrupo.textContent=pr;
   }
 
-  async function guardar(){
+async function guardar(){
     const trimestre=document.getElementById("trimestre").value;
     const grupo=document.getElementById("grupo").value;
     const materia=document.getElementById("materia").value;
@@ -408,20 +408,31 @@ const alumnosPorGrupo = {
       }
     }
 
-    const path=`calificaciones/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
+    // === Guarda las calificaciones normales ===
+    const path1=`calificaciones/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
 
-    await set(ref(db,path),{
+    await set(ref(db,path1),{
       docente,
       datos,
-      savedAt: new Date().toISOString()
+      savedAt:new Date().toISOString()
+    });
+
+    // === Guarda también en HISTORIAL CASA ===
+    const path2=`historial_casa/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
+
+    await set(ref(db,path2),{
+      docente,
+      datos,
+      savedAt:new Date().toISOString()
     });
 
     mensajeExito.style.display="block";
-    mensajeExito.textContent=`✔ Calificaciones guardadas correctamente`;
+    mensajeExito.textContent=`✔ Calificaciones guardadas correctamente en ambos registros`;
     setTimeout(()=> mensajeExito.style.display="none", 3500);
-  }
+}
 
-  function encode(s){ return s.replace(/\./g,"_"); }
+function encode(s){ return s.replace(/\./g,"_"); }
+
 
 </script>
 

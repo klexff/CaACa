@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Historial Casa — Camino a Casa</title>
+
+  <style>
+    body {
+      font-family: "Segoe UI", Arial;
+      background: #eef5f1;
+      margin: 0;
+      padding: 20px;
+    }
+
+    header {
+      background: linear-gradient(90deg, #25619c, #2f8c4a);
+      color: #fff;
+      padding: 18px;
+      text-align: center;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
+    }
+
+    h2 {
+      color: #25619c;
+      margin-top: 30px;
+    }
+
+    .card {
+      background: #fff;
+      padding: 16px;
+      border-radius: 10px;
+      margin-bottom: 18px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 6px;
+      text-align: center;
+    }
+
+    th {
+      background: #25619c;
+      color: #fff;
+    }
+
+    .volver {
+      background: #c0392b;
+      color: #fff;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>📚 Historial de Calificaciones (Casa)</h1>
+</header>
+
+<main style="max-width:1100px; margin:20px auto;">
+
+  <button class="volver" onclick="window.location.href='index.html'">⟵ Volver</button>
+
+  <div id="contenedor"></div>
+
+</main>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
+    authDomain: "camino-a-casa-87d65.firebaseapp.com",
+    databaseURL: "https://camino-a-casa-87d65-default-rtdb.firebaseio.com",
+    projectId: "camino-a-casa-87d65",
+    storageBucket: "camino-a-casa-87d65.firebasestorage.app",
+    messagingSenderId: "725645453280",
+    appId: "1:725645453280:web:4cc41935020d1ae290ed85"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getDatabase(app);
+  const contenedor = document.getElementById("contenedor");
+
+  document.addEventListener("DOMContentLoaded", cargarHistorial);
+
+  async function cargarHistorial() {
+    const snap = await get(ref(db, "historial_casa"));
+
+    if (!snap.exists()) {
+      contenedor.innerHTML = `<p style='padding:12px; background:#fff3cd; border-radius:8px;'>No hay historial registrado.</p>`;
+      return;
+    }
+
+    const data = snap.val();
+    contenedor.innerHTML = "";
+
+    for (const trimestre in data) {
+      for (const grupo in data[trimestre]) {
+        for (const materia in data[trimestre][grupo]) {
+
+          const registro = data[trimestre][grupo][materia];
+
+          const card = document.createElement("div");
+          card.className = "card";
+
+          card.innerHTML = `
+            <h2>${materia}</h2>
+            <p><b>Trimestre:</b> ${trimestre}</p>
+            <p><b>Grupo:</b> ${grupo}</p>
+            <p><b>Docente:</b> ${registro.docente ?? "—"}</p>
+            <p><b>Fecha guardado:</b> ${registro.savedAt ?? "—"}</p>
+
+            <table>
+              <thead>
+                <tr>
+                  <th>Alumno</th>
+                  <th>Calificación</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${registro.datos
+                  .map(d => `
+                    <tr>
+                      <td>${d.alumno}</td>
+                      <td>${d.calificacion}</td>
+                    </tr>
+                  `)
+                  .join("")}
+              </tbody>
+            </table>
+          `;
+
+          contenedor.appendChild(card);
+        }
+      }
+    }
+  }
+</script>
+
+</body>
+</html>
