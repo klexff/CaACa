@@ -1,100 +1,389 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8">
-<title>Calificaciones Reales</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Calificaciones Reales — Centro Educativo Integral Camino a Casa</title>
+
 <style>
-  body { font-family: "Segoe UI", Arial; background:#eef5f1; padding:20px; }
-  header { background:linear-gradient(90deg,#25619c,#2f8c4a); color:white;
-           padding:15px; text-align:center; border-radius:8px; }
-  main { max-width:1100px; margin:auto; background:white; padding:20px;
-         box-shadow:0 3px 8px rgba(0,0,0,.15); border-radius:10px; }
+/* ——— ESTILOS IGUALES A TU VERSIÓN ——— */
+:root{
+  --azul:#25619c;
+  --verde:#2f8c4a;
+  --rojo:#f8d7da;
+  --amarillo:#fff3cd;
+  --verde-claro:#d4edda;
+}
+body {
+  font-family:"Segoe UI", Arial;
+  background:#eef5f1;
+  margin:0;
+  padding:20px;
+}
+header {
+  background:linear-gradient(90deg,var(--azul),var(--verde));
+  color:#fff;
+  padding:18px;
+  text-align:center;
+  border-radius:8px;
+}
+main { max-width:1100px; margin:16px auto; }
+table {
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:10px;
+  overflow:hidden;
+  box-shadow:0 2px 6px rgba(0,0,0,0.08);
+}
+th,td {
+  border:1px solid #ddd;
+  padding:8px;
+  text-align:center;
+}
+th {
+  background:var(--azul); color:#fff;
+}
+input, select {
+  padding:6px;
+  border-radius:6px;
+  border:1px solid #ccc;
+}
+.btn { padding:8px 12px; border-radius:8px; cursor:pointer; font-weight:600; border:none; }
+.agregar { background:var(--verde); color:white; }
+.guardar { background:var(--azul); color:white; }
+.salir { background:#c0392b; color:white; }
+.editar { background:#ffc107; }
+.eliminar { background:#c0392b; color:white; }
 
-  table { width:100%; border-collapse:collapse; margin-top:10px; }
-  th,td { border:1px solid #ccc; padding:8px; text-align:center; }
-  th { background:#25619c; color:white; }
+.rojo{background:#f8d7da;}
+.amarillo{background:#fff3cd;}
+.verde{background:#d4edda;}
 
-  input, select { padding:6px; border:1px solid #bbb; border-radius:6px; }
+.mensajeExito {
+  background:#d4edda;
+  border:1px solid #c3e6cb;
+  color:#155724;
+  padding:10px;
+  border-radius:8px;
+  margin-top:12px;
+  display:none;
+  text-align:center;
+  font-weight:600;
+}
 
-  .guardar{ background:#25619c; color:white; border:none; padding:8px 14px;
-            border-radius:6px; cursor:pointer; font-weight:600; }
-  .salir{ background:#c0392b; color:white; border:none; padding:8px 14px;
-          border-radius:6px; cursor:pointer; font-weight:600; }
+label { font-weight:700; margin-right:6px; }
 </style>
 </head>
 
 <body>
 
-<header><h2>📘 Calificaciones Reales</h2></header>
+<header><h1>📝 Calificaciones Reales</h1></header>
 
 <main>
 
-<label>Grupo: </label>
-<select id="grupo">
-  <option value="">Seleccione...</option>
-  <option value="1°">1°</option>
-  <option value="2°">2°</option>
-  <option value="3°">3°</option>
-</select>
+<div id="alertaTrimestre" style="padding:10px; background:#fff3cd; border-radius:8px; margin-bottom:12px;">
+  Cargando información de trimestres...
+</div>
 
-<label style="margin-left:10px;">Materia:</label>
-<select id="materia">
-  <option value="">Seleccione...</option>
-</select>
+<div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px; background:white; padding:12px; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.06);">
+  
+  <label>Trimestre:</label>
+  <select id="trimestre"></select>
 
-<button class="salir" onclick="location.href='index.html'">Salir</button>
+  <label>Grupo:</label>
+  <select id="grupo">
+    <option value="">Seleccione...</option>
+    <option value="1°">1°</option>
+    <option value="2°">2°</option>
+    <option value="3°">3°</option>
+  </select>
 
-<table id="tabla">
+  <label>Materia:</label>
+  <select id="materia"><option>Seleccione...</option></select>
+
+  <label>Docente:</label>
+  <input id="docente" placeholder="Nombre del docente" />
+
+  <button id="btnAgregar" class="btn agregar">Agregar Alumno</button>
+  <button id="btnGuardar" class="btn guardar">Guardar</button>
+  <button id="btnNuevoMateria" class="btn agregar">Nueva Materia</button>
+  <button id="btnSalir" class="btn salir">Salir</button>
+</div>
+
+<table id="tablaCalificaciones">
 <thead>
-  <tr><th>Alumno</th><th>Calificación (≥5)</th></tr>
+<tr><th>Alumno</th><th>Calificación</th><th>Acciones</th></tr>
 </thead>
 <tbody></tbody>
+<tfoot>
+<tr><th>Promedio del grupo</th><th id="promedioGrupo">-</th><th></th></tr>
+</tfoot>
 </table>
 
-<button class="guardar">Guardar</button>
+<div id="mensajeExito" class="mensajeExito"></div>
 
 </main>
 
-<script>
-// materias por grupo
+
+<!-- ——————— FIREBASE Y LÓGICA —————————— -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey:"AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
+  authDomain:"camino-a-casa-87d65.firebaseapp.com",
+  databaseURL:"https://camino-a-casa-87d65-default-rtdb.firebaseio.com",
+  projectId:"camino-a-casa-87d65",
+  storageBucket:"camino-a-casa-87d65.firebasestorage.app",
+  messagingSenderId:"725645453280",
+  appId:"1:725645453280:web:4cc41935020d1ae290ed85"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* ——— MATERIAS POR GRUPO ——— */
 const materiasPorGrupo = {
-  "1°": ["Matemáticas 1","Español 1","Biología 1","Geografía 1","Danza 1","Educación Física 1","Historia I","Ética I","Inglés 1","Gastronomía 1","Habilidades Digitales 1"],
-  "2°": ["Matemáticas 2","Español 2","Danza 2","Ética II","Física 2","Inglés 2","Educación Física 2","Historia II","Gastronomía 2","Habilidades Digitales 2"],
-  "3°": ["Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III","Vida Saludable 3","Historia III","Educación Física 3","Gastronomía 3","Habilidades Digitales 3","Química 3"]
+  "1°":["Matemáticas 1","Español 1","Biología 1","Geografía 1","Danza 1","Educación Física 1","Historia I","Ética I","Inglés 1","Gastronomía 1","Habilidades Digitales 1"],
+  "2°":["Matemáticas 2","Español 2","Danza 2","Ética II","Física 2","Inglés 2","Educación Física 2","Historia II","Gastronomía 2","Habilidades Digitales 2"],
+  "3°":["Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III","Vida Saludable 3","Historia III","Educación Física 3","Gastronomía 3","Habilidades Digitales 3","Química 3"]
 };
 
-// alumnos reales que pediste
-const alumnos = {
-  "1°": ["Cesar D. Hernandez","A. Santiago Sanchez","Isabella Barragan","V. Victoria Rios","Samuel Tassias"],
-  "2°": ["Mateo A. Vazquez","Mario N. Gordillo","Julieta Salinas","Alisson Valencia"],
-  "3°": ["Hector Penagos","David A. Gil","Damian Alcazar","Ruben Solis","Paulina Ruiz","Grecia Morales","Hiram Rodas","Jesus Borbollan"]
-};
+const tbody = document.querySelector("#tablaCalificaciones tbody");
+const promedioGrupo = document.getElementById("promedioGrupo");
+const mensajeExito = document.getElementById("mensajeExito");
 
-document.getElementById("grupo").addEventListener("change",()=>{
-  const g = grupo.value;
-  materia.innerHTML = "<option>Seleccione...</option>";
-  tabla.querySelector("tbody").innerHTML = "";
+/* —————————— CARGAR TRIMESTRE —————————— */
+document.addEventListener("DOMContentLoaded", async () => {
 
-  if(g && materiasPorGrupo[g]){
-    materiasPorGrupo[g].forEach(m=>{
-      const op = document.createElement("option");
-      op.textContent = m;
-      materia.appendChild(op);
-    });
-  }
+  await cargarTrimestreActivo();
 
-  if(g && alumnos[g]){
-    alumnos[g].forEach(a=>{
-      const tr=document.createElement("tr");
-      tr.innerHTML=`<td>${a}</td><td contenteditable="true"></td>`;
-      tabla.querySelector("tbody").appendChild(tr);
-    });
-  }
+  document.getElementById("grupo").addEventListener("change", onGrupoChange);
+  document.getElementById("materia").addEventListener("change", precargarCalificaciones);
+  document.getElementById("btnAgregar").addEventListener("click", agregarFila);
+  document.getElementById("btnGuardar").addEventListener("click", guardar);
+  document.getElementById("btnNuevoMateria").addEventListener("click", nuevaMateria);
+  document.getElementById("btnSalir").addEventListener("click", ()=> window.location.href="index.html");
+
 });
 
-document.querySelector(".guardar").onclick = () =>{
-  alert("✔ Datos guardados (simulación). Aquí iría Firebase.");
+/* —————————— TRIMESTRE —————————— */
+async function cargarTrimestreActivo(){
+  const snap = await get(ref(db,"configuracion/trimestreActivo"));
+  const sel = document.getElementById("trimestre");
+  const alerta = document.getElementById("alertaTrimestre");
+
+  if (!snap.exists()){
+    alerta.textContent = "🚫 No hay trimestre activo.";
+    sel.innerHTML = "<option value=''>Sin trimestre</option>";
+    return;
+  }
+
+  const t = snap.val();
+  alerta.innerHTML = `✔ Trimestre activo: <b>${t.nombre}</b> (${t.inicio} al ${t.fin})`;
+
+  sel.innerHTML = `<option value="${t.nombre}">${t.nombre}</option>`;
+}
+
+/* —————————— AL CAMBIAR GRUPO —————————— */
+async function onGrupoChange(){
+
+  const grupo = document.getElementById("grupo").value;
+
+  // cargar materias
+  const selMat = document.getElementById("materia");
+  selMat.innerHTML = "<option value=''>Seleccione...</option>";
+
+  if (grupo && materiasPorGrupo[grupo]){
+    materiasPorGrupo[grupo].forEach(m => {
+      const op = document.createElement("option");
+      op.value = m;
+      op.textContent = m;
+      selMat.appendChild(op);
+    });
+  }
+
+  tbody.innerHTML = "";
+  promedioGrupo.textContent = "-";
+
+  if (!grupo) return;
+
+  /* —————————— CARGA DE ALUMNOS DESDE FIREBASE —————————— */
+  const snap = await get(ref(db,"alumnos"));
+  if (!snap.exists()) return;
+
+  const lista = [];
+
+  const all = snap.val();
+  for (const id in all){
+    const a = all[id];
+    if (a.grupo === grupo){
+      lista.push({ id, nombre:a.nombre });
+    }
+  }
+
+  lista.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+
+  lista.forEach(a=>{
+    const tr = document.createElement("tr");
+    tr.dataset.alumnoId = a.id;
+    tr.innerHTML = `
+      <td contenteditable="true">${a.nombre}</td>
+      <td contenteditable="true" onblur="validarCalificacion(this)"></td>
+      <td>
+        <button class="editar" onclick="editarFila(this)">✏️</button>
+        <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
+      </td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+/* —————————— PRECARGAR CALIFICACIONES —————————— */
+async function precargarCalificaciones(){
+
+  const trimestre = document.getElementById("trimestre").value;
+  const grupo = document.getElementById("grupo").value;
+  const materia = document.getElementById("materia").value;
+
+  if (!trimestre || !grupo || !materia) return;
+
+  const snap = await get(ref(db,
+    `calificaciones_reales/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`
+  ));
+
+  if (!snap.exists()) return;
+
+  const info = snap.val();
+  const datos = info.datos || [];
+
+  const map = {};
+  datos.forEach(d => map[d.alumno] = d.calificacion);
+
+  [...tbody.querySelectorAll("tr")].forEach(tr => {
+    const nombre = tr.cells[0].textContent.trim();
+    if (map[nombre]){
+      tr.cells[1].textContent = map[nombre];
+      aplicarColor(tr.cells[1], map[nombre]);
+    }
+  });
+
+  calcularPromedio();
+
+  if (info.docente){
+    document.getElementById("docente").value = info.docente;
+  }
+}
+
+/* —————————— FUNCIONES GENERALES —————————— */
+
+window.validarCalificacion = function(td){
+  let v = td.textContent.trim();
+  if (!/^\d+$/.test(v)){ td.textContent=""; return; }
+  v = parseInt(v);
+
+  if (v<6 || v>10){ td.textContent=""; return; }
+
+  aplicarColor(td,v);
+  calcularPromedio();
 };
+
+function aplicarColor(td,v){
+  td.className="";
+  if (v<7) td.classList.add("rojo");
+  else if (v<=8) td.classList.add("amarillo");
+  else td.classList.add("verde");
+}
+
+window.editarFila = btn => btn.closest("tr").cells[0].focus();
+
+window.eliminarFila = btn => {
+  btn.closest("tr").remove();
+  calcularPromedio();
+};
+
+function agregarFila(){
+  const tr=document.createElement("tr");
+  tr.innerHTML=`
+    <td contenteditable="true"></td>
+    <td contenteditable="true" onblur="validarCalificacion(this)"></td>
+    <td>
+      <button class="editar" onclick="editarFila(this)">✏️</button>
+      <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
+    </td>`;
+  tbody.appendChild(tr);
+}
+
+function calcularPromedio(){
+  const notas=[...tbody.querySelectorAll("td:nth-child(2)")]
+    .map(td=>parseInt(td.textContent))
+    .filter(n=>!isNaN(n));
+
+  if (!notas.length){ 
+    promedioGrupo.textContent="-"; 
+    return;
+  }
+
+  const p = (notas.reduce((a,b)=>a+b,0)/notas.length).toFixed(1);
+  promedioGrupo.textContent = p;
+}
+
+function nuevaMateria(){
+  if (!confirm("¿Limpiar la tabla para nueva materia?")) return;
+  tbody.innerHTML = "";
+  promedioGrupo.textContent = "-";
+  document.getElementById("materia").selectedIndex = 0;
+  document.getElementById("docente").value = "";
+  mensajeExito.style.display = "none";
+}
+
+/* —————————— GUARDAR —————————— */
+async function guardar(){
+
+  const trimestre = document.getElementById("trimestre").value;
+  const grupo = document.getElementById("grupo").value;
+  const materia = document.getElementById("materia").value;
+  const docente = document.getElementById("docente").value.trim();
+
+  if (!trimestre || !grupo || !materia || !docente){
+    alert("Complete todos los campos.");
+    return;
+  }
+
+  const filas=[...tbody.querySelectorAll("tr")];
+
+  const datos = filas.map(tr => ({
+    alumno: tr.cells[0].textContent.trim(),
+    alumnoId: tr.dataset.alumnoId || null,
+    calificacion: parseInt(tr.cells[1].textContent.trim()) || null
+  }));
+
+  for (const d of datos){
+    if (!d.alumno || !d.calificacion){
+      alert("Faltan datos.");
+      return;
+    }
+  }
+
+  const path = `calificaciones_reales/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
+
+  await set(ref(db,path),{
+    docente,
+    datos,
+    promedio: promedioGrupo.textContent,
+    fecha: new Date().toISOString()
+  });
+
+  mensajeExito.style.display="block";
+  mensajeExito.textContent="✔ Calificaciones reales guardadas correctamente";
+  setTimeout(()=> mensajeExito.style.display="none", 3500);
+}
+
+function encode(s){
+  return String(s).replace(/[.$/]/g,"_");
+}
+
 </script>
 
 </body>
