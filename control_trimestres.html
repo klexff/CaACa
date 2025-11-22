@@ -51,6 +51,13 @@
       font-family:inherit;
     }
 
+    .botonera {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
     .btn{
       padding:10px 16px;
       border-radius:8px;
@@ -58,8 +65,10 @@
       color:#fff;
       cursor:pointer;
       font-weight:600;
-      margin-right:6px;
       transition:.15s ease;
+      flex:1;
+      min-width:170px;
+      text-align:center;
     }
 
     .btn:hover{
@@ -69,6 +78,7 @@
 
     .guardar{ background:#2f8c4a; }
     .historial{ background:#25619c; }
+    .casa{ background:#1b6d4a; }
     .salir{ background:#c0392b; }
 
     .mensaje{
@@ -83,7 +93,6 @@
       font-weight:600;
     }
 
-    /* Panel de información */
     .panel-estado{
       margin-top:20px;
       padding:16px;
@@ -93,14 +102,9 @@
       color:#23422f;
     }
 
-    .estado-activo{
-      color:#2f8c4a;
-      font-weight:700;
-    }
-    .estado-inactivo{
-      color:#c0392b;
-      font-weight:700;
-    }
+    .estado-activo{ color:#2f8c4a; font-weight:700; }
+    .estado-inactivo{ color:#c0392b; font-weight:700; }
+
   </style>
 </head>
 
@@ -137,10 +141,11 @@
       </label>
     </div>
 
-    <!-- Botones -->
-    <div class="fila">
+    <!-- 🔥 Botones organizados -->
+    <div class="fila botonera">
       <button class="btn guardar" id="guardarBtn">Guardar</button>
-      <button class="btn historial" id="historialBtn">Historial</button>
+      <button class="btn historial" id="historialBtn">Historial SAECH</button>
+      <button class="btn casa" id="historialCasaBtn">Historial Camino a Casa</button>
       <button class="btn salir" id="salirBtn">Salir</button>
     </div>
 
@@ -179,6 +184,7 @@
 
     const guardarBtn = document.getElementById("guardarBtn");
     const historialBtn = document.getElementById("historialBtn");
+    const historialCasaBtn = document.getElementById("historialCasaBtn");
     const salirBtn = document.getElementById("salirBtn");
 
     const mensaje = document.getElementById("mensaje");
@@ -200,7 +206,7 @@
       `;
     }
 
-    // Cargar
+    // Cargar datos ya guardados
     (async function cargar() {
       try {
         const snap = await get(ref(db, "configuracion/trimestreActivo"));
@@ -242,6 +248,10 @@
 
     historialBtn.addEventListener("click", () => {
       window.location.href = "historial.html";
+    });
+
+    historialCasaBtn.addEventListener("click", () => {
+      window.location.href = "historial_casa.html";
     });
 
     salirBtn.addEventListener("click", () => {
