@@ -78,26 +78,28 @@
   const db = getDatabase(app);
 
   // Materias por grado (en el orden y agrupación que pediste)
-  const materiasPorGrupo = {
-    "1°": [
-      "Español I","Inglés I","Artes I",
-      "Matemáticas I","Biología",
-      "Geografía","Historia I","Formación cívica & ética I",
-      "Gastronomía I","Educación física I"
-    ],
-    "2°": [
-      "Español II","Inglés II","Artes II",
-      "Matemáticas II","Física",
-      "Historia II","Formación cívica & ética II",
-      "Gastronomía II","Educación física II"
-    ],
-    "3°": [
-      "Español III","Inglés III","Artes III",
-      "Matemáticas III","Química",
-      "Historia III","Formación cívica & ética III",
-      "Gastronomía III","Educación física III"
-    ]
-  };
+  // Materias por grado (en el orden y agrupación que pediste)
+const materiasPorGrupo = {
+  "1°": [
+    "Español I","Inglés I","Danza I",
+    "Matemáticas I","Biología",
+    "Geografía","Historia I","Formación cívica & ética I",
+    "Gastronomía I","Educación física I","Habilidades Digitales I"
+  ],
+  "2°": [
+    "Español II","Inglés II","Danza II",
+    "Matemáticas II","Física",
+    "Historia II","Formación cívica & ética II",
+    "Gastronomía II","Educación física II","Habilidades Digitales II"
+  ],
+  "3°": [
+    "Español III","Inglés III","Danza III",
+    "Matemáticas III","Química",
+    "Historia III","Formación cívica & ética III",
+    "Gastronomía III","Educación física III","Habilidades Digitales III"
+  ]
+};
+
 
   // elementos DOM
   const selTri = document.getElementById("selectTrimestre");
