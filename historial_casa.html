@@ -283,6 +283,9 @@ function leerAsistencias(al){
 /* ===========================================================
    GENERAR PDF (LOGO GRANDE + PALETA PROFESIONAL + AJUSTES)
    =========================================================== */
+/* ===========================================================
+   GENERAR PDF – OPCIÓN B (PALETA VERDE + COLUMNA DE PROMEDIOS)
+   =========================================================== */
 window.generar = async (encoded, grupo, trimestreSel) => {
 
   const alumno = decodeURIComponent(encoded);
@@ -304,7 +307,7 @@ window.generar = async (encoded, grupo, trimestreSel) => {
   const pageWidth = doc.internal.pageSize.getWidth();
   const margin = 36;
 
-  /* LOGO DESDE RAÍZ */
+  /* LOGO desde raíz */
   try {
     const resp = await fetch("logo2025.jpg");
     if (resp.ok) {
@@ -312,49 +315,63 @@ window.generar = async (encoded, grupo, trimestreSel) => {
       const reader = new FileReader();
       const dataUrl = await new Promise(r => { reader.onload = e => r(e.target.result); reader.readAsDataURL(blob); });
 
-      /* TAMAÑO NUEVO (profesional, centrado) */
-      doc.addImage(dataUrl, "JPEG", (pageWidth - 210) / 2, 20, 210, 95);
+      doc.addImage(dataUrl, "JPEG", (pageWidth - 240) / 2, 20, 240, 110);
     }
   } catch(e){ console.warn(e); }
 
   /* Encabezado */
   doc.setFont("helvetica","bold");
   doc.setFontSize(14);
-  doc.text("CICLO ESCOLAR", pageWidth - 200, 30);
+  doc.text("CICLO ESCOLAR", pageWidth - 200, 35);
   doc.setFontSize(18);
-  doc.text("2025-2026", pageWidth - 200, 50);
+  doc.text("2025-2026", pageWidth - 200, 55);
 
   /* Datos alumno */
   doc.setFontSize(12);
   doc.setFont("helvetica","normal");
-  doc.text(`NOMBRE DEL ALUMNO (A): ${alumno}`, margin, 120);
-  doc.text(`GRADO: ${grupo}`, margin, 140);
+  doc.text(`NOMBRE DEL ALUMNO (A): ${alumno}`, margin, 150);
+  doc.text(`GRADO: ${grupo}`, margin, 170);
 
-  /* TABLA */
+  /* ===========================
+      TABLA PRINCIPAL
+     =========================== */
+
   const columns = [{ header:"Periodo", dataKey:"p" }];
+
   materias.forEach((m,i)=> columns.push({ header:m, dataKey:`m${i}` }));
+
+  /* Columna nueva → promedio del periodo */
+  columns.push({ header:"Promedio", dataKey:"promPeriodo" });
 
   const filas = [];
   const ordenTri = ["1er Trimestre","2do Trimestre","3er Trimestre"];
 
   ordenTri.forEach((triName, r) => {
     const row = { p: `${r+1}°` };
+    const valoresParaProm = [];
 
     materias.forEach((m,i) => {
       const node = datosTodas[triName][m];
       let val = "-";
+
       if (node && node.datos) {
         const idx = node.datos.findIndex(x => x.alumno === alumno);
         if (idx >= 0) val = node.datos[idx].calificacion ?? "-";
       }
+
+      if (!isNaN(Number(val))) valoresParaProm.push(Number(val));
       row[`m${i}`] = val;
     });
+
+    row.promPeriodo = valoresParaProm.length ? 
+                      (valoresParaProm.reduce((a,b)=>a+b)/valoresParaProm.length).toFixed(1) : "-";
 
     filas.push(row);
   });
 
   /* Promedio final */
   const promRow = { p:"Promedio" };
+  let proms = [];
 
   materias.forEach((m,i)=>{
     const valores = [];
@@ -368,35 +385,58 @@ window.generar = async (encoded, grupo, trimestreSel) => {
       }
     });
 
-    promRow[`m${i}`] = valores.length === 3 ? (valores.reduce((a,b)=>a+b)/3).toFixed(1) : "-";
+    const p = valores.length === 3 ? (valores.reduce((a,b)=>a+b)/3).toFixed(1) : "-";
+    promRow[`m${i}`] = p;
+
+    if (!isNaN(Number(p))) proms.push(Number(p));
   });
+
+  promRow.promPeriodo = proms.length ? (proms.reduce((a,b)=>a+b)/proms.length).toFixed(1) : "-";
 
   filas.push(promRow);
 
+  /* ==========================================
+      TABLA ESTILIZADA – PALETA DEL LOGO
+     ========================================== */
+
   doc.autoTable({
-    startY: 170,
+    startY: 200,
     head:[columns.map(c=>c.header)],
     body: filas.map(r => columns.map(c => r[c.dataKey] ?? "")),
     theme:"grid",
-    headStyles:{ fillColor:[31,78,121], textColor:255 },
-    styles:{ fontSize:10, cellPadding:5 }
+    headStyles:{ 
+      fillColor:[31,78,121],   // azul del header
+      textColor:255,
+      fontStyle:"bold"
+    },
+    styles:{ 
+      fontSize:10,
+      cellPadding:5,
+      lineColor:[47,140,74],   // verde del logo
+      lineWidth:0.5
+    },
+    alternateRowStyles:{
+      fillColor:[235,245,238]  // verde pastel suave
+    }
   });
 
   /* Asistencias */
-  const y = doc.lastAutoTable.finalY + 20;
+  const y = doc.lastAutoTable.finalY + 25;
 
   doc.text(`Inasistencias: I1=${asist.i1}  I2=${asist.i2}  I3=${asist.i3}`, margin, y);
-  doc.text(`Asistencias: A1=${asist.a1}  A2=${asist.a2}  A3=${asist.a3}`, margin, y + 18);
+  doc.text(`Asistencias:   A1=${asist.a1}  A2=${asist.a2}  A3=${asist.a3}`, margin, y + 18);
 
-  /* Firmas */
+  /* Firmas con sombreado */
   const fy = y + 60;
-  doc.rect(margin, fy, 220, 60);
+
+  doc.setFillColor(235,245,238);
+  doc.rect(margin, fy, 220, 60, "F");
   doc.text("Firma Tutor (1er Trimestre)", margin + 6, fy + 18);
 
-  doc.rect(margin + 240, fy, 220, 60);
+  doc.rect(margin + 240, fy, 220, 60, "F");
   doc.text("Firma (2do Trimestre)", margin + 246, fy + 18);
 
-  doc.rect(margin + 480, fy, 220, 60);
+  doc.rect(margin + 480, fy, 220, 60, "F");
   doc.text("Firma (3er Trimestre)", margin + 486, fy + 18);
 
   /* Guardar */
