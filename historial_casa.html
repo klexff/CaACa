@@ -3,27 +3,138 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Historial Camino a Casa — Boletas</title>
+  <title>Boletas — Centro Educativo Integral Camino a Casa</title>
 
   <style>
-    body{ font-family:"Segoe UI", Arial; background:#eef5f1; margin:0; padding:0; text-align:center; }
-    header{ background:linear-gradient(90deg,#25619c,#2f8c4a); color:#fff; padding:18px; box-shadow:0 3px 8px rgba(0,0,0,0.12);}
-    main{ max-width:1200px; margin:18px auto; text-align:left; padding:12px;}
-    label{ font-weight:700; margin-right:8px; }
-    select,input{ padding:8px; border-radius:6px; border:1px solid #ccc; }
-    .controles{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:12px; }
-    .btn{ background:#25619c; color:#fff; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:700; }
-    .btn-danger{ background:#c0392b; }
-    .btn-green{ background:#1b6d4a; }
-    .grupo-card{ background:#fff; border-radius:8px; padding:12px; box-shadow:0 2px 8px rgba(0,0,0,0.08); margin-bottom:14px;}
-    table{ width:100%; border-collapse:collapse; margin-top:10px; font-size:13px;}
-    th,td{ border:1px solid #ccc; padding:6px; text-align:center; }
-    th{ background:#25619c; color:#fff; font-weight:700; }
-    .alumno-row td:first-child{ text-align:left; font-weight:700; }
-    .attendance{ width:80px; }
-    .small{ font-size:12px; color:#444; margin-top:6px; }
-    .inputs-att { display:flex; gap:6px; justify-content:center; flex-wrap:wrap; margin-top:8px; }
-    .att-field { width:80px; padding:6px; border-radius:6px; border:1px solid #ccc; text-align:center; }
+    body {
+      font-family: "Segoe UI", Arial;
+      background: radial-gradient(circle at top, #faf8f2 0%, #eff6f2 50%, #e2ede7 100%);
+      margin: 0;
+      padding: 0;
+      text-align: center;
+      color: #23422f;
+    }
+
+    header {
+      background: linear-gradient(90deg, #25619c, #2f8c4a);
+      color: #fff;
+      padding: 18px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 20px auto;
+      text-align: left;
+      padding: 12px;
+    }
+
+    /* Tarjeta de Grupo */
+    .grupo-card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 20px;
+      border-top: 6px solid #2f8c4a;
+      box-shadow: 0 10px 22px rgba(0,0,0,0.12);
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      font-size: 14px;
+    }
+
+    th, td {
+      border: 1px solid #b5c5bb;
+      padding: 8px;
+      text-align: center;
+    }
+
+    th {
+      background: #25619c;
+      color: white;
+      font-weight: bold;
+    }
+
+    .alumno-row td:first-child {
+      text-align: left;
+      font-weight: 600;
+    }
+
+    .controls {
+      display:flex;
+      gap:12px;
+      flex-wrap:wrap;
+      align-items:center;
+      margin-bottom:16px;
+    }
+
+    select, input[type="text"] {
+      padding:8px;
+      border-radius:8px;
+      border:1px solid #ccc;
+      font-size:14px;
+    }
+
+    .btn {
+      background: #2f8c4a;
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: .25s;
+    }
+    .btn-blue { background: #25619c; }
+    .btn-red { background: #c0392b; }
+    .btn-green { background: #3fa85c; }
+
+    .btn-boleta {
+      background: #4fba6c;
+      color: white;
+      padding: 6px 10px;
+      border-radius: 10px;
+      border: none;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: .18s;
+    }
+
+    .btn-boleta:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+    }
+
+    .att-field {
+      width: 64px;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      text-align: center;
+    }
+
+    .logo {
+      display:block;
+      margin: 6px auto 8px;
+      width: 160px;
+    }
+
+    .small {
+      font-size:12px;
+      color:#444;
+      margin-top:8px;
+    }
+
+    /* ensure last column (botón) not too small */
+    .col-actions { min-width:120px; }
+
+    @media (max-width:900px) {
+      .grupo-card { padding:12px; }
+      table { font-size:12px; }
+    }
   </style>
 </head>
 <body>
@@ -33,11 +144,11 @@
 </header>
 
 <main>
-  <div class="controles">
-    <label>Trimestre:</label>
+  <div class="controls">
+    <label><b>Trimestre:</b></label>
     <select id="selectTrimestre"></select>
 
-    <label>Grupo:</label>
+    <label><b>Grupo:</b></label>
     <select id="selectGrupo">
       <option value="">Seleccione...</option>
       <option value="1°">1°</option>
@@ -45,14 +156,14 @@
       <option value="3°">3°</option>
     </select>
 
-    <button id="btnCargar" class="btn">Cargar Grupo</button>
+    <button id="btnCargar" class="btn btn-blue">Cargar Grupo</button>
     <button id="btnImprimirGrupo" class="btn btn-green">Imprimir Boletas (por grupo)</button>
-    <button id="btnSalir" class="btn btn-danger" onclick="location.href='index.html'">Salir</button>
+    <button class="btn btn-red" onclick="location.href='index.html'">Salir</button>
   </div>
 
   <div id="contenedor"></div>
 
-  <p class="small">Edite únicamente los campos de Inasistencias y Asistencias antes de imprimir; las calificaciones se toman desde <code>historial_casa</code> (Firebase) y los promedios por materia sólo se calculan cuando hay calificaciones en los 3 trimestres.</p>
+  <p class="small">Edite únicamente las columnas de Inasistencias / Asistencias antes de generar la boleta individual o por grupo. Las calificaciones se leen desde <code>historial_casa</code> (Firebase).</p>
 </main>
 
 <!-- jsPDF y autoTable -->
@@ -63,7 +174,6 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
   import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-  // Firebase config (igual al resto de tus archivos)
   const firebaseConfig = {
     apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
     authDomain: "camino-a-casa-87d65.firebaseapp.com",
@@ -77,130 +187,157 @@
   const app = initializeApp(firebaseConfig);
   const db = getDatabase(app);
 
-  // Materias por grado (en el orden y agrupación que pediste)
-  // Materias por grado (en el orden y agrupación que pediste)
-const materiasPorGrupo = {
-  "1°": [
-    "Español I","Inglés I","Danza I",
-    "Matemáticas I","Biología",
-    "Geografía","Historia I","Formación cívica & ética I",
-    "Gastronomía I","Educación física I","Habilidades Digitales I"
-  ],
-  "2°": [
-    "Español II","Inglés II","Danza II",
-    "Matemáticas II","Física",
-    "Historia II","Formación cívica & ética II",
-    "Gastronomía II","Educación física II","Habilidades Digitales II"
-  ],
-  "3°": [
-    "Español III","Inglés III","Danza III",
-    "Matemáticas III","Química",
-    "Historia III","Formación cívica & ética III",
-    "Gastronomía III","Educación física III","Habilidades Digitales III"
-  ]
-};
+  /* ===========================
+     Materias: FORMATO A (Español 1, Matemáticas 1, ...)
+     =========================== */
+  const materiasPorGrupo = {
+    "1°": [
+      "Español 1","Inglés 1","Danza 1",
+      "Matemáticas 1","Biología 1",
+      "Geografía 1","Historia 1","Formación Cívica y Ética 1",
+      "Gastronomía 1","Educación Física 1","Habilidades Digitales 1"
+    ],
+    "2°": [
+      "Español 2","Inglés 2","Danza 2",
+      "Matemáticas 2","Física 2",
+      "Historia 2","Formación Cívica y Ética 2",
+      "Gastronomía 2","Educación Física 2","Habilidades Digitales 2"
+    ],
+    "3°": [
+      "Español 3","Inglés 3","Danza 3",
+      "Matemáticas 3","Química 3",
+      "Historia 3","Formación Cívica y Ética 3",
+      "Gastronomía 3","Educación Física 3","Habilidades Digitales 3"
+    ]
+  };
 
-
-  // elementos DOM
   const selTri = document.getElementById("selectTrimestre");
   const selGrupo = document.getElementById("selectGrupo");
   const contenedor = document.getElementById("contenedor");
   const btnCargar = document.getElementById("btnCargar");
   const btnImprimirGrupo = document.getElementById("btnImprimirGrupo");
 
-  // ciclo escolar fijo
-  const cicloEscolar = "2025-2026";
-
-  // carga trimestres disponibles en historial_casa
+  // Cargar lista de trimestres disponibles en historial_casa
   async function init() {
-    const snap = await get(ref(db, "historial_casa"));
-    selTri.innerHTML = "<option value=''>Seleccione...</option>";
-    if (!snap.exists()) return;
-    const datos = snap.val();
-    Object.keys(datos).forEach(t => {
-      const opt = document.createElement("option");
-      opt.value = t;
-      opt.textContent = t;
-      selTri.appendChild(opt);
-    });
+    try {
+      const snap = await get(ref(db, "historial_casa"));
+      selTri.innerHTML = "<option value=''>Seleccione...</option>";
+      if (!snap.exists()) return;
+      const datos = snap.val();
+      Object.keys(datos).forEach(t => {
+        const opt = document.createElement("option");
+        opt.value = t;
+        opt.textContent = t;
+        selTri.appendChild(opt);
+      });
+    } catch (err) {
+      console.error("Error cargando trimestres:", err);
+    }
   }
 
-  // cargar vista de grupo
+  // Cargar vista de grupo: tabla con alumnos x materias y campos de asistencia y botón individual
   btnCargar.addEventListener("click", async () => {
     const t = selTri.value;
     const g = selGrupo.value;
     contenedor.innerHTML = "";
     if (!t || !g) return alert("Seleccione trimestre y grupo.");
 
-    // obtener todas las materias del grado
+    // materias en el orden oficial
     const materias = materiasPorGrupo[g] || [];
-    // leer datos para ese trimestre y grupo
-    const snap = await get(ref(db, `historial_casa/${t}/${g}`));
-    if (!snap.exists()) {
-      contenedor.innerHTML = "<div class='grupo-card'>No hay datos para este trimestre/grupo.</div>";
-      return;
-    }
-    const datosGrupo = snap.val();
 
-    // construir lista de alumnos tomando la primera materia existente
-    // asumiendo que todas las materias tienen la misma orden de alumnos
-    let alumnos = [];
-    const primerMat = Object.keys(datosGrupo)[0];
-    if (primerMat) {
-      const arr = datosGrupo[primerMat].datos || [];
-      alumnos = arr.map(x => x.alumno);
-    }
+    // leer datos en historial_casa para este trimestre y grupo
+    try {
+      const snap = await get(ref(db, `historial_casa/${t}/${g}`));
+      if (!snap.exists()) {
+        contenedor.innerHTML = "<div class='grupo-card'>No hay datos para este trimestre/grupo.</div>";
+        return;
+      }
+      const datosGrupo = snap.val();
 
-    // crear tarjeta para el grupo
-    const card = document.createElement("div");
-    card.className = "grupo-card";
+      // construir lista de alumnos tomando la primera materia existente (suponemos consistencia)
+      let alumnos = [];
+      const primerMat = Object.keys(datosGrupo)[0];
+      if (primerMat) {
+        const arr = datosGrupo[primerMat].datos || [];
+        alumnos = arr.map(x => x.alumno);
+      }
 
-    // tabla resumen: alumnos por fila y materias por columnas mostrando calificación del trimestre seleccionado
-    let html = `<h3>Grupo ${g} — ${t}</h3>`;
-    html += `<table><thead><tr><th>Alumno</th>`;
-    materias.forEach(m => html += `<th>${m}</th>`);
-    html += `<th>Inasistencias (1°,2°,3°)</th><th>Asistencias (1°,2°,3°)</th></tr></thead><tbody>`;
+      // tarjeta
+      const card = document.createElement("div");
+      card.className = "grupo-card";
 
-    alumnos.forEach((al, idx) => {
-      html += `<tr class="alumno-row"><td style="text-align:left">${al}</td>`;
-      materias.forEach(m => {
-        // en este trimestre tomamos el dato de la materia m si existe
-        const matNode = datosGrupo[m];
-        let cal = "-";
-        if (matNode && matNode.datos && matNode.datos[idx]) cal = matNode.datos[idx].calificacion ?? "-";
-        html += `<td>${cal}</td>`;
+      // construir tabla
+      let html = `<h3>Grupo ${g} — ${t}</h3>`;
+      html += `<table><thead><tr><th>Alumno</th>`;
+      materias.forEach(m => html += `<th>${m}</th>`);
+      html += `<th>Inasistencias (1°,2°,3°)</th><th>Asistencias (1°,2°,3°)</th><th class="col-actions">Boleta</th></tr></thead><tbody>`;
+
+      alumnos.forEach((al, idx) => {
+        html += `<tr class="alumno-row"><td>${al}</td>`;
+        materias.forEach(m => {
+          const matNode = datosGrupo[m];
+          let cal = "-";
+          if (matNode && Array.isArray(matNode.datos) && matNode.datos[idx]) {
+            cal = matNode.datos[idx].calificacion ?? "-";
+          }
+          html += `<td>${cal}</td>`;
+        });
+
+        // inputs de asistencia/inasistencia (editable)
+        const encoded = encodeURIComponent(al);
+        html += `<td>
+          <div style="display:flex;gap:6px;justify-content:center">
+            <input class="att-field" placeholder="I1" data-alumno="${encoded}" data-type="inasis1" value="">
+            <input class="att-field" placeholder="I2" data-alumno="${encoded}" data-type="inasis2" value="">
+            <input class="att-field" placeholder="I3" data-alumno="${encoded}" data-type="inasis3" value="">
+          </div>
+        </td>`;
+
+        html += `<td>
+          <div style="display:flex;gap:6px;justify-content:center">
+            <input class="att-field" placeholder="A1" data-alumno="${encoded}" data-type="asis1" value="">
+            <input class="att-field" placeholder="A2" data-alumno="${encoded}" data-type="asis2" value="">
+            <input class="att-field" placeholder="A3" data-alumno="${encoded}" data-type="asis3" value="">
+          </div>
+        </td>`;
+
+        // Botón individual para generar boleta de este alumno
+        html += `<td><button class="btn-boleta" data-alumno="${encoded}">Generar Boleta</button></td>`;
+
+        html += `</tr>`;
       });
 
-      // agregar campos de asistencia editables: inasis1,inasis2,inasis3 y asis1,asis2,asis3
-      // los guardamos en inputs con data-alumno para luego leerlos
-      html += `<td>
-        <div class="inputs-att">
-          <input class="att-field" placeholder="I1" data-alumno="${encodeURIComponent(al)}" data-type="inasis1" value="">
-          <input class="att-field" placeholder="I2" data-alumno="${encodeURIComponent(al)}" data-type="inasis2" value="">
-          <input class="att-field" placeholder="I3" data-alumno="${encodeURIComponent(al)}" data-type="inasis3" value="">
-        </div>
-      </td>`;
+      html += `</tbody></table>`;
+      card.innerHTML = html;
+      contenedor.appendChild(card);
 
-      html += `<td>
-        <div class="inputs-att">
-          <input class="att-field" placeholder="A1" data-alumno="${encodeURIComponent(al)}" data-type="asis1" value="">
-          <input class="att-field" placeholder="A2" data-alumno="${encodeURIComponent(al)}" data-type="asis2" value="">
-          <input class="att-field" placeholder="A3" data-alumno="${encodeURIComponent(al)}" data-type="asis3" value="">
-        </div>
-      </td>`;
+      // asignar listeners al botón individual (delegación)
+      card.querySelectorAll(".btn-boleta").forEach(b => {
+        b.addEventListener("click", async (ev) => {
+          const alumnoEncoded = ev.currentTarget.getAttribute("data-alumno");
+          const alumno = decodeURIComponent(alumnoEncoded);
+          // leemos asistencias del DOM para este alumno
+          const asis = leerAsistencias(alumno);
+          // leemos datos de los 3 trimestres necesarios
+          const trimestres = ["1er Trimestre","2do Trimestre","3er Trimestre"];
+          const datosTodas = {};
+          for (const tri of trimestres) {
+            const snapTri = await get(ref(db, `historial_casa/${tri}/${g}`));
+            datosTodas[tri] = snapTri.exists() ? snapTri.val() : {};
+          }
+          // generar boleta (espera)
+          await generarBoletaPDF(alumno, g, t, materias, datosTodas, asis);
+          alert("Descarga de boleta iniciada para: " + alumno);
+        });
+      });
 
-      html += `</tr>`;
-    });
-
-    html += `</tbody></table>`;
-    card.innerHTML = html;
-    contenedor.appendChild(card);
-
-    // También añadimos una nota para cada alumno que no tenga calificaciones en este trimestre
-    // (no requerido pero útil)
+    } catch (err) {
+      console.error(err);
+      contenedor.innerHTML = "<div class='grupo-card'>Error al leer datos. Revisa consola.</div>";
+    }
   });
 
-  // utilidad: leer asistencias del DOM para un alumno
+  // leer inputs de asistencias para un alumno
   function leerAsistencias(alumno) {
     const encoded = encodeURIComponent(alumno);
     const fields = ["inasis1","inasis2","inasis3","asis1","asis2","asis3"];
@@ -212,69 +349,60 @@ const materiasPorGrupo = {
     return out;
   }
 
-  // función para construir boleta por alumno y descargarla usando jsPDF + autoTable
+  // Generar boleta PDF individual con jsPDF + autoTable
   async function generarBoletaPDF(alumno, grupo, trimestreSeleccionado, materias, datosTodasTrimestres, asistenciasAlumnos) {
-    // datosTodasTrimestres: objeto { trimestreName: { materiaName: { datos: [...] } } }
-    // asistenciasAlumnos: objeto con campos inasis1..asis3
-
-    // importar jspdf desde la variable global
     const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ unit: 'pt', format: 'letter', orientation: 'landscape' });
 
-    // crear doc landscape letter
-    const doc = new jsPDF({unit:'pt', format:'letter', orientation:'landscape'});
-
-    // ancho imprimible
     const margin = 36;
     const pageWidth = doc.internal.pageSize.getWidth();
-    // agregar logo (intenta cargar la imagen local)
+
+    // LOGO centrado (usa archivo logo2025.jpg en la misma carpeta)
     try {
-      const logoUrl = "/mnt/data/logo2025.jpg"; // ruta local (ajusta si tu servidor la expone distinto)
+      const logoUrl = "logo2025.jpg";
       const resp = await fetch(logoUrl);
       if (resp.ok) {
         const blob = await resp.blob();
         const reader = new FileReader();
         const dataUrl = await new Promise(resolve => { reader.onload = e => resolve(e.target.result); reader.readAsDataURL(blob); });
-        doc.addImage(dataUrl, 'JPEG', margin, 18, 120, 50);
+        // colocar logo centrado en la parte superior
+        const logoWidth = 140;
+        doc.addImage(dataUrl, 'JPEG', (pageWidth - logoWidth) / 2, 18, logoWidth, 50);
       }
-    } catch(e){
-      console.log("No se pudo cargar logo:", e);
+    } catch (e) {
+      console.warn("No se pudo cargar logo:", e);
+      // continuar sin logo
     }
 
-    // encabezado derecho: ciclo y titulo
+    // encabezado derecho: ciclo
     doc.setFontSize(14);
     doc.setFont("helvetica","bold");
     doc.text("CICLO ESCOLAR", pageWidth - 200, 28);
     doc.setFontSize(18);
     doc.text("2025-2026", pageWidth - 200, 48);
 
-    // Nombre alumno y grado
+    // datos alumno / grado
     doc.setFontSize(12);
     doc.setFont("helvetica","normal");
-    doc.text(`NOMBRE DEL ALUMNO (A): ${alumno}`, margin, 90);
-    doc.text(`GRADO: ${grupo}`, margin, 110);
+    doc.text(`NOMBRE DEL ALUMNO (A): ${alumno}`, margin, 100);
+    doc.text(`GRADO: ${grupo}`, margin, 120);
 
-    // Construir la tabla: filas = 1°,2°,3°, Promedio final
-    const rows = [];
-    const rowHeaders = ["1°","2°","3°","Promedio final"];
-
-    // Column headers = materias
+    // preparar columnas para autoTable
     const columns = [{ header: "Períodos de evaluación", dataKey: "bloque" }];
+    materias.forEach((m,i) => columns.push({ header: m, dataKey: `m${i}` }));
 
-    materias.forEach((m,i) => {
-      columns.push({ header: m, dataKey: `m${i}` });
-    });
-
-    // para cada trimestre (1°,2°,3°) buscamos la calificacion del alumno para cada materia
+    // construir filas: 1er, 2do, 3er y Promedio final
+    const rows = [];
+    const rowHeaders = ["1°","2°","3°"];
     const trimestresOrden = ["1er Trimestre","2do Trimestre","3er Trimestre"];
-    // construir rows para 1°,2°,3°
-    for (let r=0;r<3;r++){
+
+    for (let r = 0; r < 3; r++) {
       const fila = { bloque: rowHeaders[r] };
-      materias.forEach((m, mi) => {
+      materias.forEach((m,mi) => {
         const triName = trimestresOrden[r];
         const nodeTri = datosTodasTrimestres[triName];
         let value = "-";
-        if (nodeTri && nodeTri[m] && nodeTri[m].datos) {
-          // buscar alumno
+        if (nodeTri && nodeTri[m] && Array.isArray(nodeTri[m].datos)) {
           const idx = nodeTri[m].datos.findIndex(x => (x.alumno||"").trim() === alumno.trim());
           if (idx >= 0) value = nodeTri[m].datos[idx].calificacion ?? "-";
         }
@@ -283,7 +411,7 @@ const materiasPorGrupo = {
       rows.push(fila);
     }
 
-    // fila de promedios por materia: solo si las tres estan, calculamos promedio
+    // Promedio por materia sólo si hay las 3 calificaciones
     const promRow = { bloque: "Promedio final" };
     let sumaPromFinal = 0;
     let contPromMedible = 0;
@@ -292,7 +420,7 @@ const materiasPorGrupo = {
       const vals = [];
       trimestresOrden.forEach(triName => {
         const nodeTri = datosTodasTrimestres[triName];
-        if (nodeTri && nodeTri[m] && nodeTri[m].datos) {
+        if (nodeTri && nodeTri[m] && Array.isArray(nodeTri[m].datos)) {
           const idx = nodeTri[m].datos.findIndex(x => (x.alumno||"").trim() === alumno.trim());
           if (idx >= 0) {
             const v = Number(nodeTri[m].datos[idx].calificacion);
@@ -310,71 +438,63 @@ const materiasPorGrupo = {
       }
     });
 
-    // agregar promRow al rows
     rows.push(promRow);
 
-    // utilizar autoTable para dibujar la tabla (ajustando tamaño de fuente)
+    // dibujar tabla con autoTable (con líneas de división)
     doc.autoTable({
-      startY: 140,
+      startY: 150,
       head: [ columns.map(c => c.header) ],
-      body: rows.map(r => columns.map((c,i)=> r[c.dataKey] ?? "" )),
-      styles: { fontSize:10, cellPadding:4 },
-      headStyles: { fillColor: [37,97,156] },
-      theme: 'grid',
-      didDrawCell: function (data) {
-        // aquí se podrían hacer decoraciones si hace falta
-      }
+      body: rows.map(r => columns.map((c,i) => r[c.dataKey] ?? "" )),
+      styles: { fontSize:10, cellPadding:6 },
+      headStyles: { fillColor: [37,97,156], textColor: 255 },
+      theme: 'grid'
     });
 
-    // debajo de la tabla, poner asistencias (leídas desde asistenciasAlumnos)
-    let yAfter = doc.lastAutoTable.finalY + 14;
+    // asistencia / inasistencias mostradas debajo de la tabla
+    const yAfter = doc.lastAutoTable.finalY + 14;
     doc.setFontSize(11);
     doc.setFont("helvetica","bold");
     doc.text("Inasistencias / Asistencias", margin, yAfter);
     doc.setFont("helvetica","normal");
 
-    const attText = `Inasistencias: 1°=${asistenciasAlumnos.inasis1 || ""}  2°=${asistenciasAlumnos.inasis2 || ""}  3°=${asistenciasAlumnos.inasis3 || ""}`;
-    const attText2 = `Asistencias: 1°=${asistenciasAlumnos.asis1 || ""}  2°=${asistenciasAlumnos.asis2 || ""}  3°=${asistenciasAlumnos.asis3 || ""}`;
+    const attText = `Inasistencias: 1°=${asistenciasAlumnos.inasis1 || ""}   2°=${asistenciasAlumnos.inasis2 || ""}   3°=${asistenciasAlumnos.inasis3 || ""}`;
+    const attText2 = `Asistencias: 1°=${asistenciasAlumnos.asis1 || ""}   2°=${asistenciasAlumnos.asis2 || ""}   3°=${asistenciasAlumnos.asis3 || ""}`;
 
     doc.text(attText, margin, yAfter + 18);
     doc.text(attText2, margin, yAfter + 34);
 
-    // Promedio final general (si existen promedios medibles)
+    // Promedio final general (si hay promedios medibles)
     let promedioFinalTexto = "-";
-    if (contPromMedible > 0) {
-      promedioFinalTexto = (sumaPromFinal / contPromMedible).toFixed(1);
-    }
+    if (contPromMedible > 0) promedioFinalTexto = (sumaPromFinal / contPromMedible).toFixed(1);
     doc.setFont("helvetica","bold");
-    doc.text(`Promedio final de grado: ${promedioFinalTexto}`, pageWidth - 240, yAfter + 34);
+    doc.text(`Promedio final de grado: ${promedioFinalTexto}`, pageWidth - 280, yAfter + 34);
 
-    // Firmas (cuadros)
+    // Firmas al final (cuadros)
     const yFirma = yAfter + 70;
     doc.setDrawColor(0);
     doc.rect(margin, yFirma, 220, 60); // firma padre
-    doc.text("Firma madre/padre/tutor (1er Trimestre)", margin + 6, yFirma + 14);
+    doc.text("Firma madre/padre/tutor (1er Trimestre)", margin + 6, yFirma + 16);
     doc.rect(margin + 240, yFirma, 220, 60); // 2do
-    doc.text("Firma (2do Trimestre)", margin + 246, yFirma + 14);
+    doc.text("Firma (2do Trimestre)", margin + 246, yFirma + 16);
     doc.rect(margin + 480, yFirma, 220, 60); // 3er
-    doc.text("Firma (3er Trimestre)", margin + 486, yFirma + 14);
+    doc.text("Firma (3er Trimestre)", margin + 486, yFirma + 16);
 
-    // Guardar el PDF con nombre: boleta_{grupo}_{alumno}.pdf (limpio)
+    // Nombre safe para archivo
     const safeName = alumno.replace(/[^a-z0-9]/gi,'_');
     doc.save(`Boleta_${grupo}_${safeName}.pdf`);
   }
 
-  // al presionar imprimir por grupo: generamos boleta por cada alumno en la tabla
+  // imprimir todo el grupo: genera boleta por cada alumno en la tabla (iterativo)
   btnImprimirGrupo.addEventListener("click", async () => {
     const t = selTri.value;
     const g = selGrupo.value;
     if (!t || !g) return alert("Seleccione trimestre y grupo.");
 
-    // leemos asistencias que puso el usuario en la tabla
-    const inputs = document.querySelectorAll('.att-field');
-    // buscaremos nombres de alumnos cargados en la tabla
+    // verificar que la tabla esté cargada
     const alumnoRows = Array.from(document.querySelectorAll('.alumno-row'));
     if (alumnoRows.length === 0) return alert("Cargue el grupo primero.");
 
-    // para generar la boleta completa por alumno necesitamos los datos de los 3 trimestres
+    // leer datos de 3 trimestres
     const trimestres = ["1er Trimestre","2do Trimestre","3er Trimestre"];
     const datosTodas = {};
     for (const tri of trimestres) {
@@ -382,26 +502,22 @@ const materiasPorGrupo = {
       datosTodas[tri] = snap.exists() ? snap.val() : {};
     }
 
-    // obtener materias en el orden del grado
     const materias = materiasPorGrupo[g] || [];
 
-    // iterar alumnos
+    // generar boleta por cada alumno (esperamos cada pdf para evitar saturar)
     for (const row of alumnoRows) {
       const nombre = row.querySelector('td').textContent.trim();
-      // leer asistencias para ese alumno (desde inputs)
       const asis = leerAsistencias(nombre);
-
-      // generar PDF individual (esperando a que termine cada uno para evitar saturar)
       await generarBoletaPDF(nombre, g, t, materias, datosTodas, asis);
-      // pequeño retraso opcional para evitar bloqueos
-      await new Promise(r => setTimeout(r, 200));
+      await new Promise(r => setTimeout(r, 200)); // pequeño delay
     }
 
-    alert("Se generaron las boletas (se iniciaron las descargas).");
+    alert("Se generaron las boletas (descargas iniciadas).");
   });
 
   // iniciar
   init();
+
 </script>
 
 </body>
