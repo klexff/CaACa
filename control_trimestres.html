@@ -120,6 +120,33 @@
       margin:6px 0 0 0;
       padding-left:20px;
     }
+
+    /* Estilos pequeños para los botones de alumno */
+    .alumno-item{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:4px;
+    }
+    .alumno-texto{
+      flex:1;
+    }
+    .alumno-acciones button{
+      border:none;
+      border-radius:6px;
+      padding:4px 8px;
+      font-size:0.75rem;
+      cursor:pointer;
+      margin-left:4px;
+      color:#fff;
+    }
+    .btn-editar{
+      background:#25619c;
+    }
+    .btn-eliminar{
+      background:#c0392b;
+    }
   </style>
 </head>
 
@@ -132,7 +159,7 @@
 
   <main>
 
-    <!-- 🔹 Configuración de trimestre (igual que antes) -->
+    <!-- 🔹 Configuración de trimestre -->
     <h2>Configuración de trimestre</h2>
 
     <div class="fila">
@@ -171,7 +198,7 @@
 
     <div id="mensaje" class="mensaje">✅ Trimestre guardado correctamente</div>
 
-    <!-- 🔹 Nuevo: Configuración de ciclo escolar -->
+    <!-- 🔹 Ciclo escolar -->
     <hr>
     <h2>Ciclo escolar</h2>
 
@@ -204,7 +231,7 @@
 
     <div id="mensajeCiclo" class="mensaje">✅ Ciclo escolar guardado correctamente</div>
 
-    <!-- 🔹 Nuevo: Alta de alumnos -->
+    <!-- 🔹 Gestión de alumnos -->
     <hr>
     <h2>Gestión de alumnos</h2>
 
@@ -249,7 +276,15 @@
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, get, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import {
+      getDatabase,
+      ref,
+      set,
+      get,
+      push,
+      update,
+      remove
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
@@ -278,7 +313,7 @@
     const mensaje = document.getElementById("mensaje");
     const panelTrimestre = document.getElementById("panelTrimestre");
 
-    // Nuevos elementos ciclo escolar
+    // Ciclo escolar
     const cicloNombre = document.getElementById("cicloNombre");
     const cicloInicio = document.getElementById("cicloInicio");
     const cicloFin = document.getElementById("cicloFin");
@@ -287,7 +322,7 @@
     const panelCiclo = document.getElementById("panelCiclo");
     const mensajeCiclo = document.getElementById("mensajeCiclo");
 
-    // Nuevos elementos alumnos
+    // Gestión de alumnos
     const alumnoNombre = document.getElementById("alumnoNombre");
     const alumnoGrupo = document.getElementById("alumnoGrupo");
     const btnGuardarAlumno = document.getElementById("btnGuardarAlumno");
@@ -453,6 +488,60 @@
       }
     });
 
+    // EDITAR alumno
+    async function editarAlumno(id, nombreActual, grupoActual){
+      const nuevoNombre = prompt("Nuevo nombre del alumno:", nombreActual);
+      if (nuevoNombre === null) return; // canceló
+
+      let nuevoGrupo = prompt("Nuevo grado / grupo (1°, 2° o 3°):", grupoActual);
+      if (nuevoGrupo === null) return;
+
+      nuevoNombre.trim();
+      nuevoGrupo = nuevoGrupo.trim();
+
+      const gruposValidos = ["1°","2°","3°"];
+      if (!nuevoNombre){
+        alert("El nombre no puede estar vacío.");
+        return;
+      }
+      if (!gruposValidos.includes(nuevoGrupo)){
+        alert("El grupo debe ser 1°, 2° o 3°.");
+        return;
+      }
+
+      try {
+        await update(ref(db, "alumnos/" + id), {
+          nombre: nuevoNombre,
+          grupo: nuevoGrupo
+        });
+
+        // recargar lista del grupo actualmente filtrado
+        const g = filtroGrupoAlumnos.value;
+        if (g){
+          cargarAlumnosPorGrupo(g);
+        }
+      } catch(err){
+        console.error(err);
+        alert("Error al editar el alumno.");
+      }
+    }
+
+    // ELIMINAR alumno
+    async function eliminarAlumno(id){
+      if (!confirm("¿Seguro que desea eliminar este alumno?")) return;
+
+      try {
+        await remove(ref(db, "alumnos/" + id));
+        const g = filtroGrupoAlumnos.value;
+        if (g){
+          cargarAlumnosPorGrupo(g);
+        }
+      } catch(err){
+        console.error(err);
+        alert("Error al eliminar el alumno.");
+      }
+    }
+
     // Cargar lista de alumnos por grupo
     async function cargarAlumnosPorGrupo(grupo){
       listaAlumnos.innerHTML = "";
@@ -473,7 +562,7 @@
         for (const id in all){
           const item = all[id];
           if (item && item.grupo === grupo){
-            lista.push(item.nombre);
+            lista.push({ id, nombre: item.nombre, grupo: item.grupo });
           }
         }
 
@@ -482,11 +571,34 @@
           return;
         }
 
-        lista.sort((a,b)=>a.localeCompare(b));
+        lista.sort((a,b)=>a.nombre.localeCompare(b.nombre,"es"));
 
-        lista.forEach(nombre => {
+        lista.forEach(item => {
           const li = document.createElement("li");
-          li.textContent = nombre;
+          li.className = "alumno-item";
+
+          const span = document.createElement("span");
+          span.className = "alumno-texto";
+          span.textContent = `${item.nombre} (${item.grupo})`;
+
+          const acciones = document.createElement("div");
+          acciones.className = "alumno-acciones";
+
+          const btnE = document.createElement("button");
+          btnE.textContent = "Editar";
+          btnE.className = "btn-editar";
+          btnE.onclick = () => editarAlumno(item.id, item.nombre, item.grupo);
+
+          const btnD = document.createElement("button");
+          btnD.textContent = "Eliminar";
+          btnD.className = "btn-eliminar";
+          btnD.onclick = () => eliminarAlumno(item.id);
+
+          acciones.appendChild(btnE);
+          acciones.appendChild(btnD);
+
+          li.appendChild(span);
+          li.appendChild(acciones);
           listaAlumnos.appendChild(li);
         });
 
