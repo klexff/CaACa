@@ -535,23 +535,23 @@
             halign:"center",
             valign:"middle"
           },
-          // Marcar divisiones de campos formativos (incluida la de Períodos de evaluación)
+          // Marcar divisiones de campos formativos (incluida la de Períodos y la de Promedio del bloque)
           didDrawCell: function(data){
             const docPDF = data.doc;
             if (data.section === 'head' || data.section === 'body') {
               const idx = data.column.index;
-              // líneas más gruesas después de:
-              // 0 (Períodos) -> idx 1
-              // 3 (Lenguaje) -> idx 4
-              // 5 (Saberes)  -> idx 6
-              // 8 (Ética..)  -> idx 9
-              // 10 (Humano..) -> idx 11
               if ([1,4,6,9,11].includes(idx)) {
                 const x = data.cell.x;
                 const y = data.cell.y;
                 const h = data.cell.height;
                 docPDF.setLineWidth(1);
+                // línea a la izquierda de la columna actual
                 docPDF.line(x, y, x, y + h);
+                // para la última columna (Promedio del bloque) también a la derecha
+                if (idx === 11) {
+                  const xRight = x + data.cell.width;
+                  docPDF.line(xRight, y, xRight, y + h);
+                }
                 docPDF.setLineWidth(0.2);
               }
             }
