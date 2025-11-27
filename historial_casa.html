@@ -408,7 +408,7 @@
           });
         }
 
-        // ---------- ENCABEZADO (logo + ciclo escolar más grande) ----------
+        // ---------- ENCABEZADO (logo + ciclo escolar alineados) ----------
         const margin = 40;
         const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -416,28 +416,29 @@
           const img = new Image();
           img.src = "logo2025.jpg";
           await img.decode();
-          // logo más grande
-          doc.addImage(img,"JPEG",margin,22,110,80);
+          // logo un poco más grande y a la misma altura del bloque de ciclo escolar
+          doc.addImage(img,"JPEG",margin,28,110,80);
         } catch(e) { /* sin logo */ }
 
         doc.setFont("helvetica","bold");
         doc.setFontSize(18);
         doc.setTextColor(0,120,0);
-        doc.text("CENTRO EDUCATIVO INTEGRAL", pageWidth/2, 38, {align:"center"});
-        doc.text("CAMINO A CASA", pageWidth/2, 60, {align:"center"});
+        doc.text("CENTRO EDUCATIVO INTEGRAL", pageWidth/2, 44, {align:"center"});
+        doc.text("CAMINO A CASA", pageWidth/2, 66, {align:"center"});
 
-        // Ciclo escolar, un poco más grande
+        // Ciclo escolar alineado verticalmente con el logo
         doc.setFontSize(13);
         doc.setTextColor(0,0,0);
         const cx = pageWidth - margin - 140;
-        doc.text("CICLO ESCOLAR", cx, 36);
+        const cyBase = 48;
+        doc.text("CICLO ESCOLAR", cx, cyBase - 8);
         doc.setFont("helvetica","bold");
-        doc.text(cicloEscolarNombre || "__________", cx, 52);
+        doc.text(cicloEscolarNombre || "__________", cx, cyBase + 8);
 
         doc.setFont("helvetica","normal");
         doc.setFontSize(11);
-        doc.text(`NOMBRE DEL ALUMNO (A): ${alumno}`, margin, 110);
-        doc.text(`GRADO: ${grupo}`, margin, 126);
+        doc.text(`NOMBRE DEL ALUMNO (A): ${alumno}`, margin, 120);
+        doc.text(`GRADO: ${grupo}`, margin, 136);
 
         // ---------- TABLA PRINCIPAL ----------
         const head = [
@@ -534,13 +535,18 @@
             halign:"center",
             valign:"middle"
           },
-          // Marcar divisiones de campos formativos
+          // Marcar divisiones de campos formativos (incluida la de Períodos de evaluación)
           didDrawCell: function(data){
             const docPDF = data.doc;
             if (data.section === 'head' || data.section === 'body') {
               const idx = data.column.index;
-              // bordes más gruesos entre grupos: después de Español/Lenguajes/Artes, luego Mat/ByFQ, luego Geo/Hist/FCE, luego Gas/EF
-              if ([4,6,9,11].includes(idx)) {
+              // líneas más gruesas después de:
+              // 0 (Períodos) -> idx 1
+              // 3 (Lenguaje) -> idx 4
+              // 5 (Saberes)  -> idx 6
+              // 8 (Ética..)  -> idx 9
+              // 10 (Humano..) -> idx 11
+              if ([1,4,6,9,11].includes(idx)) {
                 const x = data.cell.x;
                 const y = data.cell.y;
                 const h = data.cell.height;
