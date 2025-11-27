@@ -360,7 +360,6 @@
               <input class="att-field" data-al="${encoded}" data-t="a3" placeholder="A3">
             </td>
             <td><button class="btn-boleta" onclick="generar('${encoded}','${g}','${t}')">Boleta</button></td>
-          </tr>
           `;
         });
 
@@ -409,7 +408,7 @@
           });
         }
 
-        // encabezado
+        // ---------- ENCABEZADO (logo + ciclo escolar más grande) ----------
         const margin = 40;
         const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -417,27 +416,30 @@
           const img = new Image();
           img.src = "logo2025.jpg";
           await img.decode();
-          doc.addImage(img,"JPEG",margin,20,80,60);
+          // logo más grande
+          doc.addImage(img,"JPEG",margin,22,110,80);
         } catch(e) { /* sin logo */ }
 
         doc.setFont("helvetica","bold");
-        doc.setFontSize(16);
-        doc.setTextColor(0,102,0);
-        doc.text("CENTRO EDUCATIVO INTEGRAL", pageWidth/2, 32, {align:"center"});
-        doc.text("CAMINO A CASA", pageWidth/2, 52, {align:"center"});
+        doc.setFontSize(18);
+        doc.setTextColor(0,120,0);
+        doc.text("CENTRO EDUCATIVO INTEGRAL", pageWidth/2, 38, {align:"center"});
+        doc.text("CAMINO A CASA", pageWidth/2, 60, {align:"center"});
 
-        doc.setFontSize(11);
+        // Ciclo escolar, un poco más grande
+        doc.setFontSize(13);
         doc.setTextColor(0,0,0);
-        doc.text("CICLO ESCOLAR", pageWidth - margin - 120, 32);
+        const cx = pageWidth - margin - 140;
+        doc.text("CICLO ESCOLAR", cx, 36);
         doc.setFont("helvetica","bold");
-        doc.text(cicloEscolarNombre || "__________", pageWidth - margin - 120, 48);
+        doc.text(cicloEscolarNombre || "__________", cx, 52);
 
         doc.setFont("helvetica","normal");
         doc.setFontSize(11);
-        doc.text(`NOMBRE DEL ALUMNO (A): ${alumno}`, margin, 100);
-        doc.text(`GRADO: ${grupo}`, margin, 118);
+        doc.text(`NOMBRE DEL ALUMNO (A): ${alumno}`, margin, 110);
+        doc.text(`GRADO: ${grupo}`, margin, 126);
 
-        // Tabla principal
+        // ---------- TABLA PRINCIPAL ----------
         const head = [
           [
             { content:"Períodos de evaluación", rowSpan:2 },
@@ -470,48 +472,91 @@
           const valoresParaProm = [];
           columnasMaterias.forEach(mat => {
             const v = califs[tri][mat] || "";
-            fila.push(v);
+            fila.push(v || "-");
             const num = parseFloat(v);
             if (!isNaN(num)) valoresParaProm.push(num);
           });
-          const prom = valoresParaProm.length ? (valoresParaProm.reduce((a,b)=>a+b,0)/valoresParaProm.length).toFixed(1) : "";
+          const prom = valoresParaProm.length
+            ? (valoresParaProm.reduce((a,b)=>a+b,0)/valoresParaProm.length).toFixed(1)
+            : "-";
           fila.push(prom);
           body.push(fila);
         });
 
-        // Promedio final
+        // ---------- PROMEDIO FINAL (solo si TODAS las calificaciones existen) ----------
         const filaFinal = [];
         filaFinal.push("Promedio final");
         const promsPorMateria = [];
+        let materiasCompletas = 0;
+
         columnasMaterias.forEach(mat => {
           const vals = [];
+          let completos = true;
           trimestres.forEach(tri => {
-            const num = parseFloat(califs[tri][mat] || "");
+            const v = califs[tri][mat] || "";
+            if (v === "") completos = false;
+            const num = parseFloat(v);
             if (!isNaN(num)) vals.push(num);
           });
-          const prom = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : "";
+
+          let prom = "-";
+          if (completos && vals.length === trimestres.length) {
+            prom = (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1);
+            promsPorMateria.push(parseFloat(prom));
+            materiasCompletas++;
+          }
           filaFinal.push(prom);
-          if (prom) promsPorMateria.push(parseFloat(prom));
         });
-        const promFinalBloque = promsPorMateria.length ? (promsPorMateria.reduce((a,b)=>a+b,0)/promsPorMateria.length).toFixed(1) : "";
+
+        let promFinalBloque = "-";
+        if (materiasCompletas === columnasMaterias.length && promsPorMateria.length) {
+          promFinalBloque = (promsPorMateria.reduce((a,b)=>a+b,0)/promsPorMateria.length).toFixed(1);
+        }
         filaFinal.push(promFinalBloque);
         body.push(filaFinal);
 
-        let startY = 140;
+        let startY = 150;
+        const verdeSuave = [204, 238, 204]; // color más claro único para tópicos
+
         doc.autoTable({
           startY,
           head,
           body,
           theme:"grid",
-          styles:{fontSize:9, halign:"center", cellPadding:3},
-          headStyles:{fillColor:[186, 214, 176]}
+          styles:{
+            fontSize:9,
+            halign:"center",
+            cellPadding:3
+          },
+          headStyles:{
+            fillColor: verdeSuave,
+            textColor: [0,0,0],
+            halign:"center",
+            valign:"middle"
+          },
+          // Marcar divisiones de campos formativos
+          didDrawCell: function(data){
+            const docPDF = data.doc;
+            if (data.section === 'head' || data.section === 'body') {
+              const idx = data.column.index;
+              // bordes más gruesos entre grupos: después de Español/Lenguajes/Artes, luego Mat/ByFQ, luego Geo/Hist/FCE, luego Gas/EF
+              if ([4,6,9,11].includes(idx)) {
+                const x = data.cell.x;
+                const y = data.cell.y;
+                const h = data.cell.height;
+                docPDF.setLineWidth(1);
+                docPDF.line(x, y, x, y + h);
+                docPDF.setLineWidth(0.2);
+              }
+            }
+          }
         });
 
-        let y = doc.lastAutoTable.finalY + 16;
+        let y = doc.lastAutoTable.finalY + 18;
 
         const asist = leerAsistencias(encodedAlumno);
 
-        // Inasistencias / Asistencias
+        // ---------- INASISTENCIAS / ASISTENCIAS ----------
         doc.autoTable({
           startY: y,
           margin: { left: margin },
@@ -522,42 +567,43 @@
           ],
           theme:"grid",
           styles:{fontSize:9, halign:"center", cellPadding:3},
-          headStyles:{fillColor:[186,214,176]}
+          headStyles:{fillColor: verdeSuave, textColor:[0,0,0], halign:"center"}
         });
 
-        y = doc.lastAutoTable.finalY + 10;
+        y = doc.lastAutoTable.finalY + 12;
 
-        // Promedio final de grado
-        const promGrado = promFinalBloque || "";
+        // ---------- PROMEDIO FINAL DE GRADO ----------
+        const promGrado = promFinalBloque !== "-" ? promFinalBloque : "-";
         doc.setFontSize(10);
         doc.setFont("helvetica","bold");
-        doc.setFillColor(186,214,176);
-        doc.rect(margin, y, 160, 24, "F");
+        doc.setFillColor(verdeSuave[0], verdeSuave[1], verdeSuave[2]);
+        doc.rect(margin, y, 180, 26, "F");
         doc.setTextColor(0,0,0);
-        doc.text("Promedio final de grado", margin+6, y+15);
-        doc.rect(margin+160, y, 60, 24);
-        doc.text(promGrado, margin+190, y+15, {align:"center"});
+        doc.text("Promedio final de grado", margin+8, y+17);
+        doc.rect(margin+180, y, 70, 26);
+        doc.text(promGrado, margin+215, y+17, {align:"center"});
 
-        // Cuadro firmas
-        const firmaX = margin + 260;
+        // ---------- CUADRO DE FIRMAS ----------
+        const firmaX = margin + 270;
         const firmaWidth = 360;
         const firmaHeight = 90;
 
-        doc.setFillColor(186,214,176);
-        doc.rect(firmaX, y, firmaWidth, 18, "F");
+        doc.setFillColor(verdeSuave[0], verdeSuave[1], verdeSuave[2]);
+        doc.rect(firmaX, y, firmaWidth, 20, "F");
         doc.setFontSize(10);
-        doc.text("Firma de la madre o padre de familia o tutor o tutora", firmaX+8, y+12);
+        doc.setTextColor(0,0,0);
+        doc.text("Firma de la madre o padre de familia o tutor o tutora", firmaX+8, y+13);
 
         const colWidth = firmaWidth / 3;
-        const fy = y+18;
-        doc.rect(firmaX, fy, colWidth, firmaHeight-18);
-        doc.rect(firmaX+colWidth, fy, colWidth, firmaHeight-18);
-        doc.rect(firmaX+2*colWidth, fy, colWidth, firmaHeight-18);
+        const fy = y+20;
+        doc.rect(firmaX, fy, colWidth, firmaHeight-20);
+        doc.rect(firmaX+colWidth, fy, colWidth, firmaHeight-20);
+        doc.rect(firmaX+2*colWidth, fy, colWidth, firmaHeight-20);
 
         doc.setFont("helvetica","normal");
-        doc.text("1er. Trimestre", firmaX+colWidth/2, fy+14, {align:"center"});
-        doc.text("2do. Trimestre", firmaX+colWidth+colWidth/2, fy+14, {align:"center"});
-        doc.text("3er. Trimestre", firmaX+2*colWidth+colWidth/2, fy+14, {align:"center"});
+        doc.text("1er. Trimestre", firmaX+colWidth/2, fy+16, {align:"center"});
+        doc.text("2do. Trimestre", firmaX+colWidth+colWidth/2, fy+16, {align:"center"});
+        doc.text("3er. Trimestre", firmaX+2*colWidth+colWidth/2, fy+16, {align:"center"});
       }
 
       // Boleta individual
