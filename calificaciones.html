@@ -115,7 +115,6 @@
 
     label { font-weight:700; margin-right:8px; }
 
-    /* 📌 Mantengo la distribución solicitada antes (botones distribuidos) */
     .controles {
       display:flex;
       flex-wrap:wrap;
@@ -147,7 +146,6 @@
     Cargando información de trimestres...
   </div>
 
-  <!-- Controles superiores -->
   <div class="controles">
 
     <div>
@@ -174,8 +172,6 @@
       <label>Docente:</label>
       <input id="docente" placeholder="Nombre del docente" />
     </div>
-
-    <!-- BOTÓN AGREGAR ALUMNO REMOVIDO -->
 
     <button id="btnGuardar" class="guardar">Guardar</button>
 
@@ -223,35 +219,32 @@
     "3°": ["Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III","Vida Saludable 3","Historia III","Educación Física 3","Gastronomía 3","Habilidades Digitales 3","Química 3"]
   };
 
-  // Alumnos por grupo (orden alfabético)
-const alumnosPorGrupo = {
-  "1°": [
-    "Cesar D. Hernandez",
-    "A. Santiago Sanchez",
-    "Isabella Barragan",
-    "V. Victoria Rios",
-    "Samuel Tassias"
-  ],
-
-  "2°": [
-    "Mateo A. Vazquez",
-    "Mario N. Gordillo",
-    "Julieta Salinas",
-    "Alisson Valencia"
-  ],
-
-  "3°": [
-    "Hector Penagos",
-    "David A. Gil",
-    "Damian Alcazar",
-    "Ruben Solis",
-    "Paulina Ruiz",
-    "Grecia Morales",
-    "Hiram Rodas",
-    "Jesus Borbollan"
-  ]
-};
-
+  // Alumnos por grupo (respaldo si no hay en BD)
+  const alumnosPorGrupo = {
+    "1°": [
+      "Cesar D. Hernandez",
+      "A. Santiago Sanchez",
+      "Isabella Barragan",
+      "V. Victoria Rios",
+      "Samuel Tassias"
+    ],
+    "2°": [
+      "Mateo A. Vazquez",
+      "Mario N. Gordillo",
+      "Julieta Salinas",
+      "Alisson Valencia"
+    ],
+    "3°": [
+      "Hector Penagos",
+      "David A. Gil",
+      "Damian Alcazar",
+      "Ruben Solis",
+      "Paulina Ruiz",
+      "Grecia Morales",
+      "Hiram Rodas",
+      "Jesus Borbollan"
+    ]
+  };
 
   const cuerpoTabla = document.querySelector("#tablaCalificaciones tbody");
   const promedioGrupo = document.getElementById("promedioGrupo");
@@ -260,11 +253,9 @@ const alumnosPorGrupo = {
   document.addEventListener("DOMContentLoaded", async () => {
     await cargarTrimestre();
     document.getElementById("grupo").addEventListener("change", actualizarGrupo);
-    // removida la referencia al botón btnAgregar para evitar errores
     document.getElementById("btnGuardar").addEventListener("click", guardar);
     document.getElementById("btnNuevoMateria").addEventListener("click", nuevaMateria);
 
-    // ✅ EVENTO DEL BOTÓN SALIR
     document.getElementById("btnSalir").addEventListener("click", () => {
       window.location.href = "index.html";
     });
@@ -309,27 +300,67 @@ const alumnosPorGrupo = {
     });
   }
 
-  function cargarAlumnos(grupo) {
+  // 🔹 Ahora los alumnos se cargan desde la BD "alumnos"
+  async function cargarAlumnos(grupo) {
     cuerpoTabla.innerHTML="";
     promedioGrupo.textContent="-";
 
     if (!grupo) return;
 
-    alumnosPorGrupo[grupo].forEach(a=>{
-      const tr=document.createElement("tr");
-      tr.innerHTML=`
-        <td contenteditable="true">${a}</td>
-        <td contenteditable="true" onblur="validarCalificacion(this)"></td>
-        <td>
-          <button class="editar" onclick="editarFila(this)">✏️</button>
-          <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
-        </td>
-      `;
-      cuerpoTabla.appendChild(tr);
-    });
+    try {
+      const snap = await get(ref(db, "alumnos"));
+      const lista = [];
+
+      if (snap.exists()) {
+        const all = snap.val();
+
+        for (const id in all) {
+          const item = all[id];
+          if (item?.grupo === grupo) {
+            lista.push({ id, nombre: item.nombre });
+          }
+        }
+      }
+
+      if (lista.length > 0) {
+        lista.sort((a,b)=>a.nombre.localeCompare(b.nombre));
+
+        lista.forEach(a => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td contenteditable="true">${a.nombre}</td>
+            <td contenteditable="true" onblur="validarCalificacion(this)"></td>
+            <td>
+              <button class="editar" onclick="editarFila(this)">✏️</button>
+              <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
+            </td>
+          `;
+          cuerpoTabla.appendChild(tr);
+        });
+        return;
+      }
+
+      // Respaldo: si no hay alumnos en BD, usa la lista fija
+      if (alumnosPorGrupo[grupo]) {
+        alumnosPorGrupo[grupo].forEach(a=>{
+          const tr=document.createElement("tr");
+          tr.innerHTML=`
+            <td contenteditable="true">${a}</td>
+            <td contenteditable="true" onblur="validarCalificacion(this)"></td>
+            <td>
+              <button class="editar" onclick="editarFila(this)">✏️</button>
+              <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
+            </td>
+          `;
+          cuerpoTabla.appendChild(tr);
+        });
+      }
+
+    } catch (err) {
+      console.error("Error leyendo alumnos:", err);
+    }
   }
 
-  // FUNCIÓN NUEVA MATERIA
   function nuevaMateria() {
     if (!confirm("¿Deseas iniciar captura para una nueva materia?")) return;
     cuerpoTabla.innerHTML = "";
@@ -356,18 +387,6 @@ const alumnosPorGrupo = {
 
   window.editarFila = b => b.closest("tr").querySelector("td").focus();
   window.eliminarFila = b => { b.closest("tr").remove(); calcularPromedio(); };
-
-  function agregarFila(){
-    const tr=document.createElement("tr");
-    tr.innerHTML=`
-      <td contenteditable="true"></td>
-      <td contenteditable="true" onblur="validarCalificacion(this)"></td>
-      <td>
-        <button class="editar" onclick="editarFila(this)">✏️</button>
-        <button class="eliminar" onclick="eliminarFila(this)">🗑️</button>
-      </td>`;
-    cuerpoTabla.appendChild(tr);
-  }
 
   function calcularPromedio(){
     const notas=[...document.querySelectorAll("#tablaCalificaciones tbody td:nth-child(2)")]
@@ -404,7 +423,8 @@ const alumnosPorGrupo = {
       }
     }
 
-    const path=`calificaciones/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
+    // 🔹 Ruta separada para evitar conflictos con calificaciones_reales
+    const path=`calificaciones_saech/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
 
     await set(ref(db,path),{
       docente,
@@ -413,7 +433,7 @@ const alumnosPorGrupo = {
     });
 
     mensajeExito.style.display="block";
-    mensajeExito.textContent=`✔ Calificaciones guardadas correctamente`;
+    mensajeExito.textContent=`✔ Calificaciones guardadas correctamente (SAECH)`;
     setTimeout(()=> mensajeExito.style.display="none", 3500);
   }
 

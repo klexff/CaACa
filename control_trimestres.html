@@ -105,6 +105,21 @@
     .estado-activo{ color:#2f8c4a; font-weight:700; }
     .estado-inactivo{ color:#c0392b; font-weight:700; }
 
+    hr{
+      border:none;
+      border-top:1px solid #dde5f0;
+      margin:24px 0;
+    }
+
+    h2{
+      margin-top:0;
+      color:#25619c;
+    }
+
+    ul{
+      margin:6px 0 0 0;
+      padding-left:20px;
+    }
   </style>
 </head>
 
@@ -117,7 +132,9 @@
 
   <main>
 
-    <!-- Selección de trimestre -->
+    <!-- 🔹 Configuración de trimestre (igual que antes) -->
+    <h2>Configuración de trimestre</h2>
+
     <div class="fila">
       <label>Nombre del Trimestre:</label>
       <select id="nombreTrimestre">
@@ -141,28 +158,98 @@
       </label>
     </div>
 
-    <!-- 🔥 Botones organizados -->
     <div class="fila botonera">
-      <button class="btn guardar" id="guardarBtn">Guardar</button>
+      <button class="btn guardar" id="guardarBtn">Guardar trimestre</button>
       <button class="btn historial" id="historialBtn">Historial SAECH</button>
       <button class="btn casa" id="historialCasaBtn">Historial Camino a Casa</button>
       <button class="btn salir" id="salirBtn">Salir</button>
     </div>
 
-    <!-- Panel de resumen -->
     <div id="panelTrimestre" class="panel-estado">
       <strong>Trimestre configurado:</strong> aún no hay información guardada.
     </div>
 
-    <!-- Mensaje -->
-    <div id="mensaje" class="mensaje">✅ Guardado correctamente</div>
+    <div id="mensaje" class="mensaje">✅ Trimestre guardado correctamente</div>
+
+    <!-- 🔹 Nuevo: Configuración de ciclo escolar -->
+    <hr>
+    <h2>Ciclo escolar</h2>
+
+    <div class="fila">
+      <label>Nombre del ciclo:</label>
+      <input type="text" id="cicloNombre" placeholder="Ej: 2024-2025" />
+    </div>
+
+    <div class="fila">
+      <label>Inicio:</label>
+      <input type="date" id="cicloInicio" />
+
+      <label style="margin-left:8px">Fin:</label>
+      <input type="date" id="cicloFin" />
+    </div>
+
+    <div class="fila">
+      <label>
+        <input type="checkbox" id="cicloActivo" /> Ciclo escolar activo
+      </label>
+    </div>
+
+    <div class="fila botonera">
+      <button class="btn guardar" id="guardarCicloBtn">Guardar ciclo escolar</button>
+    </div>
+
+    <div id="panelCiclo" class="panel-estado">
+      <strong>Ciclo escolar:</strong> aún no hay información guardada.
+    </div>
+
+    <div id="mensajeCiclo" class="mensaje">✅ Ciclo escolar guardado correctamente</div>
+
+    <!-- 🔹 Nuevo: Alta de alumnos -->
+    <hr>
+    <h2>Gestión de alumnos</h2>
+
+    <div class="fila">
+      <label>Nombre del alumno:</label>
+      <input type="text" id="alumnoNombre" placeholder="Nombre completo" />
+    </div>
+
+    <div class="fila">
+      <label>Grado / Grupo:</label>
+      <select id="alumnoGrupo">
+        <option value="">Seleccione...</option>
+        <option value="1°">1°</option>
+        <option value="2°">2°</option>
+        <option value="3°">3°</option>
+      </select>
+    </div>
+
+    <div class="fila botonera">
+      <button class="btn guardar" id="btnGuardarAlumno">Guardar alumno</button>
+    </div>
+
+    <div id="mensajeAlumno" class="mensaje">✅ Alumno guardado correctamente</div>
+
+    <div class="fila" style="margin-top:16px;">
+      <label>Ver alumnos del grupo:</label>
+      <select id="filtroGrupoAlumnos">
+        <option value="">Seleccione...</option>
+        <option value="1°">1°</option>
+        <option value="2°">2°</option>
+        <option value="3°">3°</option>
+      </select>
+
+      <div style="margin-top:8px;">
+        <strong>Alumnos registrados:</strong>
+        <ul id="listaAlumnos"></ul>
+      </div>
+    </div>
 
   </main>
 
   <!-- Firebase -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getDatabase, ref, set, get, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
@@ -177,6 +264,7 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // Elementos existentes
     const nombreTrimestre = document.getElementById("nombreTrimestre");
     const fechaInicio = document.getElementById("fechaInicio");
     const fechaFin = document.getElementById("fechaFin");
@@ -189,6 +277,23 @@
 
     const mensaje = document.getElementById("mensaje");
     const panelTrimestre = document.getElementById("panelTrimestre");
+
+    // Nuevos elementos ciclo escolar
+    const cicloNombre = document.getElementById("cicloNombre");
+    const cicloInicio = document.getElementById("cicloInicio");
+    const cicloFin = document.getElementById("cicloFin");
+    const cicloActivo = document.getElementById("cicloActivo");
+    const guardarCicloBtn = document.getElementById("guardarCicloBtn");
+    const panelCiclo = document.getElementById("panelCiclo");
+    const mensajeCiclo = document.getElementById("mensajeCiclo");
+
+    // Nuevos elementos alumnos
+    const alumnoNombre = document.getElementById("alumnoNombre");
+    const alumnoGrupo = document.getElementById("alumnoGrupo");
+    const btnGuardarAlumno = document.getElementById("btnGuardarAlumno");
+    const mensajeAlumno = document.getElementById("mensajeAlumno");
+    const filtroGrupoAlumnos = document.getElementById("filtroGrupoAlumnos");
+    const listaAlumnos = document.getElementById("listaAlumnos");
 
     function actualizarPanel(tri) {
       if (!tri || !tri.nombre) {
@@ -206,8 +311,24 @@
       `;
     }
 
-    // Cargar datos ya guardados
-    (async function cargar() {
+    function actualizarPanelCiclo(ciclo){
+      if (!ciclo || !ciclo.nombre){
+        panelCiclo.innerHTML = "<strong>Ciclo escolar:</strong> aún no hay información guardada.";
+        return;
+      }
+
+      const estadoClass = ciclo.activo ? "estado-activo" : "estado-inactivo";
+      const estadoTexto = ciclo.activo ? "ACTIVO" : "INACTIVO";
+
+      panelCiclo.innerHTML = `
+        <div><strong>Ciclo:</strong> ${ciclo.nombre}</div>
+        <div><strong>Periodo:</strong> ${ciclo.inicio} al ${ciclo.fin}</div>
+        <div class="${estadoClass}"><strong>Estado:</strong> ${estadoTexto}</div>
+      `;
+    }
+
+    // Cargar datos ya guardados de trimestre
+    (async function cargarTrimestreActivo() {
       try {
         const snap = await get(ref(db, "configuracion/trimestreActivo"));
         if (snap.exists()) {
@@ -223,14 +344,31 @@
       }
     })();
 
-    // Guardar
+    // Cargar datos del ciclo escolar
+    (async function cargarCicloEscolarActivo() {
+      try {
+        const snap = await get(ref(db, "configuracion/cicloEscolarActivo"));
+        if (snap.exists()) {
+          const c = snap.val();
+          cicloNombre.value = c.nombre || "";
+          cicloInicio.value = c.inicio || "";
+          cicloFin.value = c.fin || "";
+          cicloActivo.checked = !!c.activo;
+          actualizarPanelCiclo(c);
+        }
+      } catch (e){
+        console.error(e);
+      }
+    })();
+
+    // Guardar trimestre
     guardarBtn.addEventListener("click", async () => {
       const nombre = nombreTrimestre.value;
       const inicio = fechaInicio.value;
       const fin = fechaFin.value;
       const act = activo.checked;
 
-      if (!inicio || !fin) return alert("Complete inicio y fin.");
+      if (!inicio || !fin) return alert("Complete inicio y fin del trimestre.");
       if (new Date(inicio) > new Date(fin)) return alert("La fecha de inicio debe ser anterior a la fecha fin.");
 
       const datos = { nombre, inicio, fin, activo: act };
@@ -242,10 +380,35 @@
         setTimeout(()=> mensaje.style.display="none", 2800);
       } catch(err){
         console.error(err);
-        alert("Error al guardar.");
+        alert("Error al guardar el trimestre.");
       }
     });
 
+    // Guardar ciclo escolar
+    guardarCicloBtn.addEventListener("click", async () => {
+      const nombre = cicloNombre.value.trim();
+      const inicio = cicloInicio.value;
+      const fin = cicloFin.value;
+      const act = cicloActivo.checked;
+
+      if (!nombre) return alert("Capture el nombre del ciclo escolar.");
+      if (!inicio || !fin) return alert("Complete inicio y fin del ciclo escolar.");
+      if (new Date(inicio) > new Date(fin)) return alert("La fecha de inicio debe ser anterior a la fecha fin.");
+
+      const datos = { nombre, inicio, fin, activo: act };
+
+      try {
+        await set(ref(db, "configuracion/cicloEscolarActivo"), datos);
+        actualizarPanelCiclo(datos);
+        mensajeCiclo.style.display = "block";
+        setTimeout(()=> mensajeCiclo.style.display="none", 2800);
+      } catch(err){
+        console.error(err);
+        alert("Error al guardar el ciclo escolar.");
+      }
+    });
+
+    // Historiales y salir
     historialBtn.addEventListener("click", () => {
       window.location.href = "historial.html";
     });
@@ -256,6 +419,86 @@
 
     salirBtn.addEventListener("click", () => {
       window.location.href = "index.html";
+    });
+
+    // Guardar alumno
+    btnGuardarAlumno.addEventListener("click", async () => {
+      const nombre = (alumnoNombre.value || "").trim();
+      const grupo = alumnoGrupo.value;
+
+      if (!nombre || !grupo){
+        alert("Capture nombre del alumno y seleccione el grupo.");
+        return;
+      }
+
+      try {
+        await push(ref(db, "alumnos"), {
+          nombre,
+          grupo
+        });
+
+        alumnoNombre.value = "";
+        alumnoGrupo.value = "";
+
+        mensajeAlumno.style.display = "block";
+        setTimeout(()=> mensajeAlumno.style.display="none", 2800);
+
+        // Si el filtro está en ese grupo, recarga lista
+        if (filtroGrupoAlumnos.value === grupo){
+          cargarAlumnosPorGrupo(grupo);
+        }
+      } catch(err){
+        console.error(err);
+        alert("Error al guardar el alumno.");
+      }
+    });
+
+    // Cargar lista de alumnos por grupo
+    async function cargarAlumnosPorGrupo(grupo){
+      listaAlumnos.innerHTML = "";
+      if (!grupo){
+        return;
+      }
+
+      try {
+        const snap = await get(ref(db, "alumnos"));
+        if (!snap.exists()){
+          listaAlumnos.innerHTML = "<li>No hay alumnos registrados.</li>";
+          return;
+        }
+
+        const all = snap.val();
+        const lista = [];
+
+        for (const id in all){
+          const item = all[id];
+          if (item && item.grupo === grupo){
+            lista.push(item.nombre);
+          }
+        }
+
+        if (lista.length === 0){
+          listaAlumnos.innerHTML = "<li>No hay alumnos para este grupo.</li>";
+          return;
+        }
+
+        lista.sort((a,b)=>a.localeCompare(b));
+
+        lista.forEach(nombre => {
+          const li = document.createElement("li");
+          li.textContent = nombre;
+          listaAlumnos.appendChild(li);
+        });
+
+      } catch(err){
+        console.error(err);
+        listaAlumnos.innerHTML = "<li>Error al cargar alumnos.</li>";
+      }
+    }
+
+    filtroGrupoAlumnos.addEventListener("change", () => {
+      const g = filtroGrupoAlumnos.value;
+      cargarAlumnosPorGrupo(g);
     });
   </script>
 

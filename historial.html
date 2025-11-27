@@ -144,13 +144,14 @@
   <!-- Botones superiores -->
   <div class="top-buttons">
     <button id="btnVolver" class="btn-top btn-volver">⬅ Regresar</button>
-<button id="btnInternas" class="btn imprimir">🖨 Imprimir Calificaciones Internas</button>
 
-<script>
-  document.getElementById("btnInternas").addEventListener("click",()=>{
-    window.location.href = "internas.html";
-  });
-</script>
+
+    <script>
+      document.getElementById("btnInternas").addEventListener("click",()=>{
+        window.location.href = "internas.html";
+      });
+    </script>
+
     <button id="btnSalir" class="btn-top btn-salir">Salir</button>
   </div>
 
@@ -187,10 +188,10 @@
     const contenedor = document.getElementById("contenedorTablas");
     const mensajeConfirmacion = document.getElementById("mensajeConfirmacion");
 
-    // Cargar historial
+    // Cargar historial (AHORA DESDE calificaciones_saech)
     async function cargarHistorial() {
       contenedor.innerHTML = "";
-      const snap = await get(ref(db, "calificaciones"));
+      const snap = await get(ref(db, "calificaciones_saech"));   // 🔹 CAMBIO AQUÍ
       if (!snap.exists()) {
         contenedor.innerHTML = "<p>No hay calificaciones registradas.</p>";
         return;
@@ -296,11 +297,11 @@
       }
     }
 
-    // Eliminar grupo
+    // Eliminar grupo (AHORA desde calificaciones_saech)
     async function eliminarTabla(trimestreKey, grupoKey, contDiv) {
       if (!confirm("¿Eliminar esta tabla completa del historial?")) return;
 
-      await remove(ref(db, `calificaciones/${encodeKey(trimestreKey)}/${encodeKey(grupoKey)}`));
+      await remove(ref(db, `calificaciones_saech/${encodeKey(trimestreKey)}/${encodeKey(grupoKey)}`));  // 🔹 CAMBIO AQUÍ
 
       contDiv.remove();
       mensajeConfirmacion.style.display="block";

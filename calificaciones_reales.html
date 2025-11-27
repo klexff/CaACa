@@ -3,134 +3,31 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Calificaciones — Centro Educativo Integral Camino a Casa</title>
+  <title>Calificaciones Reales — Centro Educativo Integral Camino a Casa</title>
 
   <style>
-    body {
-      font-family:"Segoe UI", Arial;
-      background:#eef5f1;
-      margin:0;
-      padding:20px;
-      text-align:center;
-    }
-
-    header {
-      background:linear-gradient(90deg,#25619c,#2f8c4a);
-      color:#fff;
-      padding:18px;
-      box-shadow:0 3px 8px rgba(0,0,0,0.12);
-    }
-
+    body { font-family:"Segoe UI", Arial; background:#eef5f1; margin:0; padding:20px; text-align:center;}
+    header { background:linear-gradient(90deg,#25619c,#2f8c4a); color:#fff; padding:18px; box-shadow:0 3px 8px rgba(0,0,0,0.12); }
     main { max-width:1100px; margin:16px auto; text-align:left; }
-
-    table {
-      width:100%;
-      border-collapse:collapse;
-      background:#fff;
-      border-radius:10px;
-      overflow:hidden;
-      box-shadow:0 2px 6px rgba(0,0,0,0.08);
-    }
-
-    th,td {
-      border:1px solid #ddd;
-      padding:8px;
-      text-align:center;
-    }
-
-    th {
-      background:#25619c;
-      color:#fff;
-    }
-
-    input, select {
-      padding:6px;
-      border-radius:6px;
-      border:1px solid #ccc;
-    }
-
-    .guardar {
-      background:#25619c;
-      color:#fff;
-      padding:8px 12px;
-      border-radius:8px;
-      border:none;
-      cursor:pointer;
-      font-weight:600;
-      min-width:120px;
-    }
-
-    .salir {
-      background:#c0392b;
-      color:#fff;
-      padding:8px 12px;
-      border-radius:8px;
-      border:none;
-      cursor:pointer;
-      font-weight:600;
-      min-width:120px;
-    }
-
-    .agregar {
-      background:#2f8c4a;
-      color:#fff;
-      padding:8px 12px;
-      border-radius:8px;
-      border:none;
-      cursor:pointer;
-      font-weight:600;
-      min-width:120px;
-    }
-
-    .editar {
-      background:#ffc107;
-      color:#000;
-      border:none;
-      padding:6px 8px;
-      border-radius:6px;
-      cursor:pointer;
-    }
-
-    .eliminar {
-      background:#c0392b;
-      color:#fff;
-      border:none;
-      padding:6px 8px;
-      border-radius:6px;
-      cursor:pointer;
-    }
-
-    .rojo{background:#f8d7da;}
-    .amarillo{background:#fff3cd;}
-    .verde{background:#d4edda;}
-
-    .mensajeExito {
-      background:#d4edda;
-      border:1px solid #c3e6cb;
-      color:#155724;
-      padding:10px;
-      border-radius:8px;
-      margin-top:12px;
-      display:none;
-      text-align:center;
-      font-weight:600;
-    }
-
+    table { width:100%; border-collapse:collapse; background:#fff; border-radius:10px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.08); }
+    th,td { border:1px solid #ddd; padding:8px; text-align:center; }
+    th { background:#25619c; color:#fff; }
+    input, select { padding:6px; border-radius:6px; border:1px solid #ccc; }
+    .guardar { background:#25619c; color:#fff; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:600; min-width:120px; }
+    .salir { background:#c0392b; color:#fff; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:600; min-width:120px; }
+    .agregar { background:#2f8c4a; color:#fff; padding:8px 12px; border-radius:8px; border:none; cursor:pointer; font-weight:600; min-width:120px; }
+    .editar { background:#ffc107; color:#000; border:none; padding:6px 8px; border-radius:6px; cursor:pointer; }
+    .eliminar { background:#c0392b; color:#fff; border:none; padding:6px 8px; border-radius:6px; }
+    .rojo{background:#f8d7da;} .amarillo{background:#fff3cd;} .verde{background:#d4edda;}
+    .mensajeExito { background:#d4edda; border:1px solid #c3e6cb; color:#155724; padding:10px; border-radius:8px; margin-top:12px; display:none; text-align:center; font-weight:600; }
     label { font-weight:700; margin-right:8px; }
-
-    .botonera {
-      display:flex;
-      gap:10px;
-      justify-content:center;
-      flex-wrap:wrap;
-      margin-top:10px;
-    }
+    .botonera { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:10px; }
   </style>
 </head>
 
 <body>
 
-<header><h1>📝 Registro de Calificaciones</h1></header>
+<header><h1>📝 Registro de Calificaciones Reales</h1></header>
 
 <main>
 
@@ -197,39 +94,52 @@
   const db = getDatabase(app);
 
   const materiasPorGrupo = {
-    "1°": ["Matemáticas 1","Español 1","Biología 1","Geografía 1","Danza 1","Educación Física 1","Historia I","Ética I","Inglés 1","Gastronomía 1","Habilidades Digitales 1"],
-    "2°": ["Matemáticas 2","Español 2","Danza 2","Ética II","Física 2","Inglés 2","Educación Física 2","Historia II","Gastronomía 2","Habilidades Digitales 2"],
-    "3°": ["Matemáticas 3","Español 3","Inglés 3","Danza 3","Ética III","Vida Saludable 3","Historia III","Educación Física 3","Gastronomía 3","Habilidades Digitales 3","Química 3"]
+    "1°": [
+      "Español 1","Inglés 1","Danza 1",
+      "Matemáticas 1","Biología 1",
+      "Geografía 1","Historia 1","Formación Cívica y Ética 1",
+      "Gastronomía 1","Educación Física 1","Habilidades Digitales 1"
+    ],
+    "2°": [
+      "Español 2","Inglés 2","Danza 2",
+      "Matemáticas 2","Física 2",
+      "Historia 2","Formación Cívica y Ética 2",
+      "Gastronomía 2","Educación Física 2","Habilidades Digitales 2"
+    ],
+    "3°": [
+      "Español 3","Inglés 3","Danza 3",
+      "Matemáticas 3","Química 3",
+      "Historia 3","Formación Cívica y Ética 3",
+      "Gastronomía 3","Educación Física 3","Habilidades Digitales 3"
+    ]
   };
 
-const alumnosPorGrupo = {
-  "1°": [
-    "Cesar D. Hernandez",
-    "A. Santiago Sanchez",
-    "Isabella Barragan",
-    "V. Victoria Rios",
-    "Samuel Tassias"
-  ],
-
-  "2°": [
-    "Mateo A. Vazquez",
-    "Mario N. Gordillo",
-    "Julieta Salinas",
-    "Alisson Valencia"
-  ],
-
-  "3°": [
-    "Hector Penagos",
-    "David A. Gil",
-    "Damian Alcazar",
-    "Ruben Solis",
-    "Paulina Ruiz",
-    "Grecia Morales",
-    "Hiram Rodas",
-    "Jesus Borbollan"
-  ]
-};
-
+  // Respaldo en caso de que aún no haya alumnos en BD
+  const alumnosPorGrupo = {
+    "1°": [
+      "Cesar D. Hernandez",
+      "A. Santiago Sanchez",
+      "Isabella Barragan",
+      "V. Victoria Rios",
+      "Samuel Tassias"
+    ],
+    "2°": [
+      "Mateo A. Vazquez",
+      "Mario N. Gordillo",
+      "Julieta Salinas",
+      "Alisson Valencia"
+    ],
+    "3°": [
+      "Hector Penagos",
+      "David A. Gil",
+      "Damian Alcazar",
+      "Ruben Solis",
+      "Paulina Ruiz",
+      "Grecia Morales",
+      "Hiram Rodas",
+      "Jesus Borbollan"
+    ]
+  };
 
   const cuerpoTabla = document.querySelector("#tablaCalificaciones tbody");
   const promedioGrupo = document.getElementById("promedioGrupo");
@@ -325,6 +235,7 @@ const alumnosPorGrupo = {
         return;
       }
 
+      // Respaldo si aún no hay alumnos en BD
       alumnosPorGrupo[grupo].forEach(nombre => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
@@ -356,7 +267,6 @@ const alumnosPorGrupo = {
     if (!/^\d+$/.test(v)) { td.textContent=""; return; }
     v = parseInt(v,10);
 
-    // ✔ AHORA ACEPTA CALIFICACIONES DESDE 5
     if (v < 5 || v > 10) { td.textContent=""; return; }
 
     aplicarColor(td,v);
@@ -384,7 +294,7 @@ const alumnosPorGrupo = {
     promedioGrupo.textContent=pr;
   }
 
-async function guardar(){
+  async function guardar(){
     const trimestre=document.getElementById("trimestre").value;
     const grupo=document.getElementById("grupo").value;
     const materia=document.getElementById("materia").value;
@@ -408,8 +318,8 @@ async function guardar(){
       }
     }
 
-    // === Guarda las calificaciones normales ===
-    const path1=`calificaciones/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
+    // 🔹 Base de datos lógica para calificaciones REALES (separada de SAECH)
+    const path1=`calificaciones_reales/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
 
     await set(ref(db,path1),{
       docente,
@@ -417,7 +327,7 @@ async function guardar(){
       savedAt:new Date().toISOString()
     });
 
-    // === Guarda también en HISTORIAL CASA ===
+    // 🔹 También se guarda en HISTORIAL CAMINO A CASA como antes
     const path2=`historial_casa/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
 
     await set(ref(db,path2),{
@@ -427,12 +337,11 @@ async function guardar(){
     });
 
     mensajeExito.style.display="block";
-    mensajeExito.textContent=`✔ Calificaciones guardadas correctamente en ambos registros`;
+    mensajeExito.textContent=`✔ Calificaciones reales guardadas correctamente en ambas rutas`;
     setTimeout(()=> mensajeExito.style.display="none", 3500);
-}
+  }
 
-function encode(s){ return s.replace(/\./g,"_"); }
-
+  function encode(s){ return s.replace(/\./g,"_"); }
 
 </script>
 

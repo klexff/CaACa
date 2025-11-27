@@ -4,7 +4,6 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Boletas — Centro Educativo Integral Camino a Casa</title>
-
   <style>
     body {
       font-family: "Segoe UI", Arial;
@@ -12,455 +11,593 @@
       margin: 0;
       padding: 0;
       text-align: center;
-      color: #23422f;
     }
-
     header {
-      background: linear-gradient(90deg, #1f4e79, #2f8c4a);
-      color: #fff;
-      padding: 18px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.12);
-    }
-
-    /* Ajuste del contenido */
-    main {
-      max-width: 1280px;
-      margin: 20px auto;
-      text-align: left;
-      padding: 16px;
-      box-sizing: border-box;
-    }
-
-    /* Tarjeta */
-    .grupo-card {
-      background: #ffffff;
-      border-radius: 18px;
-      padding: 20px;
-      border-top: 6px solid #2f8c4a;
-      box-shadow: 0 10px 22px rgba(0,0,0,0.12);
-      margin-bottom: 24px;
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      min-width: 1100px;
-      border-collapse: collapse;
-      margin-top: 14px;
-      font-size: 14px;
-    }
-
-    th, td {
-      border: 1px solid #b5c5bb;
-      padding: 8px;
-      text-align: center;
-    }
-
-    th {
       background: #1f4e79;
-      color: white;
-      font-weight: bold;
+      color: #fff;
+      padding: 16px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.15);
     }
-
-    .alumno-row td:first-child {
-      text-align: left;
-      font-weight: 600;
+    header img {
+      width: 70px;
+      display: block;
+      margin: 0 auto 4px;
     }
-
-    .controls {
-      display:flex;
-      gap:12px;
-      flex-wrap:wrap;
-      margin-bottom:16px;
-      align-items:center;
+    header h1 {
+      margin: 4px 0 0;
+      font-size: 1.4rem;
     }
-
-    select, input[type="text"] {
-      padding:8px;
-      border-radius:8px;
-      border:1px solid #ccc;
-      font-size:14px;
-    }
-
-    .btn {
-      background: #2f8c4a;
-      color:white;
-      padding:10px 16px;
-      border:none;
+    main {
+      max-width: 1100px;
+      margin: 18px auto 40px;
+      background:#ffffffb8;
+      padding:16px 18px 24px;
       border-radius:12px;
-      cursor:pointer;
+      box-shadow:0 4px 12px rgba(0,0,0,0.10);
+      text-align:left;
+    }
+    .filtros {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      align-items:center;
+      justify-content:flex-start;
+      margin-bottom:14px;
+    }
+    label {
       font-weight:600;
-      transition:.25s;
+      color:#23422f;
     }
-
-    .btn-blue { background:#1f4e79; }
-    .btn-green { background:#3fa85c; }
-    .btn-red { background:#c0392b; }
-
-    .btn-boleta {
-      background:#4fba6c;
-      color:white;
-      padding:6px 10px;
-      border-radius:10px;
-      border:none;
-      cursor:pointer;
-      font-size:0.85rem;
-    }
-
-    .att-field {
-      width:60px;
-      padding:6px;
-      text-align:center;
+    select {
+      padding:6px 8px;
       border-radius:6px;
       border:1px solid #ccc;
+      font-family:inherit;
+      min-width:140px;
     }
-
-    .small {
-      font-size:12px;
-      margin-top:12px;
-      color:#333;
+    .btn {
+      border:none;
+      border-radius:8px;
+      padding:8px 12px;
+      cursor:pointer;
+      font-weight:600;
+      color:#fff;
+      transition:.15s ease;
+    }
+    .btn-blue { background:#1f4e79; }
+    .btn-green{ background:#2f8c4a; }
+    .btn-red  { background:#c0392b; }
+    .btn:hover{
+      transform:translateY(-1px);
+      box-shadow:0 3px 8px rgba(0,0,0,0.18);
+    }
+    #contenedor {
+      margin-top:14px;
+    }
+    .grupo-card {
+      background:#fff;
+      border-radius:10px;
+      padding:12px;
+      box-shadow:0 3px 10px rgba(0,0,0,0.08);
+      border-top:4px solid #1f4e79;
+    }
+    .grupo-card h3 {
+      margin:0 0 8px;
+      color:#1f4e79;
+    }
+    table.tabla {
+      width:100%;
+      border-collapse:collapse;
+      margin-top:6px;
+      background:#fff;
+    }
+    table.tabla th,
+    table.tabla td{
+      border:1px solid #ddd;
+      padding:6px;
+      text-align:center;
+      font-size:0.85rem;
+    }
+    table.tabla th{
+      background:#1f4e79;
+      color:#fff;
+    }
+    .alumno-row td:first-child{
+      text-align:left;
+      font-weight:600;
+    }
+    .att-field{
+      width:30px;
+      padding:2px 3px;
+      margin:0 1px;
+      font-size:0.75rem;
+      text-align:center;
+      border-radius:4px;
+      border:1px solid #ccc;
+    }
+    .btn-boleta{
+      background:#2f8c4a;
+      color:#fff;
+      border:none;
+      border-radius:6px;
+      padding:6px 10px;
+      cursor:pointer;
+      font-size:0.8rem;
+      font-weight:600;
+    }
+    .btn-boleta:hover{
+      box-shadow:0 2px 6px rgba(0,0,0,0.18);
+    }
+    .small{
+      font-size:0.78rem;
+      color:#555;
+      margin-top:8px;
     }
   </style>
 </head>
+
 <body>
+  <header>
+    <img src="logo2025.jpg" alt="Logo">
+    <h1>Boletas — Centro Educativo Integral Camino a Casa</h1>
+  </header>
 
-<header>
-  <h1>📘 Historial Camino a Casa — Generar Boletas</h1>
-</header>
+  <main>
+    <div class="filtros">
+      <label for="selectTrimestre">Trimestre:</label>
+      <select id="selectTrimestre"></select>
 
-<main>
-  <div class="controls">
-    <label><b>Trimestre:</b></label>
-    <select id="selectTrimestre"></select>
+      <label for="selectGrupo">Grupo:</label>
+      <select id="selectGrupo">
+        <option value="">Seleccione...</option>
+        <option value="1°">1°</option>
+        <option value="2°">2°</option>
+        <option value="3°">3°</option>
+      </select>
 
-    <label><b>Grupo:</b></label>
-    <select id="selectGrupo">
-      <option value="">Seleccione...</option>
-      <option value="1°">1°</option>
-      <option value="2°">2°</option>
-      <option value="3°">3°</option>
-    </select>
+      <button id="btnCargar" class="btn btn-blue">Cargar grupo</button>
+      <button id="btnImprimirGrupo" class="btn btn-green">Imprimir boletas</button>
+      <button id="btnSalir" class="btn btn-red">Salir</button>
+    </div>
 
-    <button id="btnCargar" class="btn btn-blue">Cargar Grupo</button>
-    <button id="btnImprimirGrupo" class="btn btn-green">Imprimir Boletas</button>
-    <button onclick="location.href='index.html'" class="btn btn-red">Salir</button>
-  </div>
+    <div id="contenedor"></div>
 
-  <div id="contenedor"></div>
+    <p class="small">Edite las columnas de Inasistencias / Asistencias antes de generar la boleta.</p>
+  </main>
 
-  <p class="small">
-    Edite las columnas de Inasistencias / Asistencias antes de generar la boleta.
-  </p>
-</main>
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <script>
+    // Firebase con imports dinámicos
+    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js").then(({ initializeApp }) => {
+    import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js").then(({ getDatabase, ref, get }) => {
 
-<!-- ===========================
-     🚀 SCRIPT 100% FUNCIONAL
-     =========================== -->
-<script>
-/* Firebase */
-import("https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js").then(({ initializeApp }) => {
-import("https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js").then(({ getDatabase, ref, get }) => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
+        authDomain: "camino-a-casa-87d65.firebaseapp.com",
+        databaseURL: "https://camino-a-casa-87d65-default-rtdb.firebaseio.com",
+        projectId: "camino-a-casa-87d65",
+        storageBucket: "camino-a-casa-87d65.firebasestorage.app",
+        messagingSenderId: "725645453280",
+        appId: "1:725645453280:web:4cc41935020d1ae290ed85"
+      };
 
-const firebaseConfig = {
-  apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
-  authDomain: "camino-a-casa-87d65.firebaseapp.com",
-  databaseURL: "https://camino-a-casa-87d65-default-rtdb.firebaseio.com",
-  projectId: "camino-a-casa-87d65",
-  storageBucket: "camino-a-casa-87d65.firebasestorage.app",
-  messagingSenderId: "725645453280",
-  appId: "1:725645453280:web:4cc41935020d1ae290ed85"
-};
+      const app = initializeApp(firebaseConfig);
+      const db = getDatabase(app);
 
-const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
+      /* Materias tal como en calificaciones_reales.html */
+      const materiasPorGrupo = {
+        "1°": [
+          "Español 1","Inglés 1","Danza 1",
+          "Matemáticas 1","Biología 1",
+          "Geografía 1","Historia 1","Formación Cívica y Ética 1",
+          "Gastronomía 1","Educación Física 1","Habilidades Digitales 1"
+        ],
+        "2°": [
+          "Español 2","Inglés 2","Danza 2",
+          "Matemáticas 2","Física 2",
+          "Historia 2","Formación Cívica y Ética 2",
+          "Gastronomía 2","Educación Física 2","Habilidades Digitales 2"
+        ],
+        "3°": [
+          "Español 3","Inglés 3","Danza 3",
+          "Matemáticas 3","Química 3",
+          "Historia 3","Formación Cívica y Ética 3",
+          "Gastronomía 3","Educación Física 3","Habilidades Digitales 3"
+        ]
+      };
 
-const materiasPorGrupo = {
-  "1°": ["Español 1","Inglés 1","Danza 1","Matemáticas 1","Biología 1","Geografía 1","Historia 1","Formación Cívica y Ética 1","Gastronomía 1","Educación Física 1","Habilidades Digitales 1"],
-  "2°": ["Español 2","Inglés 2","Danza 2","Matemáticas 2","Física 2","Historia 2","Formación Cívica y Ética 2","Gastronomía 2","Educación Física 2","Habilidades Digitales 2"],
-  "3°": ["Español 3","Inglés 3","Danza 3","Matemáticas 3","Química 3","Historia 3","Formación Cívica y Ética 3","Gastronomía 3","Educación Física 3","Habilidades Digitales 3"]
-};
+      /* Columnas de la boleta oficial (como en la imagen) */
+      const columnasBoleta = {
+        "1°": [
+          { campo:"Lenguaje", materia:"Español 1", etiqueta:"Español" },
+          { campo:"Lenguaje", materia:"Lenguajes 1", etiqueta:"Lenguajes" },
+          { campo:"Lenguaje", materia:"Artes 1", etiqueta:"Artes" },
+          { campo:"Saberes y pensamientos científico", materia:"Matemáticas 1", etiqueta:"Matemáticas" },
+          { campo:"Saberes y pensamientos científico", materia:"Biología 1", etiqueta:"Biología" },
+          { campo:"Ética, naturaleza y sociedades", materia:"Geografía 1", etiqueta:"Geografía" },
+          { campo:"Ética, naturaleza y sociedades", materia:"Historia 1", etiqueta:"Historia" },
+          { campo:"Ética, naturaleza y sociedades", materia:"Formación Cívica y Ética 1", etiqueta:"Formación cívica y ética" },
+          { campo:"De lo humano a lo comunitario", materia:"Gastronomía 1", etiqueta:"Gastronomía" },
+          { campo:"De lo humano a lo comunitario", materia:"Educación Física 1", etiqueta:"Educación Física" }
+        ],
+        "2°": [
+          { campo:"Lenguaje", materia:"Español 2", etiqueta:"Español" },
+          { campo:"Lenguaje", materia:"Lenguajes 2", etiqueta:"Lenguajes" },
+          { campo:"Lenguaje", materia:"Artes 2", etiqueta:"Artes" },
+          { campo:"Saberes y pensamientos científico", materia:"Matemáticas 2", etiqueta:"Matemáticas" },
+          { campo:"Saberes y pensamientos científico", materia:"Física 2", etiqueta:"Física" },
+          { campo:"Ética, naturaleza y sociedades", materia:"Geografía 2", etiqueta:"Geografía" },
+          { campo:"Ética, naturaleza y sociedades", materia:"Historia 2", etiqueta:"Historia" },
+          { campo:"Ética, naturaleza y sociedades", materia:"Formación Cívica y Ética 2", etiqueta:"Formación cívica y ética" },
+          { campo:"De lo humano a lo comunitario", materia:"Gastronomía 2", etiqueta:"Gastronomía" },
+          { campo:"De lo humano a lo comunitario", materia:"Educación Física 2", etiqueta:"Educación Física" }
+        ],
+        "3°": [
+          { campo:"Lenguaje", materia:"Español 3", etiqueta:"Español" },
+          { campo:"Lenguaje", materia:"Lenguajes 3", etiqueta:"Lenguajes" },
+          { campo:"Lenguaje", materia:"Artes 3", etiqueta:"Artes" },
+          { campo:"Saberes y pensamientos científico", materia:"Matemáticas 3", etiqueta:"Matemáticas" },
+          { campo:"Saberes y pensamientos científico", materia:"Química 3", etiqueta:"Química" },
+          { campo:"Ética, naturaleza y sociedades", materia:"Geografía 3", etiqueta:"Geografía" },
+          { campo:"Ética, naturaleza y sociedades", materia:"Historia 3", etiqueta:"Historia" },
+          { campo:"Ética, naturaleza y sociedades", materia:"Formación Cívica y Ética 3", etiqueta:"Formación cívica y ética" },
+          { campo:"De lo humano a lo comunitario", materia:"Gastronomía 3", etiqueta:"Gastronomía" },
+          { campo:"De lo humano a lo comunitario", materia:"Educación Física 3", etiqueta:"Educación Física" }
+        ]
+      };
 
-const selTri  = document.getElementById("selectTrimestre");
-const selGrupo = document.getElementById("selectGrupo");
-const contenedor = document.getElementById("contenedor");
+      const selTri  = document.getElementById("selectTrimestre");
+      const selGrupo = document.getElementById("selectGrupo");
+      const contenedor = document.getElementById("contenedor");
+      const btnCargar = document.getElementById("btnCargar");
+      const btnImprimirGrupo = document.getElementById("btnImprimirGrupo");
 
-/* ======================
-   Cargar trimestres
-   ====================== */
-async function init() {
-  const snap = await get(ref(db, "historial_casa"));
-  selTri.innerHTML = "<option value=''>Seleccione...</option>";
-  if (snap.exists()) {
-    Object.keys(snap.val()).forEach(t => {
-      const o = document.createElement("option");
-      o.value = t;
-      o.textContent = t;
-      selTri.appendChild(o);
-    });
-  }
-}
-init();
+      let cicloEscolarNombre = "";
+      let ultimoGrupoAlumnos = [];
+      let ultimoGrupo = "";
+      let ultimoTrimestre = "";
 
-/* ======================
-      CARGAR GRUPO
-   ====================== */
-document.getElementById("btnCargar").onclick = async () => {
-  const t = selTri.value;
-  const g = selGrupo.value;
+      function encodeKey(s){ return s.replace(/\./g,"_"); }
 
-  if (!t || !g) return alert("Seleccione trimestre y grupo.");
-
-  contenedor.innerHTML = "";
-  const snap = await get(ref(db, `historial_casa/${t}/${g}`));
-  if (!snap.exists()) {
-    contenedor.innerHTML = `<div class="grupo-card">No hay datos.</div>`;
-    return;
-  }
-
-  const datosGrupo = snap.val();
-  const materias = materiasPorGrupo[g];
-
-  // tomar lista de alumnos
-  let alumnos = [];
-  const primerMat = Object.keys(datosGrupo)[0];
-  if (primerMat) alumnos = datosGrupo[primerMat].datos.map(x => x.alumno);
-
-  let html = `<div class="grupo-card"><h3>Grupo ${g} — ${t}</h3>`;
-  html += `<table><thead><tr><th>Alumno</th>`;
-
-  materias.forEach(m => html += `<th>${m}</th>`);
-
-  html += `<th>Inasistencias</th><th>Asistencias</th><th>Boleta</th></tr></thead><tbody>`;
-
-  alumnos.forEach((al, i) => {
-    const encoded = encodeURIComponent(al);
-    html += `<tr class="alumno-row"><td>${al}</td>`;
-
-    materias.forEach(m => {
-      const node = datosGrupo[m];
-      const cal = node?.datos?.[i]?.calificacion ?? "-";
-      html += `<td>${cal}</td>`;
-    });
-
-    html += `
-      <td>
-        <input class="att-field" data-al="${encoded}" data-t="i1" placeholder="I1">
-        <input class="att-field" data-al="${encoded}" data-t="i2" placeholder="I2">
-        <input class="att-field" data-al="${encoded}" data-t="i3" placeholder="I3">
-      </td>
-
-      <td>
-        <input class="att-field" data-al="${encoded}" data-t="a1" placeholder="A1">
-        <input class="att-field" data-al="${encoded}" data-t="a2" placeholder="A2">
-        <input class="att-field" data-al="${encoded}" data-t="a3" placeholder="A3">
-      </td>
-
-      <td><button class="btn-boleta" onclick="generar('${encoded}','${g}','${t}')">Boleta</button></td>
-    `;
-  });
-
-  html += "</tbody></table></div>";
-  contenedor.innerHTML = html;
-};
-
-/* ================
-   LEER ASISTENCIAS
-   ================ */
-function leerAsistencias(al){
-  return {
-    i1: document.querySelector(`input[data-al="${al}"][data-t="i1"]`)?.value || "",
-    i2: document.querySelector(`input[data-al="${al}"][data-t="i2"]`)?.value || "",
-    i3: document.querySelector(`input[data-al="${al}"][data-t="i3"]`)?.value || "",
-    a1: document.querySelector(`input[data-al="${al}"][data-t="a1"]`)?.value || "",
-    a2: document.querySelector(`input[data-al="${al}"][data-t="a2"]`)?.value || "",
-    a3: document.querySelector(`input[data-al="${al}"][data-t="a3"]`)?.value || ""
-  };
-}
-
-/* ===========================================================
-   GENERAR PDF (LOGO GRANDE + PALETA PROFESIONAL + AJUSTES)
-   =========================================================== */
-/* ===========================================================
-   GENERAR PDF – OPCIÓN B (PALETA VERDE + COLUMNA DE PROMEDIOS)
-   =========================================================== */
-window.generar = async (encoded, grupo, trimestreSel) => {
-
-  const alumno = decodeURIComponent(encoded);
-  const materias = materiasPorGrupo[grupo];
-  const asist = leerAsistencias(encoded);
-
-  const trimestres = ["1er Trimestre","2do Trimestre","3er Trimestre"];
-  const datosTodas = {};
-
-  for (const t of trimestres) {
-    const snap = await get(ref(db, `historial_casa/${t}/${grupo}`));
-    datosTodas[t] = snap.exists() ? snap.val() : {};
-  }
-
-  /* PDF */
-  const { jsPDF } = window.jspdf;
-  const doc = new jsPDF({ unit:"pt", format:"letter", orientation:"landscape" });
-
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const margin = 36;
-
-  /* LOGO desde raíz */
-  try {
-    const resp = await fetch("logo2025.jpg");
-    if (resp.ok) {
-      const blob = await resp.blob();
-      const reader = new FileReader();
-      const dataUrl = await new Promise(r => { reader.onload = e => r(e.target.result); reader.readAsDataURL(blob); });
-
-      doc.addImage(dataUrl, "JPEG", (pageWidth - 240) / 2, 20, 240, 110);
-    }
-  } catch(e){ console.warn(e); }
-
-  /* Encabezado */
-  doc.setFont("helvetica","bold");
-  doc.setFontSize(14);
-  doc.text("CICLO ESCOLAR", pageWidth - 200, 35);
-  doc.setFontSize(18);
-  doc.text("2025-2026", pageWidth - 200, 55);
-
-  /* Datos alumno */
-  doc.setFontSize(12);
-  doc.setFont("helvetica","normal");
-  doc.text(`NOMBRE DEL ALUMNO (A): ${alumno}`, margin, 150);
-  doc.text(`GRADO: ${grupo}`, margin, 170);
-
-  /* ===========================
-      TABLA PRINCIPAL
-     =========================== */
-
-  const columns = [{ header:"Periodo", dataKey:"p" }];
-
-  materias.forEach((m,i)=> columns.push({ header:m, dataKey:`m${i}` }));
-
-  /* Columna nueva → promedio del periodo */
-  columns.push({ header:"Promedio", dataKey:"promPeriodo" });
-
-  const filas = [];
-  const ordenTri = ["1er Trimestre","2do Trimestre","3er Trimestre"];
-
-  ordenTri.forEach((triName, r) => {
-    const row = { p: `${r+1}°` };
-    const valoresParaProm = [];
-
-    materias.forEach((m,i) => {
-      const node = datosTodas[triName][m];
-      let val = "-";
-
-      if (node && node.datos) {
-        const idx = node.datos.findIndex(x => x.alumno === alumno);
-        if (idx >= 0) val = node.datos[idx].calificacion ?? "-";
-      }
-
-      if (!isNaN(Number(val))) valoresParaProm.push(Number(val));
-      row[`m${i}`] = val;
-    });
-
-    row.promPeriodo = valoresParaProm.length ? 
-                      (valoresParaProm.reduce((a,b)=>a+b)/valoresParaProm.length).toFixed(1) : "-";
-
-    filas.push(row);
-  });
-
-  /* Promedio final */
-  const promRow = { p:"Promedio" };
-  let proms = [];
-
-  materias.forEach((m,i)=>{
-    const valores = [];
-    ordenTri.forEach(tri => {
-      const node = datosTodas[tri][m];
-      if (node?.datos) {
-        const idx = node.datos.findIndex(x => x.alumno === alumno);
-        if (idx >= 0 && node.datos[idx].calificacion != null) {
-          valores.push(Number(node.datos[idx].calificacion));
+      async function cargarCicloEscolar() {
+        const snap = await get(ref(db, "configuracion/cicloEscolarActivo"));
+        if (snap.exists()) {
+          const c = snap.val();
+          cicloEscolarNombre = c.nombre || "";
         }
       }
-    });
 
-    const p = valores.length === 3 ? (valores.reduce((a,b)=>a+b)/3).toFixed(1) : "-";
-    promRow[`m${i}`] = p;
+      async function cargarTrimestres() {
+        const snap = await get(ref(db, "calificaciones_reales"));
+        selTri.innerHTML = "<option value=''>Seleccione...</option>";
+        if (snap.exists()) {
+          Object.keys(snap.val()).forEach(t => {
+            const opt = document.createElement("option");
+            opt.value = t;
+            opt.textContent = t;
+            selTri.appendChild(opt);
+          });
+        }
+      }
 
-    if (!isNaN(Number(p))) proms.push(Number(p));
-  });
+      async function cargarGrupo() {
+        const t = selTri.value;
+        const g = selGrupo.value;
 
-  promRow.promPeriodo = proms.length ? (proms.reduce((a,b)=>a+b)/proms.length).toFixed(1) : "-";
+        if (!t || !g) {
+          alert("Seleccione trimestre y grupo.");
+          return;
+        }
 
-  filas.push(promRow);
+        const rutaGrupo = `calificaciones_reales/${encodeKey(t)}/${encodeKey(g)}`;
+        const snap = await get(ref(db, rutaGrupo));
+        const datosGrupo = snap.exists() ? snap.val() : {};
 
-  /* ==========================================
-      TABLA ESTILIZADA – PALETA DEL LOGO
-     ========================================== */
+        // Leer alumnos desde la base "alumnos"
+        const alumnosSnap = await get(ref(db, "alumnos"));
+        let alumnos = [];
+        if (alumnosSnap.exists()) {
+          const all = alumnosSnap.val();
+          Object.keys(all).forEach(id => {
+            const a = all[id];
+            if (a && a.grupo === g) alumnos.push(a.nombre);
+          });
+        }
 
-  doc.autoTable({
-    startY: 200,
-    head:[columns.map(c=>c.header)],
-    body: filas.map(r => columns.map(c => r[c.dataKey] ?? "")),
-    theme:"grid",
-    headStyles:{ 
-      fillColor:[31,78,121],   // azul del header
-      textColor:255,
-      fontStyle:"bold"
-    },
-    styles:{ 
-      fontSize:10,
-      cellPadding:5,
-      lineColor:[47,140,74],   // verde del logo
-      lineWidth:0.5
-    },
-    alternateRowStyles:{
-      fillColor:[235,245,238]  // verde pastel suave
-    }
-  });
+        // Respaldo en caso de que aún no haya alumnos en la BD
+        if (alumnos.length === 0) {
+          const materiasK = Object.keys(datosGrupo || {});
+          if (materiasK.length > 0) {
+            const primerMat = materiasK[0];
+            const arr = datosGrupo[primerMat]?.datos || [];
+            alumnos = arr.map(x => x.alumno);
+          }
+        }
 
-  /* Asistencias */
-  const y = doc.lastAutoTable.finalY + 25;
+        alumnos.sort((a,b)=> a.localeCompare(b,"es"));
 
-  doc.text(`Inasistencias: I1=${asist.i1}  I2=${asist.i2}  I3=${asist.i3}`, margin, y);
-  doc.text(`Asistencias:   A1=${asist.a1}  A2=${asist.a2}  A3=${asist.a3}`, margin, y + 18);
+        const materias = materiasPorGrupo[g] || [];
+        if (materias.length === 0) {
+          contenedor.innerHTML = "<p>No hay materias configuradas para este grupo.</p>";
+          return;
+        }
 
-  /* Firmas con sombreado */
-  const fy = y + 60;
+        let html = `<div class="grupo-card"><h3>Grupo ${g} — ${t}</h3>`;
+        html += `<table class="tabla"><thead><tr><th>Alumno</th>`;
 
-  doc.setFillColor(235,245,238);
-  doc.rect(margin, fy, 220, 60, "F");
-  doc.text("Firma Tutor (1er Trimestre)", margin + 6, fy + 18);
+        materias.forEach(m => { html += `<th>${m}</th>`; });
 
-  doc.rect(margin + 240, fy, 220, 60, "F");
-  doc.text("Firma (2do Trimestre)", margin + 246, fy + 18);
+        html += `<th>Inasistencias</th><th>Asistencias</th><th>Boleta</th></tr></thead><tbody>`;
 
-  doc.rect(margin + 480, fy, 220, 60, "F");
-  doc.text("Firma (3er Trimestre)", margin + 486, fy + 18);
+        alumnos.forEach(al => {
+          const encoded = encodeURIComponent(al);
+          html += `<tr class="alumno-row"><td>${al}</td>`;
 
-  /* Guardar */
-  doc.save(`Boleta_${grupo}_${alumno.replace(/[^a-z0-9]/gi,"_")}.pdf`);
-};
+          materias.forEach(m => {
+            const nodo = datosGrupo[m];
+            let cal = "-";
+            if (nodo && Array.isArray(nodo.datos)) {
+              const reg = nodo.datos.find(d => d.alumno === al);
+              if (reg && reg.calificacion !== undefined && reg.calificacion !== null) {
+                cal = reg.calificacion;
+              }
+            }
+            html += `<td>${cal}</td>`;
+          });
 
-/* ======================================
-   IMPRIMIR TODO EL GRUPO
-   ====================================== */
-document.getElementById("btnImprimirGrupo").onclick = () => {
-  const alumnos = document.querySelectorAll(".alumno-row");
-  if (!alumnos.length) return alert("Cargue un grupo primero.");
+          html += `
+            <td>
+              <input class="att-field" data-al="${encoded}" data-t="i1" placeholder="I1">
+              <input class="att-field" data-al="${encoded}" data-t="i2" placeholder="I2">
+              <input class="att-field" data-al="${encoded}" data-t="i3" placeholder="I3">
+            </td>
+            <td>
+              <input class="att-field" data-al="${encoded}" data-t="a1" placeholder="A1">
+              <input class="att-field" data-al="${encoded}" data-t="a2" placeholder="A2">
+              <input class="att-field" data-al="${encoded}" data-t="a3" placeholder="A3">
+            </td>
+            <td><button class="btn-boleta" onclick="generar('${encoded}','${g}','${t}')">Boleta</button></td>
+          </tr>
+          `;
+        });
 
-  alumnos.forEach((row, i) => {
-    const nombre = row.children[0].textContent.trim();
-    const encoded = encodeURIComponent(nombre);
-    setTimeout(() => generar(encoded, selGrupo.value, selTri.value), i * 600);
-  });
+        html += "</tbody></table></div>";
+        contenedor.innerHTML = html;
 
-  alert("Boletas del grupo iniciadas.");
-};
+        ultimoGrupoAlumnos = alumnos;
+        ultimoGrupo = g;
+        ultimoTrimestre = t;
+      }
 
-});});
-</script>
+      function leerAsistencias(encoded){
+        return {
+          i1: document.querySelector(`input[data-al='${encoded}'][data-t='i1']`)?.value || "",
+          i2: document.querySelector(`input[data-al='${encoded}'][data-t='i2']`)?.value || "",
+          i3: document.querySelector(`input[data-al='${encoded}'][data-t='i3']`)?.value || "",
+          a1: document.querySelector(`input[data-al='${encoded}'][data-t='a1']`)?.value || "",
+          a2: document.querySelector(`input[data-al='${encoded}'][data-t='a2']`)?.value || "",
+          a3: document.querySelector(`input[data-al='${encoded}'][data-t='a3']`)?.value || ""
+        };
+      }
+
+      // Construye una boleta en un documento jsPDF (no hace save)
+      async function construirBoleta(doc, alumno, grupo, encodedAlumno){
+        const columnas = columnasBoleta[grupo] || [];
+        const trimestres = ["1er Trimestre","2do Trimestre","3er Trimestre"];
+
+        // leer calificaciones de los 3 trimestres desde calificaciones_reales
+        const califs = {};
+        for (const tri of trimestres) {
+          const ruta = `calificaciones_reales/${encodeKey(tri)}/${encodeKey(grupo)}`;
+          const snap = await get(ref(db, ruta));
+          const datos = snap.exists() ? snap.val() : {};
+          califs[tri] = {};
+
+          columnas.forEach(col => {
+            const nodo = datos[col.materia];
+            let valor = "";
+            if (nodo && Array.isArray(nodo.datos)) {
+              const reg = nodo.datos.find(d => d.alumno === alumno);
+              if (reg && reg.calificacion !== undefined && reg.calificacion !== null) {
+                valor = String(reg.calificacion);
+              }
+            }
+            califs[tri][col.materia] = valor;
+          });
+        }
+
+        // encabezado
+        const margin = 40;
+        const pageWidth = doc.internal.pageSize.getWidth();
+
+        try {
+          const img = new Image();
+          img.src = "logo2025.jpg";
+          await img.decode();
+          doc.addImage(img,"JPEG",margin,20,80,60);
+        } catch(e) { /* sin logo */ }
+
+        doc.setFont("helvetica","bold");
+        doc.setFontSize(16);
+        doc.setTextColor(0,102,0);
+        doc.text("CENTRO EDUCATIVO INTEGRAL", pageWidth/2, 32, {align:"center"});
+        doc.text("CAMINO A CASA", pageWidth/2, 52, {align:"center"});
+
+        doc.setFontSize(11);
+        doc.setTextColor(0,0,0);
+        doc.text("CICLO ESCOLAR", pageWidth - margin - 120, 32);
+        doc.setFont("helvetica","bold");
+        doc.text(cicloEscolarNombre || "__________", pageWidth - margin - 120, 48);
+
+        doc.setFont("helvetica","normal");
+        doc.setFontSize(11);
+        doc.text(`NOMBRE DEL ALUMNO (A): ${alumno}`, margin, 100);
+        doc.text(`GRADO: ${grupo}`, margin, 118);
+
+        // Tabla principal
+        const head = [
+          [
+            { content:"Períodos de evaluación", rowSpan:2 },
+            { content:"Lenguaje", colSpan:3 },
+            { content:"Saberes y pensamientos científico", colSpan:2 },
+            { content:"Ética, naturaleza y sociedades", colSpan:3 },
+            { content:"De lo humano a lo comunitario", colSpan:2 },
+            { content:"Promedio del bloque", rowSpan:2 }
+          ],
+          [
+            { content:"Español" },
+            { content:"Lenguajes" },
+            { content:"Artes" },
+            { content:"Matemáticas" },
+            { content:"Biología / Física / Química" },
+            { content:"Geografía" },
+            { content:"Historia" },
+            { content:"Formación cívica y ética" },
+            { content:"Gastronomía" },
+            { content:"Educación Física" }
+          ]
+        ];
+
+        const body = [];
+        const columnasMaterias = columnas.map(c => c.materia);
+
+        trimestres.forEach((tri, idx) => {
+          const fila = [];
+          fila.push(`${idx+1}°`);
+          const valoresParaProm = [];
+          columnasMaterias.forEach(mat => {
+            const v = califs[tri][mat] || "";
+            fila.push(v);
+            const num = parseFloat(v);
+            if (!isNaN(num)) valoresParaProm.push(num);
+          });
+          const prom = valoresParaProm.length ? (valoresParaProm.reduce((a,b)=>a+b,0)/valoresParaProm.length).toFixed(1) : "";
+          fila.push(prom);
+          body.push(fila);
+        });
+
+        // Promedio final
+        const filaFinal = [];
+        filaFinal.push("Promedio final");
+        const promsPorMateria = [];
+        columnasMaterias.forEach(mat => {
+          const vals = [];
+          trimestres.forEach(tri => {
+            const num = parseFloat(califs[tri][mat] || "");
+            if (!isNaN(num)) vals.push(num);
+          });
+          const prom = vals.length ? (vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(1) : "";
+          filaFinal.push(prom);
+          if (prom) promsPorMateria.push(parseFloat(prom));
+        });
+        const promFinalBloque = promsPorMateria.length ? (promsPorMateria.reduce((a,b)=>a+b,0)/promsPorMateria.length).toFixed(1) : "";
+        filaFinal.push(promFinalBloque);
+        body.push(filaFinal);
+
+        let startY = 140;
+        doc.autoTable({
+          startY,
+          head,
+          body,
+          theme:"grid",
+          styles:{fontSize:9, halign:"center", cellPadding:3},
+          headStyles:{fillColor:[186, 214, 176]}
+        });
+
+        let y = doc.lastAutoTable.finalY + 16;
+
+        const asist = leerAsistencias(encodedAlumno);
+
+        // Inasistencias / Asistencias
+        doc.autoTable({
+          startY: y,
+          margin: { left: margin },
+          head: [[ "", "1er. Trimestre","2do. Trimestre","3er. Trimestre"]],
+          body: [
+            ["Inasistencias", asist.i1, asist.i2, asist.i3],
+            ["Asistencias",  asist.a1, asist.a2, asist.a3]
+          ],
+          theme:"grid",
+          styles:{fontSize:9, halign:"center", cellPadding:3},
+          headStyles:{fillColor:[186,214,176]}
+        });
+
+        y = doc.lastAutoTable.finalY + 10;
+
+        // Promedio final de grado
+        const promGrado = promFinalBloque || "";
+        doc.setFontSize(10);
+        doc.setFont("helvetica","bold");
+        doc.setFillColor(186,214,176);
+        doc.rect(margin, y, 160, 24, "F");
+        doc.setTextColor(0,0,0);
+        doc.text("Promedio final de grado", margin+6, y+15);
+        doc.rect(margin+160, y, 60, 24);
+        doc.text(promGrado, margin+190, y+15, {align:"center"});
+
+        // Cuadro firmas
+        const firmaX = margin + 260;
+        const firmaWidth = 360;
+        const firmaHeight = 90;
+
+        doc.setFillColor(186,214,176);
+        doc.rect(firmaX, y, firmaWidth, 18, "F");
+        doc.setFontSize(10);
+        doc.text("Firma de la madre o padre de familia o tutor o tutora", firmaX+8, y+12);
+
+        const colWidth = firmaWidth / 3;
+        const fy = y+18;
+        doc.rect(firmaX, fy, colWidth, firmaHeight-18);
+        doc.rect(firmaX+colWidth, fy, colWidth, firmaHeight-18);
+        doc.rect(firmaX+2*colWidth, fy, colWidth, firmaHeight-18);
+
+        doc.setFont("helvetica","normal");
+        doc.text("1er. Trimestre", firmaX+colWidth/2, fy+14, {align:"center"});
+        doc.text("2do. Trimestre", firmaX+colWidth+colWidth/2, fy+14, {align:"center"});
+        doc.text("3er. Trimestre", firmaX+2*colWidth+colWidth/2, fy+14, {align:"center"});
+      }
+
+      // Boleta individual
+      window.generar = async (encodedAlumno, grupo, trimestreSel) => {
+        const alumno = decodeURIComponent(encodedAlumno);
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({orientation:"landscape", unit:"pt", format:"letter"});
+        await construirBoleta(doc, alumno, grupo, encodedAlumno);
+        doc.save(`Boleta_${grupo}_${alumno.replace(/[^a-z0-9]/gi,"_")}.pdf`);
+      };
+
+      // Boletas de todo el grupo en un solo PDF
+      async function imprimirBoletasGrupo(){
+        if (!ultimoGrupo || !ultimoTrimestre || ultimoGrupoAlumnos.length === 0) {
+          alert("Primero cargue un grupo con el botón 'Cargar grupo'.");
+          return;
+        }
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF({orientation:"landscape", unit:"pt", format:"letter"});
+
+        for (let i=0; i<ultimoGrupoAlumnos.length; i++){
+          const alumno = ultimoGrupoAlumnos[i];
+          const encoded = encodeURIComponent(alumno);
+          if (i>0) doc.addPage();
+          await construirBoleta(doc, alumno, ultimoGrupo, encoded);
+        }
+        doc.save(`Boletas_${ultimoGrupo}_${ultimoTrimestre}.pdf`);
+      }
+
+      btnCargar.addEventListener("click", cargarGrupo);
+      btnImprimirGrupo.addEventListener("click", imprimirBoletasGrupo);
+      document.getElementById("btnSalir").addEventListener("click", ()=> location.href="index.html");
+
+      (async function(){
+        await cargarCicloEscolar();
+        await cargarTrimestres();
+      })();
+
+    });});
+  </script>
 
 </body>
 </html>
