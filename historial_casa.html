@@ -209,12 +209,13 @@
         ]
       };
 
-      /* Columnas de la boleta oficial (como en la imagen) */
+      /* Columnas de la boleta oficial (como en la imagen)
+         CORREGIDO: Inglés y Danza en lugar de Lenguajes y Artes */
       const columnasBoleta = {
         "1°": [
           { campo:"Lenguaje", materia:"Español 1", etiqueta:"Español" },
-          { campo:"Lenguaje", materia:"Lenguajes 1", etiqueta:"Lenguajes" },
-          { campo:"Lenguaje", materia:"Artes 1", etiqueta:"Artes" },
+          { campo:"Lenguaje", materia:"Inglés 1", etiqueta:"Inglés" },
+          { campo:"Lenguaje", materia:"Danza 1", etiqueta:"Danza" },
           { campo:"Saberes y pensamientos científico", materia:"Matemáticas 1", etiqueta:"Matemáticas" },
           { campo:"Saberes y pensamientos científico", materia:"Biología 1", etiqueta:"Biología" },
           { campo:"Ética, naturaleza y sociedades", materia:"Geografía 1", etiqueta:"Geografía" },
@@ -225,8 +226,8 @@
         ],
         "2°": [
           { campo:"Lenguaje", materia:"Español 2", etiqueta:"Español" },
-          { campo:"Lenguaje", materia:"Lenguajes 2", etiqueta:"Lenguajes" },
-          { campo:"Lenguaje", materia:"Artes 2", etiqueta:"Artes" },
+          { campo:"Lenguaje", materia:"Inglés 2", etiqueta:"Inglés" },
+          { campo:"Lenguaje", materia:"Danza 2", etiqueta:"Danza" },
           { campo:"Saberes y pensamientos científico", materia:"Matemáticas 2", etiqueta:"Matemáticas" },
           { campo:"Saberes y pensamientos científico", materia:"Física 2", etiqueta:"Física" },
           { campo:"Ética, naturaleza y sociedades", materia:"Geografía 2", etiqueta:"Geografía" },
@@ -237,8 +238,8 @@
         ],
         "3°": [
           { campo:"Lenguaje", materia:"Español 3", etiqueta:"Español" },
-          { campo:"Lenguaje", materia:"Lenguajes 3", etiqueta:"Lenguajes" },
-          { campo:"Lenguaje", materia:"Artes 3", etiqueta:"Artes" },
+          { campo:"Lenguaje", materia:"Inglés 3", etiqueta:"Inglés" },
+          { campo:"Lenguaje", materia:"Danza 3", etiqueta:"Danza" },
           { campo:"Saberes y pensamientos científico", materia:"Matemáticas 3", etiqueta:"Matemáticas" },
           { campo:"Saberes y pensamientos científico", materia:"Química 3", etiqueta:"Química" },
           { campo:"Ética, naturaleza y sociedades", materia:"Geografía 3", etiqueta:"Geografía" },
@@ -452,8 +453,8 @@
           ],
           [
             { content:"Español" },
-            { content:"Lenguajes" },
-            { content:"Artes" },
+            { content:"Inglés" },   // ← CORREGIDO
+            { content:"Danza" },    // ← CORREGIDO
             { content:"Matemáticas" },
             { content:"Biología / Física / Química" },
             { content:"Geografía" },
@@ -490,7 +491,8 @@
         const promsPorMateria = [];
         let materiasCompletas = 0;
 
-        columnasMaterias.forEach(mat => {
+        const columnasMaterias2 = columnasMaterias; // alias por claridad
+        columnasMaterias2.forEach(mat => {
           const vals = [];
           let completos = true;
           trimestres.forEach(tri => {
