@@ -286,13 +286,19 @@
     cargarAlumnos(grupo);
   }
 
-  function cargarMaterias(grupo) {
+  async function cargarMaterias(grupo, trimestre) {
     const m = document.getElementById("materia");
-    m.innerHTML = "";
+    m.innerHTML = "<option value=''>Seleccione...</option>";
 
-    if (!grupo) return;
+    if (!grupo || !trimestre) {
+      materiasBloqueadasActuales = new Set();
+      return;
+    }
 
-    materiasPorGrupo[grupo]?.forEach(mat => {
+    materiasBloqueadasActuales = await obtenerMateriasBloqueadas(trimestre, grupo);
+
+    (materiasPorGrupo[grupo] || []).forEach(mat => {
+      if (materiasBloqueadasActuales.has(encode(mat))) return;
       const op = document.createElement("option");
       op.value = mat;
       op.textContent = mat;

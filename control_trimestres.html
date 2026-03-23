@@ -271,6 +271,53 @@
       </div>
     </div>
 
+
+    <!-- 🔹 Restituir materias bloqueadas -->
+    <hr>
+    <h2>Restituir materias bloqueadas</h2>
+
+    <div class="fila">
+      <label>Tipo de captura:</label>
+      <select id="restTipo">
+        <option value="">Seleccione...</option>
+        <option value="saech">Calificaciones SAECH</option>
+        <option value="reales">Calificaciones reales</option>
+      </select>
+    </div>
+
+    <div class="fila">
+      <label>Grupo:</label>
+      <select id="restGrupo">
+        <option value="">Seleccione...</option>
+        <option value="1°">1°</option>
+        <option value="2°">2°</option>
+        <option value="3°">3°</option>
+      </select>
+    </div>
+
+    <div class="fila">
+      <label>Trimestre:</label>
+      <select id="restTrimestre">
+        <option value="">Seleccione...</option>
+        <option value="1er Trimestre">1er Trimestre</option>
+        <option value="2do Trimestre">2do Trimestre</option>
+        <option value="3er Trimestre">3er Trimestre</option>
+      </select>
+    </div>
+
+    <div class="fila">
+      <label>Materia bloqueada:</label>
+      <select id="restMateria">
+        <option value="">Seleccione...</option>
+      </select>
+    </div>
+
+    <div class="fila botonera">
+      <button class="btn guardar" id="btnRestituirMateria">Restituir materia</button>
+    </div>
+
+    <div id="mensajeRestituir" class="mensaje">✅ Materia restituida correctamente</div>
+
   </main>
 
   <!-- Firebase -->
@@ -329,6 +376,50 @@
     const mensajeAlumno = document.getElementById("mensajeAlumno");
     const filtroGrupoAlumnos = document.getElementById("filtroGrupoAlumnos");
     const listaAlumnos = document.getElementById("listaAlumnos");
+
+    // Restituir materias bloqueadas
+    const restTipo = document.getElementById("restTipo");
+    const restGrupo = document.getElementById("restGrupo");
+    const restTrimestre = document.getElementById("restTrimestre");
+    const restMateria = document.getElementById("restMateria");
+    const btnRestituirMateria = document.getElementById("btnRestituirMateria");
+    const mensajeRestituir = document.getElementById("mensajeRestituir");
+
+    function encode(s){
+      return String(s || "").replace(/\./g,"_");
+    }
+
+    async function cargarMateriasBloqueadasAdmin(){
+      restMateria.innerHTML = '<option value="">Seleccione...</option>';
+
+      const tipo = restTipo.value;
+      const grupo = restGrupo.value;
+      const trimestre = restTrimestre.value;
+
+      if (!tipo || !grupo || !trimestre){
+        return;
+      }
+
+      try {
+        const snap = await get(ref(db, `configuracion/materias_bloqueadas/${tipo}/${encode(trimestre)}/${encode(grupo)}`));
+        if (!snap.exists()) return;
+
+        const bloqueadas = snap.val() || {};
+        const materias = Object.values(bloqueadas)
+          .map(item => item?.materia)
+          .filter(Boolean)
+          .sort((a,b)=>a.localeCompare(b,"es"));
+
+        materias.forEach(materia => {
+          const option = document.createElement("option");
+          option.value = materia;
+          option.textContent = materia;
+          restMateria.appendChild(option);
+        });
+      } catch (err){
+        console.error(err);
+      }
+    }
 
     function actualizarPanel(tri) {
       if (!tri || !tri.nombre) {
@@ -611,6 +702,34 @@
     filtroGrupoAlumnos.addEventListener("change", () => {
       const g = filtroGrupoAlumnos.value;
       cargarAlumnosPorGrupo(g);
+    });
+
+    restTipo.addEventListener("change", cargarMateriasBloqueadasAdmin);
+    restGrupo.addEventListener("change", cargarMateriasBloqueadasAdmin);
+    restTrimestre.addEventListener("change", cargarMateriasBloqueadasAdmin);
+
+    btnRestituirMateria.addEventListener("click", async () => {
+      const tipo = restTipo.value;
+      const grupo = restGrupo.value;
+      const trimestre = restTrimestre.value;
+      const materia = restMateria.value;
+
+      if (!tipo || !grupo || !trimestre || !materia){
+        alert("Seleccione tipo de captura, grupo, trimestre y materia.");
+        return;
+      }
+
+      if (!confirm("¿Desea restituir esta materia? Volverá a aparecer para captura.")) return;
+
+      try {
+        await remove(ref(db, `configuracion/materias_bloqueadas/${tipo}/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`));
+        mensajeRestituir.style.display = "block";
+        setTimeout(()=> mensajeRestituir.style.display="none", 2800);
+        await cargarMateriasBloqueadasAdmin();
+      } catch(err){
+        console.error(err);
+        alert("Error al restituir la materia.");
+      }
     });
   </script>
 
