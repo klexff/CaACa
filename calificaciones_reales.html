@@ -145,25 +145,10 @@
   const promedioGrupo = document.getElementById("promedioGrupo");
   const mensajeExito = document.getElementById("mensajeExito");
 
-  const BLOQUEO_TIPO = "reales";
-  let materiasBloqueadasActuales = new Set();
-
-  function rutaMateriaBloqueada(trimestre, grupo, materia) {
-    return `configuracion/materias_bloqueadas/${BLOQUEO_TIPO}/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
-  }
-
-  async function obtenerMateriasBloqueadas(trimestre, grupo) {
-    if (!trimestre || !grupo) return new Set();
-    const snap = await get(ref(db, `configuracion/materias_bloqueadas/${BLOQUEO_TIPO}/${encode(trimestre)}/${encode(grupo)}`));
-    if (!snap.exists()) return new Set();
-    return new Set(Object.keys(snap.val() || {}));
-  }
-
   document.addEventListener("DOMContentLoaded", async () => {
     await cargarTrimestre();
 
     document.getElementById("grupo").addEventListener("change", actualizarGrupo);
-    document.getElementById("trimestre").addEventListener("change", actualizarGrupo);
     document.getElementById("btnGuardar").addEventListener("click", guardar);
     document.getElementById("btnNuevoMateria").addEventListener("click", nuevaMateria);
 
@@ -193,29 +178,42 @@
 
   async function actualizarGrupo() {
     const grupo = document.getElementById("grupo").value;
-    const trimestre = document.getElementById("trimestre").value;
-    await cargarMaterias(grupo, trimestre);
-    await cargarAlumnos(grupo);
+    await cargarMaterias(grupo);
+    cargarAlumnos(grupo);
   }
 
-  async function cargarMaterias(grupo, trimestre) {
+  async function cargarMaterias(grupo) {
     const m = document.getElementById("materia");
+    const trimestre = document.getElementById("trimestre").value;
     m.innerHTML = "<option value=''>Seleccione...</option>";
 
-    if (!grupo || !trimestre) {
-      materiasBloqueadasActuales = new Set();
-      return;
+    if (!grupo || !trimestre) return;
+
+    let bloqueadas = {};
+    try {
+      const snapBloqueadas = await get(ref(db, `configuracion/materias_bloqueadas/reales/${encodeKey(grupo)}/${encodeKey(trimestre)}`));
+      if (snapBloqueadas.exists()) {
+        bloqueadas = snapBloqueadas.val() || {};
+      }
+    } catch (err) {
+      console.error("Error leyendo materias bloqueadas:", err);
     }
 
-    materiasBloqueadasActuales = await obtenerMateriasBloqueadas(trimestre, grupo);
+    const disponibles = (materiasPorGrupo[grupo] || []).filter(mat => !bloqueadas[encodeKey(mat)]);
 
-    (materiasPorGrupo[grupo] || []).forEach(mat => {
-      if (materiasBloqueadasActuales.has(encode(mat))) return;
+    disponibles.forEach(mat => {
       const op = document.createElement("option");
       op.value = mat;
       op.textContent = mat;
       m.appendChild(op);
     });
+
+    if (disponibles.length === 0) {
+      const op = document.createElement("option");
+      op.value = "";
+      op.textContent = "Sin materias disponibles";
+      m.appendChild(op);
+    }
   }
 
   async function cargarAlumnos(grupo) {
@@ -276,11 +274,11 @@
     }
   }
 
-  async function nuevaMateria() {
+  function nuevaMateria() {
     if (!confirm("¿Deseas iniciar captura para una nueva materia?")) return;
     cuerpoTabla.innerHTML = "";
     promedioGrupo.textContent = "-";
-    await actualizarGrupo();
+    document.getElementById("materia").selectedIndex = 0;
     mensajeExito.style.display = "none";
   }
 
@@ -327,14 +325,6 @@
       return;
     }
 
-    const bloqueoRef = ref(db, rutaMateriaBloqueada(trimestre, grupo, materia));
-    const bloqueoSnap = await get(bloqueoRef);
-    if (bloqueoSnap.exists()) {
-      alert("Esta materia ya fue cerrada para este trimestre y grupo. Solo el administrador puede restituirla.");
-      await actualizarGrupo();
-      return;
-    }
-
     const filas=[...document.querySelectorAll("#tablaCalificaciones tbody tr")];
     const datos=filas.map(f=>({
       alumno:f.cells[0].textContent.trim(),
@@ -348,51 +338,28 @@
       }
     }
 
-    const confirmado = confirm(`⚠️ ADVERTENCIA IMPORTANTE
+    // 🔹 Base de datos lógica para calificaciones REALES (separada de SAECH)
+    const path1=`calificaciones_reales/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
 
-Está a punto de guardar las calificaciones de ${materia} para el grupo ${grupo} en ${trimestre}.
-
-Después de guardarlas, esta materia desaparecerá del listado y NO podrá modificarse jamás desde esta pantalla.
-
-Solo el administrador podrá restituirla.
-
-¿Desea continuar?`);
-    if (!confirmado) return;
-
-    const payload = {
+    await set(ref(db,path1),{
       docente,
       datos,
       savedAt:new Date().toISOString()
-    };
+    });
 
-    const path1=`calificaciones_reales/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
-    await set(ref(db,path1), payload);
-
+    // 🔹 También se guarda en HISTORIAL CAMINO A CASA como antes
     const path2=`historial_casa/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
-    await set(ref(db,path2), payload);
 
-    await set(bloqueoRef, {
-      bloqueada: true,
-      materia,
-      grupo,
-      trimestre,
+    await set(ref(db,path2),{
       docente,
-      tipo: BLOQUEO_TIPO,
-      savedAt: payload.savedAt
+      datos,
+      savedAt:new Date().toISOString()
     });
 
     mensajeExito.style.display="block";
-    mensajeExito.textContent=`✔ Calificaciones reales guardadas correctamente. La materia quedó cerrada y fue retirada del listado.`;
-
-    cuerpoTabla.innerHTML = "";
-    promedioGrupo.textContent = "-";
-    document.getElementById("docente").value = "";
-    await actualizarGrupo();
-    document.getElementById("materia").selectedIndex = 0;
-
-    setTimeout(()=> mensajeExito.style.display="none", 4500);
+    mensajeExito.textContent=`✔ Calificaciones reales guardadas correctamente en ambas rutas`;
+    setTimeout(()=> mensajeExito.style.display="none", 3500);
   }
-
 
   function encode(s){ return s.replace(/\./g,"_"); }
 
