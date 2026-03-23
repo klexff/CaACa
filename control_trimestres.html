@@ -271,7 +271,6 @@
       </div>
     </div>
 
-
     <hr>
     <h2>Restituir materias bloqueadas</h2>
 
@@ -315,8 +314,6 @@
     </div>
 
     <div id="mensajeRestituir" class="mensaje">✅ Materia restituida correctamente</div>
-
-
   </main>
 
   <!-- Firebase -->
@@ -382,6 +379,16 @@
     const restMateria = document.getElementById("restMateria");
     const btnRestituirMateria = document.getElementById("btnRestituirMateria");
     const mensajeRestituir = document.getElementById("mensajeRestituir");
+
+
+
+    function encodeKey(valor){
+      return String(valor || "").replace(/\./g, "_");
+    }
+
+    function decodeKey(valor){
+      return String(valor || "").replace(/_/g, ".");
+    }
 
     function actualizarPanel(tri) {
       if (!tri || !tri.nombre) {
@@ -661,22 +668,14 @@
       }
     }
 
-    filtroGrupoAlumnos.addEventListener("change", () => {
-      const g = filtroGrupoAlumnos.value;
-      cargarAlumnosPorGrupo(g);
-    });
 
-
-    function encodeKey(valor){
-      return String(valor || "").replace(/[.#$/\[\]]/g, "_");
-    }
 
     async function cargarMateriasBloqueadas(){
+      restMateria.innerHTML = '<option value="">Seleccione...</option>';
+
       const tipo = restTipo.value;
       const grupo = restGrupo.value;
       const trimestre = restTrimestre.value;
-
-      restMateria.innerHTML = '<option value="">Seleccione...</option>';
 
       if (!tipo || !grupo || !trimestre){
         return;
@@ -684,7 +683,8 @@
 
       try {
         const snap = await get(ref(db, `configuracion/materias_bloqueadas/${tipo}/${encodeKey(grupo)}/${encodeKey(trimestre)}`));
-        if (!snap.exists()) {
+
+        if (!snap.exists()){
           const opt = document.createElement("option");
           opt.value = "";
           opt.textContent = "No hay materias bloqueadas";
@@ -701,21 +701,32 @@
           return;
         }
 
-        materias.sort((a,b)=>a.localeCompare(b, "es"));
+        materias.sort((a,b)=>decodeKey(a).localeCompare(decodeKey(b), "es"));
         materias.forEach(materia => {
           const opt = document.createElement("option");
           opt.value = materia;
-          opt.textContent = materia;
+          opt.textContent = decodeKey(materia);
           restMateria.appendChild(opt);
         });
       } catch(err){
         console.error(err);
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "Error al cargar materias";
+        restMateria.appendChild(opt);
       }
     }
+
+    filtroGrupoAlumnos.addEventListener("change", () => {
+      const g = filtroGrupoAlumnos.value;
+      cargarAlumnosPorGrupo(g);
+    });
 
     restTipo.addEventListener("change", cargarMateriasBloqueadas);
     restGrupo.addEventListener("change", cargarMateriasBloqueadas);
     restTrimestre.addEventListener("change", cargarMateriasBloqueadas);
+
+    cargarMateriasBloqueadas();
 
     btnRestituirMateria.addEventListener("click", async () => {
       const tipo = restTipo.value;
@@ -723,19 +734,19 @@
       const trimestre = restTrimestre.value;
       const materia = restMateria.value;
 
-      if (!tipo || !grupo || !trimestre || !materia || materia === "No hay materias bloqueadas") {
+      if (!tipo || !grupo || !trimestre || !materia){
         alert("Seleccione tipo, grupo, trimestre y materia bloqueada.");
         return;
       }
 
-      if (!confirm(`¿Desea restituir la materia ${materia}? Volverá a aparecer para captura.`)) {
+      if (!confirm(`¿Desea restituir la materia ${decodeKey(materia)}? Volverá a aparecer para captura.`)){
         return;
       }
 
       try {
-        await remove(ref(db, `configuracion/materias_bloqueadas/${tipo}/${encodeKey(grupo)}/${encodeKey(trimestre)}/${encodeKey(materia)}`));
+        await remove(ref(db, `configuracion/materias_bloqueadas/${tipo}/${encodeKey(grupo)}/${encodeKey(trimestre)}/${materia}`));
         mensajeRestituir.style.display = "block";
-        setTimeout(()=> mensajeRestituir.style.display = "none", 2500);
+        setTimeout(()=> mensajeRestituir.style.display="none", 2500);
         await cargarMateriasBloqueadas();
       } catch(err){
         console.error(err);

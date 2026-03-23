@@ -253,12 +253,20 @@
   document.addEventListener("DOMContentLoaded", async () => {
     await cargarTrimestre();
     document.getElementById("grupo").addEventListener("change", actualizarGrupo);
+    document.getElementById("trimestre").addEventListener("change", async () => {
+      const grupo = document.getElementById("grupo").value;
+      if (grupo) await cargarMaterias(grupo);
+    });
     document.getElementById("btnGuardar").addEventListener("click", guardar);
     document.getElementById("btnNuevoMateria").addEventListener("click", nuevaMateria);
 
     document.getElementById("btnSalir").addEventListener("click", () => {
       window.location.href = "index.html";
     });
+
+    if (document.getElementById("grupo").value) {
+      await actualizarGrupo();
+    }
   });
 
   async function cargarTrimestre() {
@@ -283,7 +291,7 @@
   async function actualizarGrupo() {
     const grupo = document.getElementById("grupo").value;
     await cargarMaterias(grupo);
-    cargarAlumnos(grupo);
+    await cargarAlumnos(grupo);
   }
 
   async function cargarMaterias(grupo) {
@@ -291,19 +299,30 @@
     const trimestre = document.getElementById("trimestre").value;
     m.innerHTML = "<option value=''>Seleccione...</option>";
 
-    if (!grupo || !trimestre) return;
+    if (!grupo) return;
 
     let bloqueadas = {};
-    try {
-      const snapBloqueadas = await get(ref(db, `configuracion/materias_bloqueadas/saech/${encodeKey(grupo)}/${encodeKey(trimestre)}`));
-      if (snapBloqueadas.exists()) {
-        bloqueadas = snapBloqueadas.val() || {};
+
+    if (trimestre) {
+      try {
+        const snapBloqueadas = await get(ref(db, `configuracion/materias_bloqueadas/saech/${encode(grupo)}/${encode(trimestre)}`));
+        if (snapBloqueadas.exists()) {
+          bloqueadas = snapBloqueadas.val() || {};
+        }
+      } catch (err) {
+        console.error("Error leyendo materias bloqueadas:", err);
       }
-    } catch (err) {
-      console.error("Error leyendo materias bloqueadas:", err);
     }
 
-    const disponibles = (materiasPorGrupo[grupo] || []).filter(mat => !bloqueadas[encodeKey(mat)]);
+    const disponibles = (materiasPorGrupo[grupo] || []).filter(mat => !bloqueadas[encode(mat)]);
+
+    if (disponibles.length === 0) {
+      const op = document.createElement("option");
+      op.value = "";
+      op.textContent = "Sin materias disponibles";
+      m.appendChild(op);
+      return;
+    }
 
     disponibles.forEach(mat => {
       const op = document.createElement("option");
@@ -311,13 +330,6 @@
       op.textContent = mat;
       m.appendChild(op);
     });
-
-    if (disponibles.length === 0) {
-      const op = document.createElement("option");
-      op.value = "";
-      op.textContent = "Sin materias disponibles";
-      m.appendChild(op);
-    }
   }
 
   // 🔹 Ahora los alumnos se cargan desde la BD "alumnos"
@@ -430,11 +442,17 @@
       return;
     }
 
+    if(!confirm(`⚠️ Una vez guardadas, las calificaciones de ${materia} ya no podrán modificarse. ¿Desea continuar?`)){
+      return;
+    }
+
     const filas=[...document.querySelectorAll("#tablaCalificaciones tbody tr")];
-    const datos=filas.map(f=>({
-      alumno:f.cells[0].textContent.trim(),
-      calificacion:parseInt(f.cells[1].textContent.trim())||null
-    }));
+    const datos=filas.map(f=>(
+      {
+        alumno:f.cells[0].textContent.trim(),
+        calificacion:parseInt(f.cells[1].textContent.trim())||null
+      }
+    ));
 
     for(const d of datos){
       if(!d.alumno || d.calificacion===null){
@@ -443,7 +461,6 @@
       }
     }
 
-    // 🔹 Ruta separada para evitar conflictos con calificaciones_reales
     const path=`calificaciones_saech/${encode(trimestre)}/${encode(grupo)}/${encode(materia)}`;
 
     await set(ref(db,path),{
@@ -452,12 +469,17 @@
       savedAt:new Date().toISOString()
     });
 
+    await set(ref(db, `configuracion/materias_bloqueadas/saech/${encode(grupo)}/${encode(trimestre)}/${encode(materia)}`), true);
+
     mensajeExito.style.display="block";
     mensajeExito.textContent=`✔ Calificaciones guardadas correctamente (SAECH)`;
     setTimeout(()=> mensajeExito.style.display="none", 3500);
+
+    await cargarMaterias(grupo);
+    document.getElementById("materia").value = "";
   }
 
-  function encode(s){ return s.replace(/\./g,"_"); }
+  function encode(s){ return String(s || "").replace(/\./g,"_"); }
 
 </script>
 
