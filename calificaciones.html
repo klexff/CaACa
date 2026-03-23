@@ -280,30 +280,44 @@
     select.appendChild(opt);
   }
 
-  function actualizarGrupo() {
+  async function actualizarGrupo() {
     const grupo = document.getElementById("grupo").value;
-    cargarMaterias(grupo);
+    await cargarMaterias(grupo);
     cargarAlumnos(grupo);
   }
 
-  async function cargarMaterias(grupo, trimestre) {
+  async function cargarMaterias(grupo) {
     const m = document.getElementById("materia");
+    const trimestre = document.getElementById("trimestre").value;
     m.innerHTML = "<option value=''>Seleccione...</option>";
 
-    if (!grupo || !trimestre) {
-      materiasBloqueadasActuales = new Set();
-      return;
+    if (!grupo || !trimestre) return;
+
+    let bloqueadas = {};
+    try {
+      const snapBloqueadas = await get(ref(db, `configuracion/materias_bloqueadas/saech/${encodeKey(grupo)}/${encodeKey(trimestre)}`));
+      if (snapBloqueadas.exists()) {
+        bloqueadas = snapBloqueadas.val() || {};
+      }
+    } catch (err) {
+      console.error("Error leyendo materias bloqueadas:", err);
     }
 
-    materiasBloqueadasActuales = await obtenerMateriasBloqueadas(trimestre, grupo);
+    const disponibles = (materiasPorGrupo[grupo] || []).filter(mat => !bloqueadas[encodeKey(mat)]);
 
-    (materiasPorGrupo[grupo] || []).forEach(mat => {
-      if (materiasBloqueadasActuales.has(encode(mat))) return;
+    disponibles.forEach(mat => {
       const op = document.createElement("option");
       op.value = mat;
       op.textContent = mat;
       m.appendChild(op);
     });
+
+    if (disponibles.length === 0) {
+      const op = document.createElement("option");
+      op.value = "";
+      op.textContent = "Sin materias disponibles";
+      m.appendChild(op);
+    }
   }
 
   // 🔹 Ahora los alumnos se cargan desde la BD "alumnos"
