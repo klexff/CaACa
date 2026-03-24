@@ -147,34 +147,6 @@
     .btn-eliminar{
       background:#c0392b;
     }
-    .btn-secundario{
-      background:#25619c;
-    }
-    .btn-acreditar{
-      background:#8e44ad;
-    }
-    .lista-panel{
-      margin-top:8px;
-      padding:12px;
-      border:1px solid #dde5f0;
-      border-radius:10px;
-      background:#f7f9fb;
-    }
-    .acreditacion-item{
-      display:flex;
-      align-items:center;
-      gap:10px;
-      margin-bottom:8px;
-      flex-wrap:wrap;
-    }
-    .acreditacion-item label{
-      margin-right:0;
-      font-weight:500;
-    }
-    .texto-ayuda{
-      font-size:0.95rem;
-      color:#4b5d50;
-    }
   </style>
 </head>
 
@@ -292,23 +264,27 @@
         <option value="2°">2°</option>
         <option value="3°">3°</option>
       </select>
-    </div>
 
-    <div class="fila botonera">
-      <button class="btn btn-secundario" id="btnVerAlumnosGrupo">Desplegar alumnos del grupo</button>
-    </div>
-
-    <div class="lista-panel">
-      <strong>Alumnos registrados:</strong>
-      <ul id="listaAlumnos"></ul>
+      <div style="margin-top:8px;">
+        <strong>Alumnos registrados:</strong>
+        <ul id="listaAlumnos"></ul>
+      </div>
     </div>
 
     <hr>
-    <h2>Acreditación</h2>
+    <h2>Restituir materias bloqueadas</h2>
 
     <div class="fila">
-      <label>Grupo a acreditar:</label>
-      <select id="acreditacionGrupo">
+      <label>Tipo de captura:</label>
+      <select id="restTipo">
+        <option value="saech">Calificaciones SAECH</option>
+        <option value="reales">Calificaciones reales</option>
+      </select>
+    </div>
+
+    <div class="fila">
+      <label>Grupo:</label>
+      <select id="restGrupo">
         <option value="">Seleccione...</option>
         <option value="1°">1°</option>
         <option value="2°">2°</option>
@@ -316,26 +292,28 @@
       </select>
     </div>
 
+    <div class="fila">
+      <label>Trimestre:</label>
+      <select id="restTrimestre">
+        <option value="">Seleccione...</option>
+        <option value="1er Trimestre">1er Trimestre</option>
+        <option value="2do Trimestre">2do Trimestre</option>
+        <option value="3er Trimestre">3er Trimestre</option>
+      </select>
+    </div>
+
+    <div class="fila">
+      <label>Materia bloqueada:</label>
+      <select id="restMateria">
+        <option value="">Seleccione...</option>
+      </select>
+    </div>
+
     <div class="fila botonera">
-      <button class="btn btn-secundario" id="btnCargarAcreditacion">Cargar alumnos para acreditación</button>
+      <button class="btn guardar" id="btnRestituirMateria">Restituir materia</button>
     </div>
 
-    <div class="lista-panel">
-      <div class="texto-ayuda">
-        Seleccione los alumnos a promover. Los de 1° pasarán a 2°, los de 2° pasarán a 3° y los de 3° quedarán acreditados para su futura carta de buena conducta.
-      </div>
-      <div class="fila" style="margin-top:10px;">
-        <label>Alumnos del grupo seleccionado:</label>
-        <div id="listaAcreditacion"></div>
-      </div>
-      <div class="fila botonera">
-        <button class="btn btn-secundario" id="btnSeleccionarTodosAcreditacion">Seleccionar todos</button>
-        <button class="btn btn-acreditar" id="btnProcesarAcreditacion">Procesar acreditación</button>
-      </div>
-    </div>
-
-    <div id="mensajeAcreditacion" class="mensaje">✅ Acreditación aplicada correctamente</div>
-
+    <div id="mensajeRestituir" class="mensaje">✅ Materia restituida correctamente</div>
   </main>
 
   <!-- Firebase -->
@@ -394,14 +372,23 @@
     const mensajeAlumno = document.getElementById("mensajeAlumno");
     const filtroGrupoAlumnos = document.getElementById("filtroGrupoAlumnos");
     const listaAlumnos = document.getElementById("listaAlumnos");
-    const btnVerAlumnosGrupo = document.getElementById("btnVerAlumnosGrupo");
 
-    const acreditacionGrupo = document.getElementById("acreditacionGrupo");
-    const btnCargarAcreditacion = document.getElementById("btnCargarAcreditacion");
-    const listaAcreditacion = document.getElementById("listaAcreditacion");
-    const btnSeleccionarTodosAcreditacion = document.getElementById("btnSeleccionarTodosAcreditacion");
-    const btnProcesarAcreditacion = document.getElementById("btnProcesarAcreditacion");
-    const mensajeAcreditacion = document.getElementById("mensajeAcreditacion");
+    const restTipo = document.getElementById("restTipo");
+    const restGrupo = document.getElementById("restGrupo");
+    const restTrimestre = document.getElementById("restTrimestre");
+    const restMateria = document.getElementById("restMateria");
+    const btnRestituirMateria = document.getElementById("btnRestituirMateria");
+    const mensajeRestituir = document.getElementById("mensajeRestituir");
+
+
+
+    function encodeKey(valor){
+      return String(valor || "").replace(/\./g, "_");
+    }
+
+    function decodeKey(valor){
+      return String(valor || "").replace(/_/g, ".");
+    }
 
     function actualizarPanel(tri) {
       if (!tri || !tri.nombre) {
@@ -563,13 +550,13 @@
 
     // EDITAR alumno
     async function editarAlumno(id, nombreActual, grupoActual){
-      let nuevoNombre = prompt("Nuevo nombre del alumno:", nombreActual);
+      const nuevoNombre = prompt("Nuevo nombre del alumno:", nombreActual);
       if (nuevoNombre === null) return; // canceló
 
       let nuevoGrupo = prompt("Nuevo grado / grupo (1°, 2° o 3°):", grupoActual);
       if (nuevoGrupo === null) return;
 
-      nuevoNombre = nuevoNombre.trim();
+      nuevoNombre.trim();
       nuevoGrupo = nuevoGrupo.trim();
 
       const gruposValidos = ["1°","2°","3°"];
@@ -681,156 +668,92 @@
       }
     }
 
-    btnVerAlumnosGrupo.addEventListener("click", () => {
-      const g = filtroGrupoAlumnos.value;
-      if (!g){
-        alert("Seleccione un grupo para desplegar sus alumnos.");
-        return;
-      }
-      cargarAlumnosPorGrupo(g);
-    });
 
-    filtroGrupoAlumnos.addEventListener("change", () => {
-      const g = filtroGrupoAlumnos.value;
-      if (g){
-        cargarAlumnosPorGrupo(g);
-      } else {
-        listaAlumnos.innerHTML = "";
-      }
-    });
 
-    async function cargarAlumnosAcreditacion(grupo){
-      listaAcreditacion.innerHTML = "";
-      if (!grupo){
+    async function cargarMateriasBloqueadas(){
+      restMateria.innerHTML = '<option value="">Seleccione...</option>';
+
+      const tipo = restTipo.value;
+      const grupo = restGrupo.value;
+      const trimestre = restTrimestre.value;
+
+      if (!tipo || !grupo || !trimestre){
         return;
       }
 
       try {
-        const snap = await get(ref(db, "alumnos"));
+        const snap = await get(ref(db, `configuracion/materias_bloqueadas/${tipo}/${encodeKey(grupo)}/${encodeKey(trimestre)}`));
+
         if (!snap.exists()){
-          listaAcreditacion.innerHTML = "<div>No hay alumnos registrados.</div>";
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "No hay materias bloqueadas";
+          restMateria.appendChild(opt);
           return;
         }
 
-        const all = snap.val();
-        const lista = [];
-
-        for (const id in all){
-          const item = all[id];
-          if (item && item.grupo === grupo){
-            lista.push({ id, nombre: item.nombre, grupo: item.grupo });
-          }
-        }
-
-        if (lista.length === 0){
-          listaAcreditacion.innerHTML = "<div>No hay alumnos para este grupo.</div>";
+        const materias = Object.keys(snap.val() || {});
+        if (materias.length === 0){
+          const opt = document.createElement("option");
+          opt.value = "";
+          opt.textContent = "No hay materias bloqueadas";
+          restMateria.appendChild(opt);
           return;
         }
 
-        lista.sort((a,b)=>a.nombre.localeCompare(b.nombre, "es"));
-
-        lista.forEach(item => {
-          const fila = document.createElement("div");
-          fila.className = "acreditacion-item";
-
-          const chk = document.createElement("input");
-          chk.type = "checkbox";
-          chk.value = item.id;
-          chk.className = "chk-acreditacion";
-          chk.dataset.nombre = item.nombre;
-          chk.dataset.grupo = item.grupo;
-
-          const texto = document.createElement("label");
-          texto.textContent = `${item.nombre} (${item.grupo})`;
-
-          fila.appendChild(chk);
-          fila.appendChild(texto);
-          listaAcreditacion.appendChild(fila);
+        materias.sort((a,b)=>decodeKey(a).localeCompare(decodeKey(b), "es"));
+        materias.forEach(materia => {
+          const opt = document.createElement("option");
+          opt.value = materia;
+          opt.textContent = decodeKey(materia);
+          restMateria.appendChild(opt);
         });
       } catch(err){
         console.error(err);
-        listaAcreditacion.innerHTML = "<div>Error al cargar alumnos para acreditación.</div>";
+        const opt = document.createElement("option");
+        opt.value = "";
+        opt.textContent = "Error al cargar materias";
+        restMateria.appendChild(opt);
       }
     }
 
-    btnCargarAcreditacion.addEventListener("click", async () => {
-      const grupo = acreditacionGrupo.value;
-      if (!grupo){
-        alert("Seleccione el grupo a acreditar.");
-        return;
-      }
-      await cargarAlumnosAcreditacion(grupo);
+    filtroGrupoAlumnos.addEventListener("change", () => {
+      const g = filtroGrupoAlumnos.value;
+      cargarAlumnosPorGrupo(g);
     });
 
-    btnSeleccionarTodosAcreditacion.addEventListener("click", () => {
-      const checks = listaAcreditacion.querySelectorAll('.chk-acreditacion');
-      if (!checks.length){
-        alert("Primero cargue los alumnos del grupo.");
+    restTipo.addEventListener("change", cargarMateriasBloqueadas);
+    restGrupo.addEventListener("change", cargarMateriasBloqueadas);
+    restTrimestre.addEventListener("change", cargarMateriasBloqueadas);
+
+    cargarMateriasBloqueadas();
+
+    btnRestituirMateria.addEventListener("click", async () => {
+      const tipo = restTipo.value;
+      const grupo = restGrupo.value;
+      const trimestre = restTrimestre.value;
+      const materia = restMateria.value;
+
+      if (!tipo || !grupo || !trimestre || !materia){
+        alert("Seleccione tipo, grupo, trimestre y materia bloqueada.");
         return;
       }
 
-      const haySinMarcar = Array.from(checks).some(chk => !chk.checked);
-      checks.forEach(chk => chk.checked = haySinMarcar);
-    });
-
-    btnProcesarAcreditacion.addEventListener("click", async () => {
-      const grupo = acreditacionGrupo.value;
-      if (!grupo){
-        alert("Seleccione el grupo a acreditar.");
-        return;
-      }
-
-      const checks = Array.from(listaAcreditacion.querySelectorAll('.chk-acreditacion:checked'));
-      if (!checks.length){
-        alert("Seleccione al menos un alumno para procesar la acreditación.");
-        return;
-      }
-
-      let destino = "";
-      if (grupo === "1°") destino = "2°";
-      if (grupo === "2°") destino = "3°";
-
-      const mensajeConfirmacion = grupo === "3°"
-        ? `Se acreditarán ${checks.length} alumno(s) de 3° y se retirarán de la base activa. ¿Desea continuar?`
-        : `Se pasarán ${checks.length} alumno(s) de ${grupo} a ${destino}. ¿Desea continuar?`;
-
-      if (!confirm(mensajeConfirmacion)){
+      if (!confirm(`¿Desea restituir la materia ${decodeKey(materia)}? Volverá a aparecer para captura.`)){
         return;
       }
 
       try {
-        for (const chk of checks){
-          const id = chk.value;
-          const nombre = chk.dataset.nombre || "";
-          const grupoActual = chk.dataset.grupo || grupo;
-
-          if (grupo === "3°"){
-            await push(ref(db, "acreditados"), {
-              nombre,
-              grupoOrigen: grupoActual,
-              fechaAcreditacion: new Date().toISOString().slice(0,10),
-              documentoPendiente: "Carta de buena conducta"
-            });
-            await remove(ref(db, "alumnos/" + id));
-          } else {
-            await update(ref(db, "alumnos/" + id), {
-              grupo: destino
-            });
-          }
-        }
-
-        mensajeAcreditacion.style.display = "block";
-        setTimeout(()=> mensajeAcreditacion.style.display="none", 2800);
-
-        await cargarAlumnosAcreditacion(grupo);
-        if (filtroGrupoAlumnos.value === grupo){
-          await cargarAlumnosPorGrupo(grupo);
-        }
+        await remove(ref(db, `configuracion/materias_bloqueadas/${tipo}/${encodeKey(grupo)}/${encodeKey(trimestre)}/${materia}`));
+        mensajeRestituir.style.display = "block";
+        setTimeout(()=> mensajeRestituir.style.display="none", 2500);
+        await cargarMateriasBloqueadas();
       } catch(err){
         console.error(err);
-        alert("Error al procesar la acreditación.");
+        alert("Error al restituir la materia.");
       }
     });
+
   </script>
 
 </body>
