@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Acreditación — Centro Educativo Integral Camino a Casa</title>
+  <style>
+    body {
+      font-family:"Segoe UI", Arial;
+      background:#f0f5f3;
+      margin:0;
+      padding:0;
+      text-align:center;
+    }
+    header{
+      background:#25619c;
+      color:#fff;
+      padding:18px;
+      box-shadow:0 3px 8px rgba(0,0,0,0.15);
+    }
+    .logo {
+      width: 70px;
+      margin-bottom: 6px;
+    }
+    main{
+      max-width:950px;
+      margin:20px auto;
+      background:#ffffff;
+      padding:20px;
+      border-radius:12px;
+      box-shadow:0 4px 12px rgba(0,0,0,0.10);
+      text-align:left;
+    }
+    .fila { margin-bottom:14px; }
+    label {
+      font-weight:600;
+      margin-right:8px;
+      color:#23422f;
+    }
+    input, select{
+      padding:8px;
+      border-radius:6px;
+      border:1px solid #ccc;
+      font-family:inherit;
+    }
+    .botonera {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+    .btn{
+      padding:10px 16px;
+      border-radius:8px;
+      border:none;
+      color:#fff;
+      cursor:pointer;
+      font-weight:600;
+      transition:.15s ease;
+      flex:1;
+      min-width:170px;
+      text-align:center;
+    }
+    .btn:hover{
+      transform: translateY(-2px);
+      box-shadow:0 4px 10px rgba(0,0,0,0.15);
+    }
+    .guardar{ background:#2f8c4a; }
+    .secundario{ background:#25619c; }
+    .salir{ background:#c0392b; }
+    .mensaje{
+      background:#d4edda;
+      border:1px solid #c3e6cb;
+      color:#155724;
+      padding:10px;
+      border-radius:8px;
+      display:none;
+      margin-top:14px;
+      text-align:center;
+      font-weight:600;
+    }
+    .panel{
+      margin-top:20px;
+      padding:16px;
+      border-radius:10px;
+      background:#f7f9fb;
+      border:1px solid #dde5f0;
+      color:#23422f;
+    }
+    .texto-ayuda{
+      margin-top:0;
+      color:#4b5d50;
+    }
+    .alumno-item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      padding:8px 0;
+      border-bottom:1px solid #e5eaf0;
+      flex-wrap:wrap;
+    }
+    .alumno-item:last-child{ border-bottom:none; }
+    .alumno-nombre{ flex:1; }
+    h2{ margin-top:0; color:#25619c; }
+  </style>
+</head>
+<body>
+  <header>
+    <img src="logo2025.jpg" class="logo">
+    <h1 style="margin:0;">🎓 Acreditación de alumnos</h1>
+  </header>
+
+  <main>
+    <h2>Proceso de acreditación</h2>
+    <p class="texto-ayuda">
+      Seleccione el grupo a procesar. Los alumnos de 1° pasarán a 2°, los de 2° pasarán a 3° y los de 3° quedarán acreditados y saldrán de la base activa.
+    </p>
+
+    <div class="fila">
+      <label>Grupo actual:</label>
+      <select id="grupoAcreditacion">
+        <option value="">Seleccione...</option>
+        <option value="1°">1°</option>
+        <option value="2°">2°</option>
+        <option value="3°">3°</option>
+      </select>
+    </div>
+
+    <div class="fila botonera">
+      <button class="btn secundario" id="btnCargar">Cargar alumnos</button>
+      <button class="btn secundario" id="btnSeleccionarTodos">Seleccionar todos</button>
+    </div>
+
+    <div class="panel">
+      <strong>Alumnos del grupo:</strong>
+      <div id="listaAcreditacion" style="margin-top:10px;"></div>
+    </div>
+
+    <div class="fila botonera">
+      <button class="btn guardar" id="btnGuardarCambios">Guardar cambios</button>
+      <button class="btn salir" id="btnRegresar">Regresar a Control de Trimestres</button>
+    </div>
+
+    <div id="mensajeAcreditacion" class="mensaje">✅ Cambios guardados correctamente</div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import {
+      getDatabase,
+      ref,
+      get,
+      update,
+      set,
+      remove
+    } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyDqty2eG_5VEi5NtU_HQzfZU_6FruMh66Q",
+      authDomain: "camino-a-casa-87d65.firebaseapp.com",
+      databaseURL: "https://camino-a-casa-87d65-default-rtdb.firebaseio.com",
+      projectId: "camino-a-casa-87d65",
+      storageBucket: "camino-a-casa-87d65.firebasestorage.app",
+      messagingSenderId: "725645453280",
+      appId: "1:725645453280:web:4cc41935020d1ae290ed85"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
+    const grupoAcreditacion = document.getElementById("grupoAcreditacion");
+    const btnCargar = document.getElementById("btnCargar");
+    const btnSeleccionarTodos = document.getElementById("btnSeleccionarTodos");
+    const btnGuardarCambios = document.getElementById("btnGuardarCambios");
+    const btnRegresar = document.getElementById("btnRegresar");
+    const listaAcreditacion = document.getElementById("listaAcreditacion");
+    const mensajeAcreditacion = document.getElementById("mensajeAcreditacion");
+
+    function obtenerGrupoSiguiente(grupo){
+      if (grupo === "1°") return "2°";
+      if (grupo === "2°") return "3°";
+      return null;
+    }
+
+    async function cargarAlumnosAcreditacion(){
+      const grupo = grupoAcreditacion.value;
+      listaAcreditacion.innerHTML = "";
+
+      if (!grupo){
+        alert("Seleccione el grupo a acreditar.");
+        return;
+      }
+
+      try {
+        const snap = await get(ref(db, "alumnos"));
+        if (!snap.exists()){
+          listaAcreditacion.innerHTML = "<div>No hay alumnos registrados.</div>";
+          return;
+        }
+
+        const alumnos = [];
+        const data = snap.val();
+        for (const id in data){
+          const item = data[id];
+          if (item && item.grupo === grupo){
+            alumnos.push({ id, nombre: item.nombre, grupo: item.grupo });
+          }
+        }
+
+        if (!alumnos.length){
+          listaAcreditacion.innerHTML = "<div>No hay alumnos en ese grupo.</div>";
+          return;
+        }
+
+        alumnos.sort((a,b)=>a.nombre.localeCompare(b.nombre, "es"));
+        alumnos.forEach(alumno => {
+          const row = document.createElement("div");
+          row.className = "alumno-item";
+
+          const check = document.createElement("input");
+          check.type = "checkbox";
+          check.className = "check-acreditacion";
+          check.value = alumno.id;
+          check.dataset.nombre = alumno.nombre;
+          check.dataset.grupo = alumno.grupo;
+
+          const span = document.createElement("span");
+          span.className = "alumno-nombre";
+          if (grupo === "3°") {
+            span.textContent = `${alumno.nombre} (${alumno.grupo}) → Acreditado`;
+          } else {
+            span.textContent = `${alumno.nombre} (${alumno.grupo}) → ${obtenerGrupoSiguiente(grupo)}`;
+          }
+
+          row.appendChild(check);
+          row.appendChild(span);
+          listaAcreditacion.appendChild(row);
+        });
+      } catch (err){
+        console.error(err);
+        listaAcreditacion.innerHTML = "<div>Error al cargar alumnos.</div>";
+      }
+    }
+
+    btnCargar.addEventListener("click", cargarAlumnosAcreditacion);
+
+    btnSeleccionarTodos.addEventListener("click", () => {
+      const checks = document.querySelectorAll(".check-acreditacion");
+      if (!checks.length){
+        alert("Primero cargue los alumnos del grupo.");
+        return;
+      }
+      checks.forEach(ch => ch.checked = true);
+    });
+
+    btnGuardarCambios.addEventListener("click", async () => {
+      const grupo = grupoAcreditacion.value;
+      const seleccionados = [...document.querySelectorAll(".check-acreditacion:checked")];
+
+      if (!grupo){
+        alert("Seleccione el grupo a acreditar.");
+        return;
+      }
+      if (!seleccionados.length){
+        alert("Seleccione al menos un alumno.");
+        return;
+      }
+
+      const accion = grupo === "3°"
+        ? "Los alumnos seleccionados serán acreditados y saldrán de la base activa. ¿Desea continuar?"
+        : `Los alumnos seleccionados pasarán de ${grupo} a ${obtenerGrupoSiguiente(grupo)}. ¿Desea continuar?`;
+
+      if (!confirm(accion)) return;
+
+      try {
+        for (const item of seleccionados){
+          const id = item.value;
+          const nombre = item.dataset.nombre;
+
+          if (grupo === "3°"){
+            await set(ref(db, "alumnos_acreditados/" + id), {
+              nombre,
+              grupoOrigen: grupo,
+              acreditado: true,
+              fechaAcreditacion: new Date().toISOString().slice(0,10)
+            });
+            await remove(ref(db, "alumnos/" + id));
+          } else {
+            await update(ref(db, "alumnos/" + id), {
+              grupo: obtenerGrupoSiguiente(grupo)
+            });
+          }
+        }
+
+        mensajeAcreditacion.style.display = "block";
+        setTimeout(()=> mensajeAcreditacion.style.display = "none", 2600);
+        await cargarAlumnosAcreditacion();
+      } catch (err){
+        console.error(err);
+        alert("Error al guardar los cambios de acreditación.");
+      }
+    });
+
+    btnRegresar.addEventListener("click", () => {
+      window.location.href = "control_trimestres.html";
+    });
+  </script>
+</body>
+</html>

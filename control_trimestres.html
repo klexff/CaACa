@@ -147,6 +147,9 @@
     .btn-eliminar{
       background:#c0392b;
     }
+    .btn-secundario{
+      background:#25619c;
+    }
   </style>
 </head>
 
@@ -252,6 +255,7 @@
 
     <div class="fila botonera">
       <button class="btn guardar" id="btnGuardarAlumno">Guardar alumno</button>
+      <button class="btn btn-secundario" id="btnAbrirAcreditacion">Acreditación</button>
     </div>
 
     <div id="mensajeAlumno" class="mensaje">✅ Alumno guardado correctamente</div>
@@ -264,56 +268,17 @@
         <option value="2°">2°</option>
         <option value="3°">3°</option>
       </select>
-
-      <div style="margin-top:8px;">
-        <strong>Alumnos registrados:</strong>
-        <ul id="listaAlumnos"></ul>
-      </div>
-    </div>
-
-    <hr>
-    <h2>Restituir materias bloqueadas</h2>
-
-    <div class="fila">
-      <label>Tipo de captura:</label>
-      <select id="restTipo">
-        <option value="saech">Calificaciones SAECH</option>
-        <option value="reales">Calificaciones reales</option>
-      </select>
-    </div>
-
-    <div class="fila">
-      <label>Grupo:</label>
-      <select id="restGrupo">
-        <option value="">Seleccione...</option>
-        <option value="1°">1°</option>
-        <option value="2°">2°</option>
-        <option value="3°">3°</option>
-      </select>
-    </div>
-
-    <div class="fila">
-      <label>Trimestre:</label>
-      <select id="restTrimestre">
-        <option value="">Seleccione...</option>
-        <option value="1er Trimestre">1er Trimestre</option>
-        <option value="2do Trimestre">2do Trimestre</option>
-        <option value="3er Trimestre">3er Trimestre</option>
-      </select>
-    </div>
-
-    <div class="fila">
-      <label>Materia bloqueada:</label>
-      <select id="restMateria">
-        <option value="">Seleccione...</option>
-      </select>
     </div>
 
     <div class="fila botonera">
-      <button class="btn guardar" id="btnRestituirMateria">Restituir materia</button>
+      <button class="btn btn-secundario" id="btnVerAlumnosGrupo">Desplegar alumnos del grupo</button>
     </div>
 
-    <div id="mensajeRestituir" class="mensaje">✅ Materia restituida correctamente</div>
+    <div style="margin-top:8px;">
+      <strong>Alumnos registrados:</strong>
+      <ul id="listaAlumnos"></ul>
+    </div>
+
   </main>
 
   <!-- Firebase -->
@@ -372,23 +337,8 @@
     const mensajeAlumno = document.getElementById("mensajeAlumno");
     const filtroGrupoAlumnos = document.getElementById("filtroGrupoAlumnos");
     const listaAlumnos = document.getElementById("listaAlumnos");
-
-    const restTipo = document.getElementById("restTipo");
-    const restGrupo = document.getElementById("restGrupo");
-    const restTrimestre = document.getElementById("restTrimestre");
-    const restMateria = document.getElementById("restMateria");
-    const btnRestituirMateria = document.getElementById("btnRestituirMateria");
-    const mensajeRestituir = document.getElementById("mensajeRestituir");
-
-
-
-    function encodeKey(valor){
-      return String(valor || "").replace(/\./g, "_");
-    }
-
-    function decodeKey(valor){
-      return String(valor || "").replace(/_/g, ".");
-    }
+    const btnVerAlumnosGrupo = document.getElementById("btnVerAlumnosGrupo");
+    const btnAbrirAcreditacion = document.getElementById("btnAbrirAcreditacion");
 
     function actualizarPanel(tri) {
       if (!tri || !tri.nombre) {
@@ -668,92 +618,22 @@
       }
     }
 
-
-
-    async function cargarMateriasBloqueadas(){
-      restMateria.innerHTML = '<option value="">Seleccione...</option>';
-
-      const tipo = restTipo.value;
-      const grupo = restGrupo.value;
-      const trimestre = restTrimestre.value;
-
-      if (!tipo || !grupo || !trimestre){
+    btnVerAlumnosGrupo.addEventListener("click", () => {
+      const g = filtroGrupoAlumnos.value;
+      if (!g){
+        alert("Seleccione el grupo que desea desplegar.");
         return;
       }
-
-      try {
-        const snap = await get(ref(db, `configuracion/materias_bloqueadas/${tipo}/${encodeKey(grupo)}/${encodeKey(trimestre)}`));
-
-        if (!snap.exists()){
-          const opt = document.createElement("option");
-          opt.value = "";
-          opt.textContent = "No hay materias bloqueadas";
-          restMateria.appendChild(opt);
-          return;
-        }
-
-        const materias = Object.keys(snap.val() || {});
-        if (materias.length === 0){
-          const opt = document.createElement("option");
-          opt.value = "";
-          opt.textContent = "No hay materias bloqueadas";
-          restMateria.appendChild(opt);
-          return;
-        }
-
-        materias.sort((a,b)=>decodeKey(a).localeCompare(decodeKey(b), "es"));
-        materias.forEach(materia => {
-          const opt = document.createElement("option");
-          opt.value = materia;
-          opt.textContent = decodeKey(materia);
-          restMateria.appendChild(opt);
-        });
-      } catch(err){
-        console.error(err);
-        const opt = document.createElement("option");
-        opt.value = "";
-        opt.textContent = "Error al cargar materias";
-        restMateria.appendChild(opt);
-      }
-    }
-
-    filtroGrupoAlumnos.addEventListener("change", () => {
-      const g = filtroGrupoAlumnos.value;
       cargarAlumnosPorGrupo(g);
     });
 
-    restTipo.addEventListener("change", cargarMateriasBloqueadas);
-    restGrupo.addEventListener("change", cargarMateriasBloqueadas);
-    restTrimestre.addEventListener("change", cargarMateriasBloqueadas);
-
-    cargarMateriasBloqueadas();
-
-    btnRestituirMateria.addEventListener("click", async () => {
-      const tipo = restTipo.value;
-      const grupo = restGrupo.value;
-      const trimestre = restTrimestre.value;
-      const materia = restMateria.value;
-
-      if (!tipo || !grupo || !trimestre || !materia){
-        alert("Seleccione tipo, grupo, trimestre y materia bloqueada.");
-        return;
-      }
-
-      if (!confirm(`¿Desea restituir la materia ${decodeKey(materia)}? Volverá a aparecer para captura.`)){
-        return;
-      }
-
-      try {
-        await remove(ref(db, `configuracion/materias_bloqueadas/${tipo}/${encodeKey(grupo)}/${encodeKey(trimestre)}/${materia}`));
-        mensajeRestituir.style.display = "block";
-        setTimeout(()=> mensajeRestituir.style.display="none", 2500);
-        await cargarMateriasBloqueadas();
-      } catch(err){
-        console.error(err);
-        alert("Error al restituir la materia.");
-      }
+    filtroGrupoAlumnos.addEventListener("change", () => {
+      listaAlumnos.innerHTML = "";
     });
 
+    btnAbrirAcreditacion.addEventListener("click", () => {
+      window.location.href = "acreditacion.html";
+    });
   </script>
 
 </body>
