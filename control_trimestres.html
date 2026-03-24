@@ -150,6 +150,31 @@
     .btn-secundario{
       background:#25619c;
     }
+    .btn-acreditar{
+      background:#8e44ad;
+    }
+    .lista-panel{
+      margin-top:8px;
+      padding:12px;
+      border:1px solid #dde5f0;
+      border-radius:10px;
+      background:#f7f9fb;
+    }
+    .acreditacion-item{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:8px;
+      flex-wrap:wrap;
+    }
+    .acreditacion-item label{
+      margin-right:0;
+      font-weight:500;
+    }
+    .texto-ayuda{
+      font-size:0.95rem;
+      color:#4b5d50;
+    }
   </style>
 </head>
 
@@ -255,7 +280,6 @@
 
     <div class="fila botonera">
       <button class="btn guardar" id="btnGuardarAlumno">Guardar alumno</button>
-      <button class="btn btn-secundario" id="btnAbrirAcreditacion">Acreditación</button>
     </div>
 
     <div id="mensajeAlumno" class="mensaje">✅ Alumno guardado correctamente</div>
@@ -274,10 +298,43 @@
       <button class="btn btn-secundario" id="btnVerAlumnosGrupo">Desplegar alumnos del grupo</button>
     </div>
 
-    <div style="margin-top:8px;">
+    <div class="lista-panel">
       <strong>Alumnos registrados:</strong>
       <ul id="listaAlumnos"></ul>
     </div>
+
+    <hr>
+    <h2>Acreditación</h2>
+
+    <div class="fila">
+      <label>Grupo a acreditar:</label>
+      <select id="acreditacionGrupo">
+        <option value="">Seleccione...</option>
+        <option value="1°">1°</option>
+        <option value="2°">2°</option>
+        <option value="3°">3°</option>
+      </select>
+    </div>
+
+    <div class="fila botonera">
+      <button class="btn btn-secundario" id="btnCargarAcreditacion">Cargar alumnos para acreditación</button>
+    </div>
+
+    <div class="lista-panel">
+      <div class="texto-ayuda">
+        Seleccione los alumnos a promover. Los de 1° pasarán a 2°, los de 2° pasarán a 3° y los de 3° quedarán acreditados para su futura carta de buena conducta.
+      </div>
+      <div class="fila" style="margin-top:10px;">
+        <label>Alumnos del grupo seleccionado:</label>
+        <div id="listaAcreditacion"></div>
+      </div>
+      <div class="fila botonera">
+        <button class="btn btn-secundario" id="btnSeleccionarTodosAcreditacion">Seleccionar todos</button>
+        <button class="btn btn-acreditar" id="btnProcesarAcreditacion">Procesar acreditación</button>
+      </div>
+    </div>
+
+    <div id="mensajeAcreditacion" class="mensaje">✅ Acreditación aplicada correctamente</div>
 
   </main>
 
@@ -338,7 +395,13 @@
     const filtroGrupoAlumnos = document.getElementById("filtroGrupoAlumnos");
     const listaAlumnos = document.getElementById("listaAlumnos");
     const btnVerAlumnosGrupo = document.getElementById("btnVerAlumnosGrupo");
-    const btnAbrirAcreditacion = document.getElementById("btnAbrirAcreditacion");
+
+    const acreditacionGrupo = document.getElementById("acreditacionGrupo");
+    const btnCargarAcreditacion = document.getElementById("btnCargarAcreditacion");
+    const listaAcreditacion = document.getElementById("listaAcreditacion");
+    const btnSeleccionarTodosAcreditacion = document.getElementById("btnSeleccionarTodosAcreditacion");
+    const btnProcesarAcreditacion = document.getElementById("btnProcesarAcreditacion");
+    const mensajeAcreditacion = document.getElementById("mensajeAcreditacion");
 
     function actualizarPanel(tri) {
       if (!tri || !tri.nombre) {
@@ -500,13 +563,13 @@
 
     // EDITAR alumno
     async function editarAlumno(id, nombreActual, grupoActual){
-      const nuevoNombre = prompt("Nuevo nombre del alumno:", nombreActual);
+      let nuevoNombre = prompt("Nuevo nombre del alumno:", nombreActual);
       if (nuevoNombre === null) return; // canceló
 
       let nuevoGrupo = prompt("Nuevo grado / grupo (1°, 2° o 3°):", grupoActual);
       if (nuevoGrupo === null) return;
 
-      nuevoNombre.trim();
+      nuevoNombre = nuevoNombre.trim();
       nuevoGrupo = nuevoGrupo.trim();
 
       const gruposValidos = ["1°","2°","3°"];
@@ -621,18 +684,152 @@
     btnVerAlumnosGrupo.addEventListener("click", () => {
       const g = filtroGrupoAlumnos.value;
       if (!g){
-        alert("Seleccione el grupo que desea desplegar.");
+        alert("Seleccione un grupo para desplegar sus alumnos.");
         return;
       }
       cargarAlumnosPorGrupo(g);
     });
 
     filtroGrupoAlumnos.addEventListener("change", () => {
-      listaAlumnos.innerHTML = "";
+      const g = filtroGrupoAlumnos.value;
+      if (g){
+        cargarAlumnosPorGrupo(g);
+      } else {
+        listaAlumnos.innerHTML = "";
+      }
     });
 
-    btnAbrirAcreditacion.addEventListener("click", () => {
-      window.location.href = "acreditacion.html";
+    async function cargarAlumnosAcreditacion(grupo){
+      listaAcreditacion.innerHTML = "";
+      if (!grupo){
+        return;
+      }
+
+      try {
+        const snap = await get(ref(db, "alumnos"));
+        if (!snap.exists()){
+          listaAcreditacion.innerHTML = "<div>No hay alumnos registrados.</div>";
+          return;
+        }
+
+        const all = snap.val();
+        const lista = [];
+
+        for (const id in all){
+          const item = all[id];
+          if (item && item.grupo === grupo){
+            lista.push({ id, nombre: item.nombre, grupo: item.grupo });
+          }
+        }
+
+        if (lista.length === 0){
+          listaAcreditacion.innerHTML = "<div>No hay alumnos para este grupo.</div>";
+          return;
+        }
+
+        lista.sort((a,b)=>a.nombre.localeCompare(b.nombre, "es"));
+
+        lista.forEach(item => {
+          const fila = document.createElement("div");
+          fila.className = "acreditacion-item";
+
+          const chk = document.createElement("input");
+          chk.type = "checkbox";
+          chk.value = item.id;
+          chk.className = "chk-acreditacion";
+          chk.dataset.nombre = item.nombre;
+          chk.dataset.grupo = item.grupo;
+
+          const texto = document.createElement("label");
+          texto.textContent = `${item.nombre} (${item.grupo})`;
+
+          fila.appendChild(chk);
+          fila.appendChild(texto);
+          listaAcreditacion.appendChild(fila);
+        });
+      } catch(err){
+        console.error(err);
+        listaAcreditacion.innerHTML = "<div>Error al cargar alumnos para acreditación.</div>";
+      }
+    }
+
+    btnCargarAcreditacion.addEventListener("click", async () => {
+      const grupo = acreditacionGrupo.value;
+      if (!grupo){
+        alert("Seleccione el grupo a acreditar.");
+        return;
+      }
+      await cargarAlumnosAcreditacion(grupo);
+    });
+
+    btnSeleccionarTodosAcreditacion.addEventListener("click", () => {
+      const checks = listaAcreditacion.querySelectorAll('.chk-acreditacion');
+      if (!checks.length){
+        alert("Primero cargue los alumnos del grupo.");
+        return;
+      }
+
+      const haySinMarcar = Array.from(checks).some(chk => !chk.checked);
+      checks.forEach(chk => chk.checked = haySinMarcar);
+    });
+
+    btnProcesarAcreditacion.addEventListener("click", async () => {
+      const grupo = acreditacionGrupo.value;
+      if (!grupo){
+        alert("Seleccione el grupo a acreditar.");
+        return;
+      }
+
+      const checks = Array.from(listaAcreditacion.querySelectorAll('.chk-acreditacion:checked'));
+      if (!checks.length){
+        alert("Seleccione al menos un alumno para procesar la acreditación.");
+        return;
+      }
+
+      let destino = "";
+      if (grupo === "1°") destino = "2°";
+      if (grupo === "2°") destino = "3°";
+
+      const mensajeConfirmacion = grupo === "3°"
+        ? `Se acreditarán ${checks.length} alumno(s) de 3° y se retirarán de la base activa. ¿Desea continuar?`
+        : `Se pasarán ${checks.length} alumno(s) de ${grupo} a ${destino}. ¿Desea continuar?`;
+
+      if (!confirm(mensajeConfirmacion)){
+        return;
+      }
+
+      try {
+        for (const chk of checks){
+          const id = chk.value;
+          const nombre = chk.dataset.nombre || "";
+          const grupoActual = chk.dataset.grupo || grupo;
+
+          if (grupo === "3°"){
+            await push(ref(db, "acreditados"), {
+              nombre,
+              grupoOrigen: grupoActual,
+              fechaAcreditacion: new Date().toISOString().slice(0,10),
+              documentoPendiente: "Carta de buena conducta"
+            });
+            await remove(ref(db, "alumnos/" + id));
+          } else {
+            await update(ref(db, "alumnos/" + id), {
+              grupo: destino
+            });
+          }
+        }
+
+        mensajeAcreditacion.style.display = "block";
+        setTimeout(()=> mensajeAcreditacion.style.display="none", 2800);
+
+        await cargarAlumnosAcreditacion(grupo);
+        if (filtroGrupoAlumnos.value === grupo){
+          await cargarAlumnosPorGrupo(grupo);
+        }
+      } catch(err){
+        console.error(err);
+        alert("Error al procesar la acreditación.");
+      }
     });
   </script>
 
